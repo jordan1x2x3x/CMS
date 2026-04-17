@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Help Centre — MTU Clearance Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4A0058; --purple-light: #8B20A0;
+      --green: #76B82A; --green-dark: #5A8C20;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Nav */
+    nav { background: var(--purple-dark); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 60px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo { width: 40px; height: 40px; background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 2px; }
+    .nav-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .nav-title { font-family: 'Newsreader', serif; font-size: 1.05rem; font-weight: 700; color: white; }
+    .nav-links { display: flex; gap: 1rem; align-items: center; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: white; }
+    .nav-links a.btn { background: var(--green); color: white; padding: 7px 18px; border-radius: 8px; font-weight: 600; }
+    .nav-links a.btn:hover { background: var(--green-dark); }
+
+    /* Hero */
+    .hero { background: linear-gradient(135deg, var(--purple-dark), var(--purple)); padding: 4rem 2rem 3rem; text-align: center; }
+    .hero h1 { font-family: 'Newsreader', serif; font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 0.75rem; }
+    .hero p { color: rgba(255,255,255,0.7); font-size: 1rem; max-width: 520px; margin: 0 auto 2rem; line-height: 1.6; }
+    .search-wrap { display: flex; align-items: center; gap: 10px; background: white; border-radius: 12px; padding: 10px 16px; max-width: 500px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .search-wrap .material-symbols-outlined { color: var(--muted); font-size: 20px; }
+    .search-wrap input { border: none; outline: none; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text); flex: 1; }
+
+    /* Content */
+    .page { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+
+    /* Category tabs */
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2.5rem; }
+    .tab { padding: 8px 18px; border-radius: 100px; border: 1.5px solid var(--border); background: white; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+    .tab:hover { border-color: var(--purple); color: var(--purple); }
+    .tab.active { background: var(--purple); border-color: var(--purple); color: white; }
+
+    /* FAQ sections */
+    .section-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+    .section-title .material-symbols-outlined { font-size: 20px; color: var(--purple); }
+    .faq-group { margin-bottom: 2.5rem; }
+    .faq-item { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+    .faq-q { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; font-size: 0.88rem; font-weight: 600; gap: 12px; user-select: none; }
+    .faq-q:hover { background: #fafafa; }
+    .faq-q .material-symbols-outlined { font-size: 18px; color: var(--muted); flex-shrink: 0; transition: transform 0.2s; }
+    .faq-item.open .faq-q .material-symbols-outlined { transform: rotate(180deg); }
+    .faq-a { display: none; padding: 0 1.25rem 1rem; font-size: 0.83rem; color: var(--muted); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 0.85rem; }
+    .faq-item.open .faq-a { display: block; }
+
+    /* Quick links */
+    .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+    .quick-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; gap: 8px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; text-decoration: none; }
+    .quick-card:hover { border-color: var(--purple); box-shadow: 0 4px 16px rgba(107,0,128,0.1); }
+    .quick-icon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--purple), var(--purple-light)); display: flex; align-items: center; justify-content: center; }
+    .quick-icon .material-symbols-outlined { color: white; font-size: 20px; }
+    .quick-title { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+    .quick-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+
+    /* Contact */
+    .contact-strip { background: linear-gradient(135deg, var(--purple-dark), var(--purple)); border-radius: 16px; padding: 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+    .contact-strip h3 { font-size: 1rem; font-weight: 700; color: white; }
+    .contact-strip p { font-size: 0.82rem; color: rgba(255,255,255,0.7); margin-top: 4px; }
+    .contact-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    .contact-btn { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; }
+    .contact-btn-primary { background: var(--green); color: white; }
+    .contact-btn-outline { background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.25); }
+    .contact-btn .material-symbols-outlined { font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo"><img src="assets/mtu-logo.png" alt="MTU" /></div>
+    <span class="nav-title">Mountain Top University</span>
+  </a>
+  <div class="nav-links">
+    <a href="help.html" style="color:white;">Help</a>
+    <a href="login.html" class="btn">Sign In</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>How can we help you?</h1>
+  <p>Find answers about the MTU Clearance Portal — from signing up to downloading your final certificate.</p>
+  <div class="search-wrap">
+    <span class="material-symbols-outlined">search</span>
+    <input type="text" id="searchInput" placeholder="Search help topics… e.g. 'access code', 'flagged', 'certificate'" />
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Category tabs -->
+  <div class="tabs">
+    <button class="tab active" data-cat="all">All Topics</button>
+    <button class="tab" data-cat="account">Account & Login</button>
+    <button class="tab" data-cat="clearance">Clearance Process</button>
+    <button class="tab" data-cat="officer">For Officers</button>
+    <button class="tab" data-cat="technical">Technical Issues</button>
+  </div>
+
+  <!-- Quick links -->
+  <div class="quick-grid">
+    <a class="quick-card" href="#account">
+      <div class="quick-icon"><span class="material-symbols-outlined">manage_accounts</span></div>
+      <div class="quick-title">Account & Login</div>
+      <div class="quick-desc">Registration, passwords, roles, and access codes</div>
+    </a>
+    <a class="quick-card" href="#clearance">
+      <div class="quick-icon"><span class="material-symbols-outlined">task_alt</span></div>
+      <div class="quick-title">Clearance Process</div>
+      <div class="quick-desc">How clearance works, statuses, departments</div>
+    </a>
+    <a class="quick-card" href="#officer">
+      <div class="quick-icon"><span class="material-symbols-outlined">badge</span></div>
+      <div class="quick-title">For Officers</div>
+      <div class="quick-desc">Reviewing requests, approving, flagging, rejecting</div>
+    </a>
+  </div>
+
+  <!-- Account FAQ -->
+  <div class="faq-group" id="account" data-cat="account">
+    <div class="section-title"><span class="material-symbols-outlined">manage_accounts</span>Account & Login</div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do I create an account?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Click <strong>Create an Account</strong> on the login page. You'll go through 3 steps: select your role, fill in your profile details (name, email, matric number for students), then set a password. Students do not need an access code — only officers, admins, and super admins do.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is an access code and where do I get one?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Access codes are one-time codes required for non-student roles (Officers, Admin, Super Admin). They are issued by the <strong>ICT Unit / Super Admin</strong>. Contact the ICT office at the Senate Building to request yours. Each code can only be used once.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">I can't sign in — it says "incorrect credentials".<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Make sure you are using the correct email (e.g. <em>name@mtu.edu.ng</em>) or matric number, the right role, and your correct password. If you just registered, your account email may not be confirmed yet — contact ICT Support for help activating your account.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I log in with my matric number instead of email?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Yes. Students can enter their matric number (e.g. <em>22010301062</em>) in the login field. The system will look up your registered email automatically. Make sure your matric number was entered correctly during signup.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">I forgot my password. What do I do?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Click <strong>Forgot Password?</strong> on the login page and enter your email address. A reset link will be sent to your inbox. If you do not receive it within a few minutes, check your spam folder or contact ICT Support.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">My account says "deactivated". Who do I contact?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Deactivated accounts are managed by the <strong>Super Admin / ICT Unit</strong>. Visit the ICT office at the Senate Building with your student ID to have your account reactivated.</div>
+    </div>
+  </div>
+
+  <!-- Clearance FAQ -->
+  <div class="faq-group" id="clearance" data-cat="clearance">
+    <div class="section-title"><span class="material-symbols-outlined">task_alt</span>Clearance Process</div>
+
+    <div class="faq-item">
+      <div class="faq-q">How does the clearance process work?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">After submitting your clearance request, it is sent to all <strong>15 departments</strong> simultaneously. Each department officer reviews your request and either <em>Approves</em>, <em>Flags</em>, or <em>Rejects</em> it. You are fully cleared only when all 15 departments approve you. Track your progress on the <strong>Clearance Tracking</strong> page.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What do the different statuses mean?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">
+        <strong>Pending</strong> — The department officer has not reviewed your request yet.<br/>
+        <strong>Approved</strong> — That department has cleared you.<br/>
+        <strong>Flagged</strong> — There is an issue that needs to be resolved (e.g. missing document). Check the officer's reason and resubmit.<br/>
+        <strong>Rejected</strong> — Your request was denied by that department. Read the reason carefully and contact the department.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">My request was flagged. What do I do?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Go to the <strong>Clearance Tracking</strong> page, find the flagged department, and read the officer's reason. Upload the required document or resolve the issue, then resubmit. The officer will review again after your resubmission.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What does each department require for clearance?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">
+        Requirements vary by department. Key ones include:<br/><br/>
+        <strong>HOD:</strong> 4 project copies, 4 CDs, plagiarism results, HOD & Supervisor signatures.<br/>
+        <strong>CEDGS:</strong> Fee payment receipt, HOD signature, Poise/Entrepreneurship proof.<br/>
+        <strong>Chapel:</strong> Attendance record (max 10 misses).<br/>
+        <strong>Bursary:</strong> School fee receipt (proof of full payment).<br/>
+        <strong>Library:</strong> Requires CEDGS, HOD, and College Officer clearance first.<br/>
+        <strong>Alumni:</strong> Proof of Alumni fee payment.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do I get my final clearance certificate?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Once all 15 departments have approved your request, your final clearance certificate becomes available on the <strong>Certificate</strong> page of your dashboard. You can download it as a PDF. Keep this certificate safe — it is your official proof of clearance.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How long does clearance take?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">The average review time is <strong>1–2 working days</strong> per department once all required documents are submitted. Departments with outstanding dues or missing documents take longer. You can monitor real-time progress on your dashboard.</div>
+    </div>
+  </div>
+
+  <!-- Officer FAQ -->
+  <div class="faq-group" id="officer" data-cat="officer">
+    <div class="section-title"><span class="material-symbols-outlined">badge</span>For Department Officers</div>
+
+    <div class="faq-item">
+      <div class="faq-q">How do I sign in as a department officer?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">On the login page, enter your staff email and select <strong>Department Officer</strong> as your role. Use the password you set during registration. If you have not registered yet, contact the ICT Unit for an access code specific to your department.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">I can only see my department's requests — is that correct?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Yes. This is by design. Each officer only sees clearance requests for their assigned department. You cannot view or modify requests from other departments.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What is the difference between Flag and Reject?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">
+        <strong>Flag</strong> — Use this when the student needs to provide more information or fix something (e.g. missing document). The student can resubmit after resolving the issue.<br/><br/>
+        <strong>Reject</strong> — Use this when the student does not meet the clearance requirement and cannot be cleared at this time (e.g. outstanding debt, disciplinary issue).
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Can I change my decision after approving or rejecting?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Yes. Go back to the student's review page and select a new action. Your most recent decision overrides the previous one. All changes are recorded in the audit log.</div>
+    </div>
+  </div>
+
+  <!-- Technical FAQ -->
+  <div class="faq-group" id="technical" data-cat="technical">
+    <div class="section-title"><span class="material-symbols-outlined">build</span>Technical Issues</div>
+
+    <div class="faq-item">
+      <div class="faq-q">The page keeps redirecting me back and forth.<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">This is usually a session issue. Try clearing your browser cache, then log in again. If the problem persists, open the browser console (F12) and report the error to ICT Support.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">My document upload is failing.<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Ensure your file is in <strong>PDF, JPG, or PNG</strong> format and is under <strong>5MB</strong>. If the upload still fails, try a different browser (Chrome or Edge recommended) or check your internet connection.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">The portal says my email is not confirmed.<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">Your account was created but the email verification step was not completed. Contact the <strong>ICT Unit</strong> at the Senate Building — they can manually confirm your account so you can log in.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Which browsers are supported?<span class="material-symbols-outlined">expand_more</span></div>
+      <div class="faq-a">The portal works best on <strong>Google Chrome</strong>, <strong>Microsoft Edge</strong>, and <strong>Mozilla Firefox</strong> (latest versions). Internet Explorer is not supported. For mobile, use Chrome on Android or Safari on iOS.</div>
+    </div>
+  </div>
+
+  <!-- Contact strip -->
+  <div class="contact-strip">
+    <div>
+      <h3>Still need help?</h3>
+      <p>Contact the ICT Support team at the Senate Building, Mountain Top University.</p>
+    </div>
+    <div class="contact-btns">
+      <a href="mailto:ict@mtu.edu.ng" class="contact-btn contact-btn-primary">
+        <span class="material-symbols-outlined">mail</span>Email ICT Support
+      </a>
+      <a href="tel:+2348000000000" class="contact-btn contact-btn-outline">
+        <span class="material-symbols-outlined">call</span>Call Support
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Accordion
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  // Category filter
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const cat = tab.dataset.cat;
+      document.querySelectorAll('.faq-group').forEach(group => {
+        group.style.display = (cat === 'all' || group.dataset.cat === cat) ? 'block' : 'none';
+      });
+      document.querySelector('.quick-grid').style.display = cat === 'all' ? 'grid' : 'none';
+    });
+  });
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    if (!q) {
+      document.querySelectorAll('.faq-item').forEach(i => i.style.display = '');
+      document.querySelectorAll('.faq-group').forEach(g => g.style.display = 'block');
+      document.querySelector('.quick-grid').style.display = 'grid';
+      return;
+    }
+    document.querySelector('.quick-grid').style.display = 'none';
+    document.querySelectorAll('.faq-group').forEach(g => {
+      let anyVisible = false;
+      g.querySelectorAll('.faq-item').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const match = text.includes(q);
+        item.style.display = match ? '' : 'none';
+        if (match) { anyVisible = true; item.classList.add('open'); }
+      });
+      g.style.display = anyVisible ? 'block' : 'none';
+    });
+  });
+</script>
+</body>
+</html>

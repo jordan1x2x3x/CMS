@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports — MTU CMS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .role-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .role-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .role-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .role-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .role-chip-sub { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+    .content { padding: 2rem; flex: 1; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-header h3 { font-size: 0.9rem; font-weight: 700; }
+    .card-body { padding: 1.25rem; }
+    .report-card { display: flex; align-items: flex-start; gap: 14px; padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
+    .report-card:last-child { border-bottom: none; }
+    .report-card:hover { background: var(--bg); }
+    .report-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .report-icon .material-symbols-outlined { font-size: 20px; }
+    .report-info { flex: 1; }
+    .report-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }
+    .report-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+    .report-action { display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 0.75rem; font-weight: 600; color: var(--purple); }
+    .report-action .material-symbols-outlined { font-size: 15px; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { width: 100px; font-size: 0.75rem; color: var(--muted); text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 22px; background: var(--bg); border-radius: 6px; overflow: hidden; position: relative; }
+    .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 0.68rem; font-weight: 600; color: white; transition: width 0.5s; }
+    .bar-count { width: 30px; font-size: 0.75rem; font-weight: 600; text-align: right; flex-shrink: 0; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .summary-item { background: var(--bg); border-radius: 10px; padding: 1rem; text-align: center; }
+    .summary-val { font-size: 1.6rem; font-weight: 700; }
+    .summary-lbl { font-size: 0.72rem; color: var(--muted); font-weight: 500; margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" /></div>
+    <div class="brand-text">MTU Clearance<span>Admin Portal</span></div>
+  </div>
+  <div class="role-chip">
+    <div class="role-chip-label">Signed in as</div>
+    <div class="role-chip-name"><span class="material-symbols-outlined">admin_panel_settings</span><span id="adminName">Admin</span></div>
+    <div class="role-chip-sub">Registrar / Administrator</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <a href="admin-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="admin-requests.html" class="nav-item"><span class="material-symbols-outlined">list_alt</span>All Requests</a>
+    <div class="nav-label">Management</div>
+    <a href="admin-departments.html" class="nav-item"><span class="material-symbols-outlined">apartment</span>Departments</a>
+    <a href="admin-reports.html" class="nav-item active"><span class="material-symbols-outlined">bar_chart</span>Reports</a>
+    <div class="nav-label">System</div>
+    <a href="admin-audit.html" class="nav-item"><span class="material-symbols-outlined">history</span>Audit Log</a>
+    <a href="admin-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="nav-item danger" id="logoutBtn"><span class="material-symbols-outlined">logout</span>Logout</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Reports</h1>
+      <p>Generate and export clearance reports for all departments</p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="avatarInitial">A</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Summary -->
+    <div class="two-col" style="margin-bottom:1.25rem;">
+      <div class="card">
+        <div class="card-header"><h3>Session Summary</h3><span id="genDate" style="font-size:0.75rem;color:var(--muted);"></span></div>
+        <div class="card-body">
+          <div class="summary-grid" id="summaryGrid"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Available Reports</h3></div>
+        <div class="report-card" onclick="exportFullCSV()">
+          <div class="report-icon" style="background:var(--approved-bg);"><span class="material-symbols-outlined" style="color:var(--approved);">table_chart</span></div>
+          <div class="report-info">
+            <div class="report-title">Full Clearance Report</div>
+            <div class="report-desc">All 24 students × 15 departments — status per cell</div>
+            <div class="report-action"><span class="material-symbols-outlined">download</span>Export CSV</div>
+          </div>
+        </div>
+        <div class="report-card" onclick="exportDecisionsCSV()">
+          <div class="report-icon" style="background:#EDE9FE;"><span class="material-symbols-outlined" style="color:#7C3AED;">gavel</span></div>
+          <div class="report-info">
+            <div class="report-title">Officer Decisions Log</div>
+            <div class="report-desc">All approve/flag/reject actions with timestamps</div>
+            <div class="report-action"><span class="material-symbols-outlined">download</span>Export CSV</div>
+          </div>
+        </div>
+        <div class="report-card" onclick="exportDeptSummaryCSV()">
+          <div class="report-icon" style="background:var(--pending-bg);"><span class="material-symbols-outlined" style="color:var(--pending);">apartment</span></div>
+          <div class="report-info">
+            <div class="report-title">Department Summary</div>
+            <div class="report-desc">Approved/pending/flagged counts per department</div>
+            <div class="report-action"><span class="material-symbols-outlined">download</span>Export CSV</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar chart -->
+    <div class="card">
+      <div class="card-header"><h3>Approval Rate by Department</h3></div>
+      <div class="card-body"><div class="bar-chart" id="barChart"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Logout modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--rejected-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+      <span class="material-symbols-outlined" style="color:var(--rejected);font-size:26px;">logout</span>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Confirm Logout</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">Are you sure you want to end your session?</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('logoutModal').style.display='none'" style="padding:10px 22px;border:1px solid var(--border);background:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Cancel</button>
+      <button id="confirmLogout" style="padding:10px 22px;background:var(--rejected);color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Logout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
+  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
+  document.getElementById('adminName').textContent = sess.name || 'Admin';
+  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+  document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-NG', { day:'numeric', month:'long', year:'numeric' });
+
+  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
+  const DEPTS = [
+    { key:'hod', label:'HOD', seed:3 }, { key:'cedgs', label:'CEDGS', seed:7 },
+    { key:'lab', label:'Lab Instructor', seed:11 }, { key:'college', label:'College Officer', seed:17 },
+    { key:'health', label:'Health Unit', seed:19 }, { key:'sport', label:'Sport', seed:23 },
+    { key:'hall', label:'Hall of Residence', seed:29 }, { key:'ict', label:'ICT Unit', seed:31 },
+    { key:'alumni', label:'Alumni', seed:37 }, { key:'affairs', label:'Student Affairs', seed:41 },
+    { key:'library', label:'Library', seed:43 }, { key:'bursary', label:'Bursary', seed:47 },
+    { key:'esm', label:'ESM (Music)', seed:53 }, { key:'academic', label:'Academic Affairs', seed:59 },
+    { key:'chapel', label:'Chapel', seed:0 },
+  ];
+  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
+  const NAMES = ['Adebayo K.','Chisom A.','Fatima M.','Daniel O.','Grace E.','Samuel I.','Ngozi P.','Michael T.','Amaka R.','Joshua F.','Blessing N.','Emmanuel S.','Taiwo A.','Chinwe B.','David L.','Esther O.','Tobi R.','Chukwuma E.','Halima Y.','Patrick O.','Funmilayo A.','Obinna C.','Kehinde S.','Zainab H.'];
+
+  function getDeptStatus(sid, dept) {
+    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
+    if (saved) return saved.status;
+    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
+    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
+    const v = (sid * s) % 97;
+    if (v < 10) return 'rejected'; if (v < 24) return 'flagged'; if (v < 50) return 'pending';
+    return 'approved';
+  }
+
+  const deptStats = DEPTS.map(dept => {
+    let approved=0, pending=0, flagged=0, rejected=0;
+    STUDENTS.forEach(sid => {
+      const st = getDeptStatus(sid, dept.key);
+      if (st==='approved') approved++; else if (st==='pending') pending++;
+      else if (st==='flagged') flagged++; else rejected++;
+    });
+    return { ...dept, approved, pending, flagged, rejected };
+  });
+
+  let totalApproved=0, totalCleared=0;
+  STUDENTS.forEach(sid => {
+    DEPTS.forEach(d => { if (getDeptStatus(sid, d.key) === 'approved') totalApproved++; });
+    if (DEPTS.every(d => getDeptStatus(sid, d.key) === 'approved')) totalCleared++;
+  });
+  const grandTotal = STUDENTS.length * DEPTS.length;
+  const overallPct = Math.round((totalApproved/grandTotal)*100);
+  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+
+  document.getElementById('summaryGrid').innerHTML = `
+    <div class="summary-item"><div class="summary-val" style="color:var(--purple);">24</div><div class="summary-lbl">Total Students</div></div>
+    <div class="summary-item"><div class="summary-val" style="color:var(--approved);">${totalCleared}</div><div class="summary-lbl">Fully Cleared</div></div>
+    <div class="summary-item"><div class="summary-val" style="color:var(--pending);">${overallPct}%</div><div class="summary-lbl">Overall Approval Rate</div></div>
+    <div class="summary-item"><div class="summary-val" style="color:var(--text);">${decisions.length}</div><div class="summary-lbl">Officer Decisions</div></div>`;
+
+  // Bar chart
+  const barChart = document.getElementById('barChart');
+  const sorted = [...deptStats].sort((a,b) => b.approved - a.approved);
+  sorted.forEach(d => {
+    const pct = Math.round((d.approved/24)*100);
+    const color = pct >= 70 ? '#10B981' : pct >= 40 ? '#F59E0B' : '#EF4444';
+    barChart.innerHTML += `
+      <div class="bar-row">
+        <div class="bar-label">${d.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};">${pct > 15 ? pct+'%' : ''}</div></div>
+        <div class="bar-count" style="color:${color};">${d.approved}</div>
+      </div>`;
+  });
+
+  function downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportFullCSV() {
+    const headers = ['Student ID','Name','Matric', ...DEPTS.map(d => d.label),'Total Approved','Status'];
+    const rows = [headers.join(',')];
+    STUDENTS.forEach((sid, idx) => {
+      const statuses = DEPTS.map(d => getDeptStatus(sid, d.key));
+      const approved = statuses.filter(s => s === 'approved').length;
+      rows.push([sid, NAMES[idx], `MTU/2021/${String(sid).padStart(3,'0')}`, ...statuses, approved, approved===15?'Cleared':'In Progress'].join(','));
+    });
+    downloadCSV(rows.join('\n'), 'mtu_full_clearance.csv');
+  }
+
+  function exportDecisionsCSV() {
+    const headers = ['Timestamp','Student ID','Department','Action','Reason','Comment'];
+    const rows = [headers.join(',')];
+    decisions.sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp)).forEach(d => {
+      rows.push([d.timestamp||'', d.studentId, d.dept, d.status, (d.reason||'').replace(/,/g,' '), (d.comment||'').replace(/,/g,' ')].join(','));
+    });
+    downloadCSV(rows.join('\n'), 'mtu_officer_decisions.csv');
+  }
+
+  function exportDeptSummaryCSV() {
+    const headers = ['Department','Approved','Pending','Flagged','Rejected','Approval Rate'];
+    const rows = [headers.join(',')];
+    deptStats.forEach(d => {
+      rows.push([d.label, d.approved, d.pending, d.flagged, d.rejected, Math.round((d.approved/24)*100)+'%'].join(','));
+    });
+    downloadCSV(rows.join('\n'), 'mtu_dept_summary.csv');
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
+  document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
+</script>
+</body>
+</html>

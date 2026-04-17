@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mountain Top University | Clearance Portal</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#1e3a8a", // Navy Blue
+                    "on-primary": "#ffffff",
+                    "primary-container": "#dce1ff",
+                    "on-primary-container": "#00164e",
+                    "secondary": "#064e3b", // Forest Green
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#d1fae5",
+                    "on-secondary-container": "#064e3b",
+                    "tertiary": "#166534", // Darker Forest Green
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#f0fdf4",
+                    "on-tertiary-container": "#166534",
+                    "error": "#ba1a1a",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-error-container": "#93000a",
+                    "background": "#f8faff",
+                    "on-background": "#1a1c1e",
+                    "surface": "#f8faff",
+                    "on-surface": "#1a1c1e",
+                    "surface-variant": "#dfe2eb",
+                    "on-surface-variant": "#43474e",
+                    "outline": "#73777f",
+                    "surface-container-low": "#f1f3f9",
+                    "surface-container": "#ebeef5",
+                    "surface-container-high": "#e5e8f0",
+                    "surface-container-highest": "#dfe2eb",
+                    "surface-container-lowest": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope", "sans-serif"],
+                    "body": ["Inter", "sans-serif"],
+                    "label": ["Inter", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-layering {
+            background-image: radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.05) 0px, transparent 50%),
+                              radial-gradient(at 100% 100%, rgba(6, 78, 59, 0.03) 0px, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- SideNavBar Shell -->
+<nav class="h-screen w-72 flex flex-col fixed left-0 top-0 bg-white border-r border-surface-variant p-4 gap-2 z-50">
+<div class="mb-8 px-4 flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Official crest of Mountain Top University featuring an open book and academic symbols in gold and navy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwwG6ES68GhR4fqM4fvowPA5Dt-d_1UztLQ_ed9GjcMf7FunZ3PS9U2RggLPNaBuSSh96aKBzpsGKM46U3zKd5gUcs7SY5Yvqnsu3hAu62WqV2UL2YZUII0c0EivwC0Afi3ga_CZfYGBW-AdH7Yd3c-gEUyIyZIgQsJowvpC8M3Tg58r1v0SGN5COEWFtiVfMe_ceVrlI3E2-g1GudMU8nAueAbj3nLx7fLdrr0QCU26IL-_G3_jc5pkUMhgKrxiatGI_pz9FL9w"/>
+</div>
+<div>
+<h1 class="text-lg font-black text-primary leading-tight">MTU Clearance</h1>
+<p class="font-inter text-[11px] font-bold uppercase tracking-[0.08em] text-on-surface-variant">Academic Portal</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5 flex-grow">
+<!-- Dashboard (Active) -->
+<a class="flex items-center gap-3 bg-primary/5 text-primary rounded-xl px-4 py-3 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-inter text-[13px] font-bold uppercase tracking-[0.05em]">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="font-inter text-[13px] font-semibold uppercase tracking-[0.05em]">Departmental Status</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">upload_file</span>
+<span class="font-inter text-[13px] font-semibold uppercase tracking-[0.05em]">Document Uploads</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-inter text-[13px] font-semibold uppercase tracking-[0.05em]">Fee Clearance</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span class="font-inter text-[13px] font-semibold uppercase tracking-[0.05em]">Final Certificate</span>
+</a>
+</div>
+<div class="mt-auto border-t border-surface-variant pt-4 flex flex-col gap-2">
+<button class="bg-primary hover:bg-primary/90 text-on-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 mb-4 transition-all active:scale-95 shadow-md shadow-primary/20">
+<span class="material-symbols-outlined text-sm">add</span>
+<span class="text-[13px] uppercase tracking-wider">Start New Request</span>
+</button>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-low rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[13px] font-semibold uppercase tracking-wider">Settings</span>
+</a>
+<a class="flex items-center gap-3 text-error px-4 py-2 hover:bg-error-container/20 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-[13px] font-semibold uppercase tracking-wider">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-72 min-h-screen p-8 tonal-layering">
+<!-- TopNavBar Execution -->
+<header class="flex justify-between items-center mb-10">
+<div>
+<h2 class="font-headline text-3xl font-extrabold tracking-tight text-primary">Welcome, Akintola David</h2>
+<p class="text-on-surface-variant font-medium">Matriculation No: MTU/CST/20/0412</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-surface-variant/50">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm font-medium w-48 placeholder:text-outline" placeholder="Search departments..." type="text"/>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low text-on-surface-variant transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden ring-1 ring-surface-variant/50">
+<img class="w-full h-full object-cover" data-alt="Professional studio portrait of a university student in a smart navy blue suit against a soft grey academic background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVr1DT_mkhGKT6mqq8-MY4bKfU5c2EfiIzOr91wsgOxALI42fBmUmyL6RVs2d6ud7W3vPDHNTW3VmNmqt7FY8pLh5sm1XoDm3QSk7vgidg_o3KJ2auqokiGcS986thSYDvlVSUKigGFwfQrY6aygJ_W8lBv4tYfgeCM-WiB6vNQXchNX2L7NUf8EDFmoKzzcA9yMV6OD6dK4LjFuBAJA9ruHDJizrTVtVBMZvt3MyPbumSdLpqrKM9MxL4Z6Isz1POHu9Q0dWBBA"/>
+</div>
+</div>
+</header>
+<!-- Action Required Alert -->
+<section class="mb-8">
+<div class="bg-primary/5 rounded-xl p-6 border-l-4 border-primary flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">error</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg text-primary">Action Required</h3>
+<p class="text-on-surface-variant font-medium">Please upload your Bursary receipt to clear Finance Department review.</p>
+</div>
+</div>
+<button class="bg-primary text-white px-6 py-2 rounded-full font-bold text-sm shadow-md hover:brightness-110 active:scale-95 transition-all">
+                Upload Now
+            </button>
+</div>
+</section>
+<!-- Bento Grid Main Dashboard Area -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Current Status Progress Ring Card -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-lowest rounded-xl p-8 shadow-sm flex flex-col items-center justify-center text-center">
+<div class="mb-4 text-left w-full">
+<span class="font-inter text-[11px] font-bold uppercase tracking-[0.08em] text-secondary">Clearance Journey</span>
+<h3 class="font-headline text-2xl font-extrabold text-on-surface">Current Status</h3>
+</div>
+<div class="relative w-48 h-48 flex items-center justify-center mb-6">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="553" stroke-dashoffset="193" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-headline text-5xl font-black text-primary">65%</span>
+<span class="font-inter text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Complete</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 w-full">
+<div class="p-4 bg-surface-container-low rounded-xl text-left border border-surface-variant/30">
+<p class="font-inter text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Expected Completion</p>
+<p class="font-headline font-bold text-secondary">July 15, 2024</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-xl text-left border border-surface-variant/30">
+<p class="font-inter text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Active Stage</p>
+<p class="font-headline font-bold text-primary">Financial Audit</p>
+</div>
+</div>
+</div>
+<!-- Stats Grid Section -->
+<div class="col-span-12 lg:col-span-7 grid grid-cols-2 gap-6">
+<!-- Departments Cleared Card -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-transparent flex flex-col justify-between group hover:border-secondary/20 hover:bg-secondary-container/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+</div>
+<span class="bg-secondary-container text-secondary text-[10px] font-bold uppercase px-2 py-1 rounded-full tracking-tighter">+2 This week</span>
+</div>
+<div>
+<h4 class="font-headline text-4xl font-black text-on-surface">08</h4>
+<p class="font-inter text-sm font-semibold text-on-surface-variant uppercase tracking-wider">Departments Cleared</p>
+</div>
+</div>
+<!-- Pending Reviews Card -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-transparent flex flex-col justify-between group hover:border-primary/20 hover:bg-primary/5 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">hourglass_empty</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline text-4xl font-black text-on-surface">03</h4>
+<p class="font-inter text-sm font-semibold text-on-surface-variant uppercase tracking-wider">Pending Reviews</p>
+</div>
+</div>
+<!-- Flagged Issues Card -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-transparent flex flex-col justify-between group hover:border-error/20 hover:bg-error-container/10 transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-error-container/50 rounded-full flex items-center justify-center text-error">
+<span class="material-symbols-outlined">warning</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline text-4xl font-black text-error">01</h4>
+<p class="font-inter text-sm font-semibold text-on-surface-variant uppercase tracking-wider">Flagged Issues</p>
+</div>
+</div>
+<!-- Quick Links Box -->
+<div class="bg-primary rounded-xl p-6 shadow-lg shadow-primary/20 text-white flex flex-col justify-between">
+<h4 class="font-inter text-[11px] font-bold uppercase tracking-[0.15em] opacity-80 mb-4">Quick Navigation</h4>
+<div class="flex flex-col gap-3">
+<a class="flex items-center justify-between group" href="#">
+<span class="font-bold text-sm">Upload Documents</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+<div class="h-px bg-white/20 w-full"></div>
+<a class="flex items-center justify-between group" href="#">
+<span class="font-bold text-sm">Help Center</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">help</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Departmental Progress List -->
+<div class="col-span-12 bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+<div class="flex justify-between items-end mb-8">
+<div>
+<span class="font-inter text-[11px] font-bold uppercase tracking-[0.08em] text-secondary">Detailed view</span>
+<h3 class="font-headline text-2xl font-extrabold text-on-surface">Recent Activity</h3>
+</div>
+<button class="text-primary font-bold text-sm hover:underline">View Detailed Status Report</button>
+</div>
+<div class="space-y-4">
+<!-- Activity Item 1 -->
+<div class="flex items-center gap-6 p-4 rounded-xl hover:bg-surface-container-low transition-colors border border-transparent hover:border-surface-variant/50">
+<div class="w-14 h-14 bg-tertiary-container rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary">library_books</span>
+</div>
+<div class="flex-grow">
+<h5 class="font-headline font-bold text-on-surface">University Library</h5>
+<p class="text-sm text-on-surface-variant">Cleared: All borrowed books returned and fees paid.</p>
+</div>
+<div class="text-right">
+<span class="bg-secondary-container text-secondary text-[11px] font-bold uppercase px-3 py-1 rounded-full">Approved</span>
+<p class="text-[11px] font-medium text-outline mt-1">2 Hours Ago</p>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="flex items-center gap-6 p-4 rounded-xl hover:bg-surface-container-low transition-colors border border-transparent hover:border-surface-variant/50">
+<div class="w-14 h-14 bg-primary/5 rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">school</span>
+</div>
+<div class="flex-grow">
+<h5 class="font-headline font-bold text-on-surface">Department of Computer Science</h5>
+<p class="text-sm text-on-surface-variant">Reviewing: Project defense certification pending HOD signature.</p>
+</div>
+<div class="text-right">
+<span class="bg-surface-container-highest text-on-surface-variant text-[11px] font-bold uppercase px-3 py-1 rounded-full">Pending</span>
+<p class="text-[11px] font-medium text-outline mt-1">Yesterday</p>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="flex items-center gap-6 p-4 rounded-xl hover:bg-error-container/5 transition-colors border border-dashed border-error/20">
+<div class="w-14 h-14 bg-error-container/30 rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-error">account_balance_wallet</span>
+</div>
+<div class="flex-grow">
+<h5 class="font-headline font-bold text-error">Bursary / Finance</h5>
+<p class="text-sm text-on-surface-variant">Missing document: Level 400 school fee receipt not found.</p>
+</div>
+<div class="text-right">
+<span class="bg-error text-on-error text-[11px] font-bold uppercase px-3 py-1 rounded-full">Action Needed</span>
+<p class="text-[11px] font-medium text-outline mt-1">3 Days Ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="mt-12 text-center text-on-surface-variant/40 text-[10px] font-bold uppercase tracking-[0.2em] py-8 border-t border-surface-variant/30">
+        © 2024 Mountain Top University — Academic Portal Support: 0800-MTU-CLEAR
+    </footer>
+</main>
+</body></html>

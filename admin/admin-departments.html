@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Departments — MTU CMS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .role-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .role-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .role-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .role-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .role-chip-sub { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+    .content { padding: 2rem; flex: 1; }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .page-header h2 { font-size: 1.1rem; font-weight: 700; }
+    .page-header p { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .add-btn { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: var(--purple); color: white; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+
+    .dept-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .dept-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .dept-card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .dept-icon { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--purple), var(--purple-mid)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dept-icon .material-symbols-outlined { font-size: 18px; color: white; }
+    .dept-card-title { font-weight: 700; font-size: 0.88rem; }
+    .dept-card-key { font-size: 0.68rem; color: var(--muted); font-family: monospace; }
+    .dept-card-body { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .dept-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; }
+    .dept-row-label { color: var(--muted); }
+    .dept-row-val { font-weight: 600; }
+    .progress-wrap { display: flex; align-items: center; gap: 8px; margin-top: 0.4rem; }
+    .progress-bar { flex: 1; height: 5px; background: var(--border); border-radius: 100px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 100px; }
+    .dept-card-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .action-btn { flex: 1; padding: 7px 0; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .action-btn .material-symbols-outlined { font-size: 14px; }
+    .btn-view { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-view:hover { background: var(--border); }
+    .btn-edit { background: var(--purple); color: white; }
+    .btn-edit:hover { background: var(--purple-dark); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" /></div>
+    <div class="brand-text">MTU Clearance<span>Admin Portal</span></div>
+  </div>
+  <div class="role-chip">
+    <div class="role-chip-label">Signed in as</div>
+    <div class="role-chip-name"><span class="material-symbols-outlined">admin_panel_settings</span><span id="adminName">Admin</span></div>
+    <div class="role-chip-sub">Registrar / Administrator</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <a href="admin-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="admin-requests.html" class="nav-item"><span class="material-symbols-outlined">list_alt</span>All Requests</a>
+    <div class="nav-label">Management</div>
+    <a href="admin-departments.html" class="nav-item active"><span class="material-symbols-outlined">apartment</span>Departments</a>
+    <a href="admin-reports.html" class="nav-item"><span class="material-symbols-outlined">bar_chart</span>Reports</a>
+    <div class="nav-label">System</div>
+    <a href="admin-audit.html" class="nav-item"><span class="material-symbols-outlined">history</span>Audit Log</a>
+    <a href="admin-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="nav-item danger" id="logoutBtn"><span class="material-symbols-outlined">logout</span>Logout</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Department Management</h1>
+      <p>View and configure all clearance departments</p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="avatarInitial">A</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <h2>All Departments <span style="font-size:0.78rem;font-weight:500;color:var(--muted);margin-left:8px;">(15)</span></h2>
+        <p>Each department has a dedicated officer reviewing student clearance requests</p>
+      </div>
+      <button class="add-btn"><span class="material-symbols-outlined" style="font-size:17px;">add</span>Add Department</button>
+    </div>
+
+    <div class="dept-grid" id="deptGrid"></div>
+  </div>
+</div>
+
+<!-- Logout modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--rejected-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+      <span class="material-symbols-outlined" style="color:var(--rejected);font-size:26px;">logout</span>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Confirm Logout</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">Are you sure you want to end your session?</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('logoutModal').style.display='none'" style="padding:10px 22px;border:1px solid var(--border);background:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Cancel</button>
+      <button id="confirmLogout" style="padding:10px 22px;background:var(--rejected);color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Logout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
+  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
+  document.getElementById('adminName').textContent = sess.name || 'Admin';
+  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+
+  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
+  const DEPTS = [
+    { key:'hod',      label:'HOD / Project',      seed:3,  icon:'school',          officer:'Dr. Okonkwo J.' },
+    { key:'cedgs',    label:'CEDGS',               seed:7,  icon:'account_balance',  officer:'Mrs. Adeyemi F.' },
+    { key:'lab',      label:'Lab Instructor',      seed:11, icon:'science',          officer:'Mr. Babatunde A.' },
+    { key:'college',  label:'College Officer',     seed:17, icon:'domain',           officer:'Prof. Eze C.' },
+    { key:'health',   label:'Health Unit',         seed:19, icon:'local_hospital',   officer:'Dr. Sule M.' },
+    { key:'sport',    label:'Sport',               seed:23, icon:'sports_soccer',    officer:'Mr. Okeke T.' },
+    { key:'hall',     label:'Hall of Residence',   seed:29, icon:'home',             officer:'Mrs. Bello K.' },
+    { key:'ict',      label:'ICT Unit',            seed:31, icon:'computer',         officer:'Mr. Afolabi D.' },
+    { key:'alumni',   label:'Alumni',              seed:37, icon:'people',           officer:'Mr. Nwosu G.' },
+    { key:'affairs',  label:'Student Affairs',     seed:41, icon:'supervised_user_circle', officer:'Mrs. Adeola R.' },
+    { key:'library',  label:'Library',             seed:43, icon:'menu_book',        officer:'Mr. Ibrahim S.' },
+    { key:'bursary',  label:'Bursary',             seed:47, icon:'payments',         officer:'Mrs. Okafor P.' },
+    { key:'esm',      label:'ESM (Music)',          seed:53, icon:'music_note',       officer:'Mr. Chukwu E.' },
+    { key:'academic', label:'Academic Affairs',    seed:59, icon:'assignment',       officer:'Prof. Adeleke B.' },
+    { key:'chapel',   label:'Chapel',              seed:0,  icon:'church',           officer:'Rev. Olawale K.' },
+  ];
+  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
+
+  function getDeptStatus(sid, dept) {
+    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
+    if (saved) return saved.status;
+    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
+    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
+    const v = (sid * s) % 97;
+    if (v < 10) return 'rejected'; if (v < 24) return 'flagged'; if (v < 50) return 'pending';
+    return 'approved';
+  }
+
+  const grid = document.getElementById('deptGrid');
+  DEPTS.forEach(dept => {
+    let approved=0, pending=0, flagged=0, rejected=0;
+    STUDENTS.forEach(sid => {
+      const st = getDeptStatus(sid, dept.key);
+      if (st==='approved') approved++; else if (st==='pending') pending++;
+      else if (st==='flagged') flagged++; else rejected++;
+    });
+    const pct = Math.round((approved/24)*100);
+    const fillColor = pct >= 70 ? '#10B981' : pct >= 40 ? '#F59E0B' : '#EF4444';
+    grid.innerHTML += `
+      <div class="dept-card">
+        <div class="dept-card-header">
+          <div class="dept-icon"><span class="material-symbols-outlined">${dept.icon}</span></div>
+          <div><div class="dept-card-title">${dept.label}</div><div class="dept-card-key">${dept.key}</div></div>
+        </div>
+        <div class="dept-card-body">
+          <div class="dept-row"><span class="dept-row-label">Officer</span><span class="dept-row-val">${dept.officer}</span></div>
+          <div class="dept-row"><span class="dept-row-label">Approved</span><span class="dept-row-val" style="color:var(--approved);">${approved}/24</span></div>
+          <div class="dept-row"><span class="dept-row-label">Pending</span><span class="dept-row-val" style="color:var(--pending);">${pending}</span></div>
+          <div class="dept-row"><span class="dept-row-label">Flagged / Rejected</span><span class="dept-row-val" style="color:var(--flagged);">${flagged + rejected}</span></div>
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${fillColor};"></div></div>
+            <span style="font-size:0.72rem;font-weight:600;color:var(--muted);min-width:32px;text-align:right;">${pct}%</span>
+          </div>
+        </div>
+        <div class="dept-card-footer">
+          <button class="action-btn btn-view" onclick="window.location.href='admin-requests.html'">
+            <span class="material-symbols-outlined">visibility</span>View
+          </button>
+          <button class="action-btn btn-edit">
+            <span class="material-symbols-outlined">edit</span>Edit
+          </button>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
+  document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
+</script>
+</body>
+</html>

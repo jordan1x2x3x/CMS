@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — MTU CMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A; --green-dark: #5a8d1e;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .role-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .role-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .role-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .role-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .role-chip-sub { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 2px; }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    /* Main */
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 36px; height: 36px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: background 0.15s; position: relative; }
+    .icon-btn:hover { background: var(--border); }
+    .icon-btn .material-symbols-outlined { font-size: 20px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .content { padding: 2rem; flex: 1; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .stat-icon .material-symbols-outlined { font-size: 20px; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    .stat-trend { font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+    .trend-up { color: var(--approved); }
+    .trend-warn { color: var(--pending); }
+
+    /* Two col */
+    .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; margin-bottom: 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-header h3 { font-size: 0.9rem; font-weight: 700; }
+    .card-header a, .card-header button { font-size: 0.75rem; color: var(--purple); font-weight: 600; text-decoration: none; background: none; border: none; cursor: pointer; }
+
+    /* Dept progress table */
+    .dept-table { width: 100%; border-collapse: collapse; }
+    .dept-table th { font-size: 0.7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; padding: 0.7rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .dept-table td { padding: 0.85rem 1.25rem; font-size: 0.82rem; border-bottom: 1px solid var(--border); }
+    .dept-table tr:last-child td { border-bottom: none; }
+    .dept-table tr:hover td { background: var(--bg); }
+    .dept-name { font-weight: 600; }
+    .dept-officer-name { font-size: 0.72rem; color: var(--muted); }
+    .progress-wrap { display: flex; align-items: center; gap: 8px; }
+    .progress-bar { flex: 1; height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 100px; background: var(--green); }
+    .progress-pct { font-size: 0.72rem; font-weight: 600; color: var(--muted); width: 32px; text-align: right; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 100px; font-size: 0.68rem; font-weight: 600; }
+    .badge-approved { background: var(--approved-bg); color: var(--approved); }
+    .badge-pending { background: var(--pending-bg); color: #B45309; }
+    .badge-flagged { background: var(--flagged-bg); color: #C2410C; }
+    .badge-rejected { background: var(--rejected-bg); color: #DC2626; }
+
+    /* Activity feed */
+    .activity-list { padding: 0.5rem 0; }
+    .activity-item { display: flex; align-items: flex-start; gap: 10px; padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .activity-dot .material-symbols-outlined { font-size: 15px; }
+    .dot-approve { background: var(--approved-bg); color: var(--approved); }
+    .dot-flag { background: var(--flagged-bg); color: var(--flagged); }
+    .dot-reject { background: var(--rejected-bg); color: var(--rejected); }
+    .dot-pending { background: var(--pending-bg); color: var(--pending); }
+    .activity-text { flex: 1; }
+    .activity-text p { font-size: 0.8rem; line-height: 1.4; }
+    .activity-text p strong { font-weight: 600; }
+    .activity-time { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+    /* Bottom row */
+    .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 1.5rem; }
+    .mini-stat { display: flex; align-items: center; gap: 12px; padding: 1rem 1.25rem; }
+    .mini-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mini-icon .material-symbols-outlined { font-size: 18px; }
+    .mini-label { font-size: 0.72rem; color: var(--muted); }
+    .mini-value { font-size: 1.1rem; font-weight: 700; }
+    .divider { border-bottom: 1px solid var(--border); }
+
+    /* Donut chart */
+    .donut-wrap { display: flex; flex-direction: column; align-items: center; padding: 1.25rem; gap: 1rem; }
+    .donut { position: relative; width: 140px; height: 140px; }
+    .donut canvas { position: absolute; top: 0; left: 0; }
+    .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+    .donut-center .pct { font-size: 1.5rem; font-weight: 700; color: var(--approved); }
+    .donut-center .lbl { font-size: 0.6rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .donut-legend { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .legend-row { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { flex: 1; color: var(--muted); }
+    .legend-val { font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" /></div>
+    <div class="brand-text">MTU Clearance<span>Admin Portal</span></div>
+  </div>
+  <div class="role-chip">
+    <div class="role-chip-label">Signed in as</div>
+    <div class="role-chip-name"><span class="material-symbols-outlined">admin_panel_settings</span><span id="adminName">Admin</span></div>
+    <div class="role-chip-sub">Registrar / Administrator</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <a href="admin-dashboard.html" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="admin-requests.html" class="nav-item"><span class="material-symbols-outlined">list_alt</span>All Requests<span class="nav-badge" id="pendingNavBadge">0</span></a>
+    <div class="nav-label">Management</div>
+    <a href="admin-departments.html" class="nav-item"><span class="material-symbols-outlined">apartment</span>Departments</a>
+    <a href="admin-reports.html" class="nav-item"><span class="material-symbols-outlined">bar_chart</span>Reports</a>
+    <div class="nav-label">System</div>
+    <a href="admin-audit.html" class="nav-item"><span class="material-symbols-outlined">history</span>Audit Log</a>
+    <a href="admin-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="nav-item danger" id="logoutBtn"><span class="material-symbols-outlined">logout</span>Logout</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Admin Dashboard</h1>
+      <p id="topbarDate">Loading…</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" title="Notifications"><span class="material-symbols-outlined">notifications</span><span class="notif-dot" style="position:absolute;top:7px;right:7px;width:7px;height:7px;background:var(--flagged);border-radius:50%;border:1.5px solid white;"></span></button>
+      <div class="topbar-avatar" id="avatarInitial">A</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon" style="background:#EDE9FE;"><span class="material-symbols-outlined" style="color:#7C3AED;">groups</span></div>
+          <span class="stat-trend trend-up"><span class="material-symbols-outlined" style="font-size:14px;">arrow_upward</span>+4</span>
+        </div>
+        <div class="stat-value" id="statTotal">24</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon" style="background:var(--approved-bg);"><span class="material-symbols-outlined" style="color:var(--approved);">verified</span></div>
+          <span class="stat-trend trend-up"><span class="material-symbols-outlined" style="font-size:14px;">arrow_upward</span>+2</span>
+        </div>
+        <div class="stat-value" id="statCleared">0</div>
+        <div class="stat-label">Fully Cleared</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon" style="background:var(--pending-bg);"><span class="material-symbols-outlined" style="color:var(--pending);">hourglass_top</span></div>
+          <span class="stat-trend trend-warn"><span class="material-symbols-outlined" style="font-size:14px;">arrow_upward</span>+6</span>
+        </div>
+        <div class="stat-value" id="statPending">0</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon" style="background:var(--flagged-bg);"><span class="material-symbols-outlined" style="color:var(--flagged);">flag</span></div>
+          <span class="stat-trend" style="color:var(--rejected);"><span class="material-symbols-outlined" style="font-size:14px;">arrow_upward</span>+1</span>
+        </div>
+        <div class="stat-value" id="statFlagged">0</div>
+        <div class="stat-label">Flagged / Rejected</div>
+      </div>
+    </div>
+
+    <!-- Dept progress + Donut -->
+    <div class="two-col">
+      <!-- Department progress table -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Department Clearance Progress</h3>
+          <a href="admin-departments.html">View all</a>
+        </div>
+        <table class="dept-table">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Progress</th>
+              <th>Pending</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="deptTableBody">
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Donut -->
+      <div class="card">
+        <div class="card-header"><h3>Clearance Overview</h3></div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <canvas id="donutCanvas" width="140" height="140"></canvas>
+            <div class="donut-center">
+              <div class="pct" id="donutPct">0%</div>
+              <div class="lbl">Cleared</div>
+            </div>
+          </div>
+          <div class="donut-legend" id="donutLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity + Quick actions -->
+    <div class="two-col">
+      <!-- Recent activity -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Activity</h3>
+          <a href="admin-audit.html">View audit log</a>
+        </div>
+        <div class="activity-list" id="activityList">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="card">
+        <div class="card-header"><h3>System Summary</h3></div>
+        <div class="mini-stat">
+          <div class="mini-icon" style="background:#EDE9FE;"><span class="material-symbols-outlined" style="color:#7C3AED;">apartment</span></div>
+          <div><div class="mini-label">Active Departments</div><div class="mini-value">15</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="mini-stat">
+          <div class="mini-icon" style="background:var(--approved-bg);"><span class="material-symbols-outlined" style="color:var(--approved);">badge</span></div>
+          <div><div class="mini-label">Active Officers</div><div class="mini-value">15</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="mini-stat">
+          <div class="mini-icon" style="background:var(--pending-bg);"><span class="material-symbols-outlined" style="color:var(--pending);">schedule</span></div>
+          <div><div class="mini-label">Avg. Review Time</div><div class="mini-value">1.4 days</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="mini-stat">
+          <div class="mini-icon" style="background:var(--flagged-bg);"><span class="material-symbols-outlined" style="color:var(--flagged);">gavel</span></div>
+          <div><div class="mini-label">Decisions Today</div><div class="mini-value" id="todayDecisions">0</div></div>
+        </div>
+        <div class="divider"></div>
+        <div style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:8px;">
+          <a href="admin-reports.html" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--purple);color:white;border-radius:10px;text-decoration:none;font-size:0.82rem;font-weight:600;">
+            <span class="material-symbols-outlined" style="font-size:18px;">download</span>Export Report
+          </a>
+          <a href="admin-requests.html" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);color:var(--text);border-radius:10px;text-decoration:none;font-size:0.82rem;font-weight:600;border:1px solid var(--border);">
+            <span class="material-symbols-outlined" style="font-size:18px;">list_alt</span>View All Requests
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Logout confirm -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--rejected-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+      <span class="material-symbols-outlined" style="color:var(--rejected);font-size:26px;">logout</span>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Confirm Logout</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">Are you sure you want to end your admin session?</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('logoutModal').style.display='none'" style="padding:10px 22px;border:1px solid var(--border);background:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Cancel</button>
+      <button id="confirmLogout" style="padding:10px 22px;background:var(--rejected);color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Logout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Session guard ──
+  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
+  if (!sess.role || sess.role !== 'admin') {
+    window.location.href = '../login.html';
+  }
+  document.getElementById('adminName').textContent = sess.name || 'Admin';
+  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+  document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-NG', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // ── Data ──
+  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
+  const DEPTS = [
+    { key:'hod',      label:'HOD',             seed:3  },
+    { key:'cedgs',    label:'CEDGS',            seed:7  },
+    { key:'lab',      label:'Lab Instructor',   seed:11 },
+    { key:'college',  label:'College Officer',  seed:17 },
+    { key:'health',   label:'Health Unit',      seed:19 },
+    { key:'sport',    label:'Sport',            seed:23 },
+    { key:'hall',     label:'Hall of Residence',seed:29 },
+    { key:'ict',      label:'ICT Unit',         seed:31 },
+    { key:'alumni',   label:'Alumni',           seed:37 },
+    { key:'affairs',  label:'Student Affairs',  seed:41 },
+    { key:'library',  label:'Library',          seed:43 },
+    { key:'bursary',  label:'Bursary',          seed:47 },
+    { key:'esm',      label:'ESM (Music)',       seed:53 },
+    { key:'academic', label:'Academic Affairs',  seed:59 },
+    { key:'chapel',   label:'Chapel',           seed:0  },
+  ];
+  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
+
+  function getDeptStatus(sid, dept) {
+    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
+    if (saved) return saved.status;
+    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
+    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
+    const v = (sid * s) % 97;
+    if (v < 10) return 'rejected';
+    if (v < 24) return 'flagged';
+    if (v < 50) return 'pending';
+    return 'approved';
+  }
+
+  // ── Compute stats ──
+  let totalCleared = 0, totalPending = 0, totalFlagged = 0;
+  const deptStats = DEPTS.map(dept => {
+    let approved=0, pending=0, flagged=0, rejected=0;
+    STUDENTS.forEach(sid => {
+      const st = getDeptStatus(sid, dept.key);
+      if (st==='approved') approved++;
+      else if (st==='pending') pending++;
+      else if (st==='flagged') flagged++;
+      else rejected++;
+    });
+    const pct = Math.round((approved/STUDENTS.length)*100);
+    return { ...dept, approved, pending, flagged, rejected, pct };
+  });
+
+  // How many students cleared ALL 15 depts
+  STUDENTS.forEach(sid => {
+    const allApproved = DEPTS.every(d => getDeptStatus(sid, d.key) === 'approved');
+    if (allApproved) totalCleared++;
+    const anyPending = DEPTS.some(d => getDeptStatus(sid, d.key) === 'pending');
+    if (anyPending) totalPending++;
+    const anyFlagged = DEPTS.some(d => ['flagged','rejected'].includes(getDeptStatus(sid, d.key)));
+    if (anyFlagged) totalFlagged++;
+  });
+
+  document.getElementById('statCleared').textContent = totalCleared;
+  document.getElementById('statPending').textContent = totalPending;
+  document.getElementById('statFlagged').textContent = totalFlagged;
+
+  const pendingTotal = deptStats.reduce((s,d) => s + d.pending, 0);
+  document.getElementById('pendingNavBadge').textContent = pendingTotal;
+
+  // ── Dept table ──
+  const tbody = document.getElementById('deptTableBody');
+  deptStats.slice(0,10).forEach(d => {
+    const worst = d.rejected > 0 ? 'rejected' : d.flagged > 0 ? 'flagged' : d.pending > 0 ? 'pending' : 'approved';
+    const badgeMap = { approved:'badge-approved', pending:'badge-pending', flagged:'badge-flagged', rejected:'badge-rejected' };
+    const badgeLabel = { approved:'Active', pending:'Ongoing', flagged:'Has Flags', rejected:'Has Rejections' };
+    tbody.innerHTML += `
+      <tr>
+        <td><div class="dept-name">${d.label}</div></td>
+        <td>
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${d.pct}%"></div></div>
+            <div class="progress-pct">${d.pct}%</div>
+          </div>
+        </td>
+        <td style="font-weight:600;color:var(--pending);">${d.pending}</td>
+        <td><span class="badge ${badgeMap[worst]}">${badgeLabel[worst]}</span></td>
+      </tr>`;
+  });
+
+  // ── Donut ──
+  const totalApproved = deptStats.reduce((s,d) => s+d.approved, 0);
+  const totalPendingAll = deptStats.reduce((s,d) => s+d.pending, 0);
+  const totalFlaggedAll = deptStats.reduce((s,d) => s+d.flagged, 0);
+  const totalRejected = deptStats.reduce((s,d) => s+d.rejected, 0);
+  const grandTotal = totalApproved + totalPendingAll + totalFlaggedAll + totalRejected;
+  const approvedPct = Math.round((totalApproved/grandTotal)*100);
+  document.getElementById('donutPct').textContent = approvedPct + '%';
+  document.getElementById('donutPct').style.color = approvedPct >= 60 ? 'var(--approved)' : 'var(--pending)';
+
+  const canvas = document.getElementById('donutCanvas');
+  const ctx = canvas.getContext('2d');
+  const cx=70, cy=70, r=58, thick=18;
+  const slices = [
+    { val:totalApproved, color:'#10B981' },
+    { val:totalPendingAll, color:'#F59E0B' },
+    { val:totalFlaggedAll, color:'#F97316' },
+    { val:totalRejected, color:'#EF4444' },
+  ];
+  let startAngle = -Math.PI/2;
+  slices.forEach(s => {
+    const angle = (s.val/grandTotal) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, startAngle, startAngle+angle);
+    ctx.arc(cx, cy, r-thick, startAngle+angle, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = s.color;
+    ctx.fill();
+    startAngle += angle;
+  });
+
+  const legendItems = [
+    { label:'Approved', val:totalApproved, color:'#10B981' },
+    { label:'Pending',  val:totalPendingAll, color:'#F59E0B' },
+    { label:'Flagged',  val:totalFlaggedAll, color:'#F97316' },
+    { label:'Rejected', val:totalRejected,  color:'#EF4444' },
+  ];
+  document.getElementById('donutLegend').innerHTML = legendItems.map(l =>
+    `<div class="legend-row"><div class="legend-dot" style="background:${l.color}"></div><div class="legend-label">${l.label}</div><div class="legend-val">${l.val}</div></div>`
+  ).join('');
+
+  // ── Activity feed (from decisions) ──
+  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+  const todayDec = decisions.filter(d => d.timestamp && new Date(d.timestamp).toDateString() === new Date().toDateString());
+  document.getElementById('todayDecisions').textContent = todayDec.length;
+
+  const activity = document.getElementById('activityList');
+  const recent = [...decisions].sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp)).slice(0,6);
+  if (recent.length === 0) {
+    activity.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:0.82rem;">No officer decisions recorded yet.</div>';
+  } else {
+    const dotMap = { approved:'dot-approve', flagged:'dot-flag', rejected:'dot-reject', pending:'dot-pending' };
+    const iconMap = { approved:'check_circle', flagged:'flag', rejected:'cancel', pending:'hourglass_top' };
+    recent.forEach(d => {
+      const dept = DEPTS.find(x => x.key === d.dept)?.label || d.dept;
+      const timeAgo = d.timestamp ? new Date(d.timestamp).toLocaleString('en-NG', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '';
+      activity.innerHTML += `
+        <div class="activity-item">
+          <div class="activity-dot ${dotMap[d.status] || 'dot-pending'}"><span class="material-symbols-outlined">${iconMap[d.status] || 'info'}</span></div>
+          <div class="activity-text">
+            <p><strong>Student #${d.studentId}</strong> ${d.status} by <strong>${dept}</strong>${d.reason ? ' — ' + d.reason : ''}</p>
+            <div class="activity-time">${timeAgo}</div>
+          </div>
+        </div>`;
+    });
+  }
+
+  // ── Logout ──
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    document.getElementById('logoutModal').style.display = 'flex';
+  });
+  document.getElementById('confirmLogout').addEventListener('click', () => {
+    window.location.href = '../logout.html';
+  });
+</script>
+</body>
+</html>

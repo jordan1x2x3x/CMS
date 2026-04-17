@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Review Request — MTU CMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A; --green-dark: #5a8d1e;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .dept-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .dept-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .dept-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .dept-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .dept-chip-role { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 2px; }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .back-btn { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 0.82rem; font-weight: 500; text-decoration: none; padding: 6px 10px; border-radius: 8px; transition: background 0.15s; }
+    .back-btn:hover { background: var(--bg); color: var(--text); }
+    .back-btn .material-symbols-outlined { font-size: 18px; }
+    .topbar-title h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-title p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 36px; height: 36px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+    .icon-btn .material-symbols-outlined { font-size: 20px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+
+    .content { padding: 2rem; flex: 1; display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; align-items: start; }
+
+    /* ── Card ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; }
+    .card:last-child { margin-bottom: 0; }
+    .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-header h3 { font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+    .card-header h3 .material-symbols-outlined { font-size: 18px; color: var(--purple); }
+    .card-body { padding: 1.25rem; }
+
+    /* ── Student info ── */
+    .student-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+    .student-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--purple); color: white; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .student-name { font-size: 1.1rem; font-weight: 700; }
+    .student-matric { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-pending  { background: var(--pending-bg);  color: var(--pending); }
+    .badge-approved { background: var(--approved-bg); color: var(--approved); }
+    .badge-flagged  { background: var(--flagged-bg);  color: var(--flagged); }
+    .badge-rejected { background: var(--rejected-bg); color: var(--rejected); }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .info-item label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 3px; }
+    .info-item span { font-size: 0.83rem; font-weight: 500; }
+
+    /* ── Document list ── */
+    .doc-item { display: flex; align-items: center; gap: 12px; padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .doc-item:last-child { border-bottom: none; }
+    .doc-icon { width: 38px; height: 38px; border-radius: 9px; background: rgba(107,0,128,0.07); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .doc-icon .material-symbols-outlined { font-size: 19px; color: var(--purple); }
+    .doc-info { flex: 1; min-width: 0; }
+    .doc-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .doc-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+    .doc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .doc-btn { padding: 5px 10px; border-radius: 7px; border: 1.5px solid var(--border); background: transparent; font-family: 'Inter', sans-serif; font-size: 0.73rem; font-weight: 600; cursor: pointer; color: var(--muted); display: flex; align-items: center; gap: 4px; transition: border-color 0.15s, color 0.15s; }
+    .doc-btn .material-symbols-outlined { font-size: 14px; }
+    .doc-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .doc-empty { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.82rem; }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; padding: 1rem 1.25rem; }
+    .tl-item { display: flex; gap: 12px; padding-bottom: 1.25rem; position: relative; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item:not(:last-child)::before { content: ''; position: absolute; left: 15px; top: 30px; width: 2px; bottom: 0; background: var(--border); }
+    .tl-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1; }
+    .tl-dot .material-symbols-outlined { font-size: 15px; }
+    .tl-content { flex: 1; }
+    .tl-title { font-size: 0.82rem; font-weight: 600; }
+    .tl-body { font-size: 0.75rem; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+    .tl-time { font-size: 0.67rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── Action panel ── */
+    .current-status-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.25rem; background: var(--flagged-bg); border-bottom: 1px solid rgba(249,115,22,0.2); }
+    .current-status-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+    .action-buttons { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.25rem; }
+    .btn-action { width: 100%; padding: 11px 16px; border-radius: 10px; border: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s, transform 0.1s; }
+    .btn-action:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-action:active { transform: translateY(0); }
+    .btn-action .material-symbols-outlined { font-size: 18px; }
+    .btn-approve { background: var(--approved); color: white; }
+    .btn-flag    { background: var(--flagged);  color: white; }
+    .btn-reject  { background: var(--rejected); color: white; }
+
+    /* ── Comment box ── */
+    .comment-section { padding: 1.25rem; border-top: 1px solid var(--border); }
+    .comment-section label { font-size: 0.78rem; font-weight: 600; display: block; margin-bottom: 6px; }
+    .comment-section textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.82rem; resize: vertical; min-height: 90px; outline: none; color: var(--text); transition: border-color 0.15s; }
+    .comment-section textarea:focus { border-color: var(--purple); }
+    .comment-section p { font-size: 0.7rem; color: var(--muted); margin-top: 5px; }
+    .comment-section textarea.required-field { border-color: var(--rejected); }
+
+    /* ── Flag/Reject reason ── */
+    .reason-box { display: none; padding: 0 1.25rem 1rem; }
+    .reason-box.show { display: block; }
+    .reason-box label { font-size: 0.78rem; font-weight: 600; display: block; margin-bottom: 6px; }
+    .reason-box select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.82rem; background: var(--surface); outline: none; margin-bottom: 8px; }
+    .reason-box select:focus { border-color: var(--purple); }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; color: white; padding: 12px 18px; border-radius: 10px; font-size: 0.82rem; font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(80px); opacity: 0; transition: transform 0.3s, opacity 0.3s; z-index: 300; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast .material-symbols-outlined { font-size: 18px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="brand-text">CMS Portal<span>Mountain Top University</span></div>
+  </div>
+  <div class="dept-chip">
+    <div class="dept-chip-label">Your Department</div>
+    <div class="dept-chip-name" id="deptChipName"><span class="material-symbols-outlined">church</span>University Chapel</div>
+    <div class="dept-chip-role">Department Officer</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="officer-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="officer-requests.html" class="nav-item active"><span class="material-symbols-outlined">fact_check</span>Clearance Requests<span class="nav-badge">8</span></a>
+    <a href="officer-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="officer-requests.html" class="back-btn"><span class="material-symbols-outlined">arrow_back</span>Requests</a>
+      <div style="width:1px;height:24px;background:var(--border);"></div>
+      <div class="topbar-title">
+        <h1 id="topbarName">Odunukwe C. Jordan</h1>
+        <p id="topbarMeta">MTU/CSC/2021/001 · University Chapel Review</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <div class="topbar-avatar">CO</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Left column -->
+    <div>
+      <!-- Student Info -->
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="material-symbols-outlined">person</span>Student Information</h3>
+          <span class="badge badge-flagged" id="statusBadge">Flagged</span>
+        </div>
+        <div class="card-body">
+          <div class="student-header">
+            <div class="student-avatar" id="studentAvatar">OJ</div>
+            <div>
+              <div class="student-name" id="studentName">Odunukwe C. Jordan</div>
+              <div class="student-matric" id="studentMatric">MTU/CSC/2021/001</div>
+            </div>
+          </div>
+          <div class="info-grid">
+            <div class="info-item"><label>Programme</label><span id="infoProg">B.Sc Computer Science</span></div>
+            <div class="info-item"><label>College</label><span id="infoCollege">CBAS</span></div>
+            <div class="info-item"><label>Clearance Type</label><span id="infoClearance">🎓 Graduation</span></div>
+            <div class="info-item"><label>Academic Session</label><span>2024/2025</span></div>
+            <div class="info-item"><label>Submitted</label><span id="infoSubmitted">Apr 14, 2026</span></div>
+            <div class="info-item"><label>Clearance Dept</label><span id="infoClearanceDept">University Chapel</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="material-symbols-outlined">attach_file</span>Submitted Documents</h3>
+        </div>
+        <div id="docList">
+          <div class="doc-item">
+            <div class="doc-icon"><span class="material-symbols-outlined">picture_as_pdf</span></div>
+            <div class="doc-info">
+              <div class="doc-name">Chapel_Attendance_Record.pdf</div>
+              <div class="doc-meta">PDF · 1.2 MB · Uploaded Apr 14, 2026</div>
+            </div>
+            <div class="doc-actions">
+              <button class="doc-btn"><span class="material-symbols-outlined">visibility</span>View</button>
+              <button class="doc-btn"><span class="material-symbols-outlined">download</span>Download</button>
+            </div>
+          </div>
+          <div class="doc-item">
+            <div class="doc-icon"><span class="material-symbols-outlined">image</span></div>
+            <div class="doc-info">
+              <div class="doc-name">Chapel_Tithe_Receipt_2024.jpg</div>
+              <div class="doc-meta">JPEG · 840 KB · Uploaded Apr 14, 2026</div>
+            </div>
+            <div class="doc-actions">
+              <button class="doc-btn"><span class="material-symbols-outlined">visibility</span>View</button>
+              <button class="doc-btn"><span class="material-symbols-outlined">download</span>Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="material-symbols-outlined">history</span>Activity Log</h3>
+        </div>
+        <div class="timeline" id="timeline">
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--flagged-bg);"><span class="material-symbols-outlined" style="color:var(--flagged);">flag</span></div>
+            <div class="tl-content">
+              <div class="tl-title">Request flagged — Insufficient chapel attendance</div>
+              <div class="tl-body">Student has only attended 12 out of 20 required chapel sessions. Must complete remaining sessions before clearance can be granted.</div>
+              <div class="tl-time">Apr 14, 2026 · 3:42 PM · You</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:rgba(107,0,128,0.08);"><span class="material-symbols-outlined" style="color:var(--purple);">upload_file</span></div>
+            <div class="tl-content">
+              <div class="tl-title">Documents submitted by student</div>
+              <div class="tl-body">Chapel attendance record and tithe receipt uploaded.</div>
+              <div class="tl-time">Apr 14, 2026 · 10:05 AM · Student</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:rgba(107,0,128,0.08);"><span class="material-symbols-outlined" style="color:var(--purple);">send</span></div>
+            <div class="tl-content">
+              <div class="tl-title">Clearance request submitted</div>
+              <div class="tl-body">Graduation clearance request sent to all 15 departments.</div>
+              <div class="tl-time">Apr 12, 2026 · 9:20 AM · Student</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Action panel -->
+    <div>
+      <div class="card">
+        <div class="card-header" style="padding:1rem 1.25rem;">
+          <h3><span class="material-symbols-outlined">gavel</span>Decision</h3>
+        </div>
+
+        <!-- Current status -->
+        <div class="current-status-bar" id="statusBar">
+          <span class="current-status-label">Current status</span>
+          <span class="badge badge-flagged" id="statusBadge2">Flagged</span>
+        </div>
+
+        <!-- Flag reason selector -->
+        <div class="reason-box" id="flagReasonBox">
+          <label>Flag Reason</label>
+          <select id="flagReason">
+            <option value="">Select a reason…</option>
+            <option value="Insufficient chapel attendance">Insufficient chapel attendance</option>
+            <option value="Outstanding tithe obligations">Outstanding tithe obligations</option>
+            <option value="Unresolved chapel disciplinary issue">Unresolved chapel disciplinary issue</option>
+            <option value="Missing required chapel form">Missing required chapel form</option>
+            <option value="Other">Other (specify in comment)</option>
+          </select>
+        </div>
+
+        <!-- Reject reason selector -->
+        <div class="reason-box" id="rejectReasonBox">
+          <label>Rejection Reason</label>
+          <select id="rejectReason">
+            <option value="">Select a reason…</option>
+            <option value="Student did not meet minimum chapel requirements">Did not meet minimum chapel requirements</option>
+            <option value="Falsified attendance records submitted">Falsified attendance records submitted</option>
+            <option value="Active chapel disciplinary case">Active chapel disciplinary case</option>
+            <option value="Other">Other (specify in comment)</option>
+          </select>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-buttons">
+          <button class="btn-action btn-approve" onclick="takeAction('approved')">
+            <span class="material-symbols-outlined">check_circle</span>Approve Clearance
+          </button>
+          <button class="btn-action btn-flag" onclick="showReason('flag')">
+            <span class="material-symbols-outlined">flag</span>Flag — Needs Attention
+          </button>
+          <button class="btn-action btn-reject" onclick="showReason('reject')">
+            <span class="material-symbols-outlined">cancel</span>Reject Clearance
+          </button>
+        </div>
+
+        <!-- Comment -->
+        <div class="comment-section">
+          <label>Comment / Note <span style="color:var(--muted);font-weight:400;">(optional for approval, required for flag/reject)</span></label>
+          <textarea id="commentBox" placeholder="Add a note for the student or for your records…"></textarea>
+          <p>The student will be notified of your decision and can see your comment.</p>
+        </div>
+
+        <!-- Confirm button (shown after flag/reject selection) -->
+        <div id="confirmSection" style="display:none;padding:0 1.25rem 1.25rem;">
+          <button class="btn-action" id="confirmBtn" style="background:var(--flagged);color:white;" onclick="confirmAction()">
+            <span class="material-symbols-outlined">send</span><span id="confirmLabel">Confirm Flag</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation between students -->
+      <div class="card">
+        <div class="card-header"><h3><span class="material-symbols-outlined">swap_horiz</span>Navigate Requests</h3></div>
+        <div style="display:flex;gap:0.75rem;padding:1.25rem;">
+          <a id="prevBtn" href="#" style="flex:1;padding:9px;border:1.5px solid var(--border);border-radius:9px;text-align:center;text-decoration:none;color:var(--muted);font-size:0.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;transition:border-color 0.15s;">
+            <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>Previous
+          </a>
+          <a href="officer-requests.html" style="flex:1;padding:9px;border:1.5px solid var(--border);border-radius:9px;text-align:center;text-decoration:none;color:var(--muted);font-size:0.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;transition:border-color 0.15s;">
+            <span class="material-symbols-outlined" style="font-size:16px;">list</span>All
+          </a>
+          <a id="nextBtn" href="#" style="flex:1;padding:9px;border:1.5px solid var(--border);border-radius:9px;text-align:center;text-decoration:none;color:var(--muted);font-size:0.78rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;transition:border-color 0.15s;">
+            Next<span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="material-symbols-outlined" id="toastIcon">check_circle</span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const REQUESTS = [
+  { id:1,  name:'Odunukwe C. Jordan',   matric:'MTU/CSC/2021/001', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 14, 2026', initials:'OJ', color:'#6B0080' },
+  { id:2,  name:'Adeyemi Miracle',       matric:'MTU/BCH/2021/014', programme:'B.Sc Biochemistry',               college:'CBAS', type:'Graduation', submitted:'Apr 13, 2026', initials:'AM', color:'#0e7490' },
+  { id:3,  name:'Eze Oluwaseun',         matric:'MTU/NRS/2021/007', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 13, 2026', initials:'EO', color:'#065f46' },
+  { id:4,  name:'Fashola Kehinde',       matric:'MTU/MLS/2021/022', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 12, 2026', initials:'FK', color:'#92400e' },
+  { id:5,  name:'Nwosu Blessing',        matric:'MTU/ECO/2021/031', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 11, 2026', initials:'NB', color:'#1e3a5f' },
+  { id:6,  name:'Ibrahim Aisha',         matric:'MTU/PHL/2020/008', programme:'B.A Philosophy',                  college:'CHMS', type:'Withdrawal', submitted:'Apr 10, 2026', initials:'IA', color:'#5b21b6' },
+  { id:7,  name:'Okonkwo David',         matric:'MTU/CSC/2021/019', programme:'B.Sc Software Engineering',       college:'CBAS', type:'Graduation', submitted:'Apr 09, 2026', initials:'OD', color:'#be185d' },
+  { id:8,  name:'Lawal Fatimah',         matric:'MTU/ACF/2021/005', programme:'B.Sc Accounting and Finance',     college:'CHMS', type:'Graduation', submitted:'Apr 09, 2026', initials:'LF', color:'#b45309' },
+  { id:9,  name:'Chukwu Emeka',          matric:'MTU/CSC/2020/003', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 08, 2026', initials:'CE', color:'#0f766e' },
+  { id:10, name:'Adeola Tunde',          matric:'MTU/PHY/2021/011', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Apr 07, 2026', initials:'AT', color:'#7c3aed' },
+  { id:11, name:'Bello Fatima',          matric:'MTU/NUT/2020/016', programme:'B.Sc Nutrition & Dietetics',      college:'CAHS', type:'Graduation', submitted:'Apr 06, 2026', initials:'BF', color:'#dc2626' },
+  { id:12, name:'Taiwo Samuel',          matric:'MTU/MCS/2021/009', programme:'B.Sc Mass Communication',         college:'CHMS', type:'Graduation', submitted:'Apr 05, 2026', initials:'TS', color:'#059669' },
+  { id:13, name:'Obi Grace',             matric:'MTU/BIO/2021/027', programme:'B.Sc Biological Sciences',        college:'CBAS', type:'Graduation', submitted:'Apr 05, 2026', initials:'OG', color:'#0369a1' },
+  { id:14, name:'Hassan Musa',           matric:'MTU/GEO/2021/033', programme:'B.Sc Geosciences',                college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'HM', color:'#4d7c0f' },
+  { id:15, name:'Amara Chisom',          matric:'MTU/CHM/2021/018', programme:'B.Sc Chemical Sciences',          college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'AC', color:'#9333ea' },
+  { id:16, name:'Daniels Victor',        matric:'MTU/BMT/2021/041', programme:'B.Sc Biomedical Technology',      college:'CAHS', type:'Graduation', submitted:'Apr 03, 2026', initials:'DV', color:'#c2410c' },
+  { id:17, name:'Yusuf Khadijat',        matric:'MTU/FST/2021/012', programme:'B.Sc Food Science & Technology',  college:'CBAS', type:'Graduation', submitted:'Apr 03, 2026', initials:'YK', color:'#0891b2' },
+  { id:18, name:'Nnamdi Peter',          matric:'MTU/ECO/2021/025', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'NP', color:'#65a30d' },
+  { id:19, name:'Oke Christiana',        matric:'MTU/PHL/2021/006', programme:'B.A Philosophy & Religion',       college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'OC', color:'#b91c1c' },
+  { id:20, name:'Adeleye Rotimi',        matric:'MTU/MLS/2021/038', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'AR', color:'#0f172a' },
+  { id:21, name:'Nnaji Chidinma',        matric:'MTU/NRS/2021/029', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'NC', color:'#92400e' },
+  { id:22, name:'Okeke Emmanuel',        matric:'MTU/CSC/2020/044', programme:'B.Sc Cyber Security',             college:'CBAS', type:'Withdrawal', submitted:'Mar 31, 2026', initials:'OE', color:'#312e81' },
+  { id:23, name:'Adeleke Rukayat',       matric:'MTU/BAD/2021/017', programme:'B.Sc Business Administration',   college:'CHMS', type:'Graduation', submitted:'Mar 30, 2026', initials:'AR', color:'#166534' },
+  { id:24, name:'Musa Hauwa',            matric:'MTU/PHY/2020/052', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Mar 29, 2026', initials:'MH', color:'#0c4a6e' },
+];
+
+function getDeptStatus(studentId, dept) {
+  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+  const saved = decisions.find(d => d.studentId === studentId && d.dept === dept);
+  if (saved) return saved.status;
+  const chapelMap = {
+    1:'flagged', 2:'pending', 3:'pending', 4:'pending', 5:'pending',
+    6:'pending', 7:'pending', 8:'pending', 9:'flagged', 10:'flagged',
+    11:'rejected', 12:'approved', 13:'approved', 14:'approved', 15:'approved',
+    16:'approved', 17:'approved', 18:'approved', 19:'approved', 20:'approved',
+    21:'approved', 22:'approved', 23:'approved', 24:'approved'
+  };
+  if (dept === 'chapel') return chapelMap[studentId] || 'pending';
+  const seeds = {hod:3,cedgs:7,lab:11,college:17,health:19,sport:23,hall:29,ict:31,alumni:37,affairs:41,library:43,bursary:47,esm:53,academic:59};
+  const v = (studentId * (seeds[dept] || 13)) % 97;
+  if (v < 10) return 'rejected';
+  if (v < 24) return 'flagged';
+  if (v < 50) return 'pending';
+  return 'approved';
+}
+
+const DEPT_NAMES = {
+  hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
+  college:'College Officer', chapel:'University Chapel', health:'Health Centre',
+  sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
+  alumni:'Alumni Association', affairs:'Student Affairs', library:'University Library',
+  bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
+};
+const DEPT_ICONS = {
+  hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
+  chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
+  ict:'computer', alumni:'groups', affairs:'diversity_3', library:'menu_book',
+  bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
+};
+
+const DEPT_DOCS = {
+  chapel:   [{name:'Chapel_Attendance_Record.pdf',      type:'PDF',  size:'1.2 MB', icon:'picture_as_pdf'}, {name:'Chapel_Tithe_Receipt_2024.jpg',         type:'JPEG', size:'840 KB', icon:'image'}],
+  hod:      [{name:'HOD_Clearance_Form.pdf',            type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Project_Thesis_Submission.pdf',          type:'PDF',  size:'3.4 MB', icon:'picture_as_pdf'}],
+  cedgs:    [{name:'CEDGS_Clearance_Form.pdf',          type:'PDF',  size:'0.6 MB', icon:'picture_as_pdf'}, {name:'Entrepreneurship_Project_Report.pdf',    type:'PDF',  size:'2.1 MB', icon:'picture_as_pdf'}],
+  lab:      [{name:'Lab_Equipment_Return_Form.pdf',     type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'Lab_Usage_Clearance.pdf',               type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
+  college:  [{name:'College_Clearance_Form.pdf',        type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Academic_Transcript_Request.pdf',        type:'PDF',  size:'0.9 MB', icon:'picture_as_pdf'}],
+  health:   [{name:'Medical_Clearance_Form.pdf',        type:'PDF',  size:'0.6 MB', icon:'picture_as_pdf'}, {name:'Health_Record_Update.pdf',               type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
+  sport:    [{name:'Sport_Equipment_Return.pdf',        type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}, {name:'Sport_Clearance_Certificate.pdf',        type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
+  hall:     [{name:'Room_Clearance_Form.pdf',           type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Hall_Property_Return_Receipt.pdf',       type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
+  ict:      [{name:'ICT_Equipment_Return_Form.pdf',     type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'Student_Portal_Clearance.pdf',           type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
+  alumni:   [{name:'Alumni_Registration_Form.pdf',      type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Alumni_Dues_Receipt.pdf',                type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
+  affairs:  [{name:'Student_Affairs_Clearance.pdf',     type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Conduct_Clearance_Certificate.pdf',      type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
+  library:  [{name:'Library_Clearance_Form.pdf',        type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'Book_Return_Confirmation.pdf',           type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
+  bursary:  [{name:'School_Fees_Clearance.pdf',         type:'PDF',  size:'0.6 MB', icon:'picture_as_pdf'}, {name:'Bursary_Statement.pdf',                  type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}],
+  esm:      [{name:'ESM_Clearance_Form.pdf',            type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'ESM_Membership_Receipt.pdf',             type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
+  academic: [{name:'Academic_Clearance_Form.pdf',       type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Results_Verification_Letter.pdf',        type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
+};
+
+const DEPT_FLAG_REASONS = {
+  chapel:   ['Insufficient chapel attendance','Outstanding tithe obligations','Unresolved chapel disciplinary issue','Missing required chapel form'],
+  hod:      ['Incomplete project/thesis submission','Outstanding departmental obligations','Lab equipment not returned','Missing HOD clearance form'],
+  cedgs:    ['Incomplete entrepreneurship project','Outstanding CEDGS dues','Attendance below required hours','Missing CEDGS clearance form'],
+  lab:      ['Lab equipment not returned','Damage to lab property','Outstanding lab fees','Missing lab clearance form'],
+  college:  ['Incomplete college requirements','Outstanding college assessment','Academic standing issue','Missing college clearance form'],
+  health:   ['Outstanding medical bills','Incomplete medical records','Medical assessment pending','Missing health clearance form'],
+  sport:    ['Sport equipment not returned','Outstanding sport fees','Ongoing sport disciplinary case','Missing sport clearance form'],
+  hall:     ['Room not properly vacated','Outstanding hall fees','Hall property not returned','Hall damage assessment pending'],
+  ict:      ['ICT equipment not returned','Outstanding ICT subscription fees','Student portal issues unresolved','Missing ICT clearance form'],
+  alumni:   ['Alumni registration incomplete','Outstanding alumni dues','Alumni verification pending','Missing alumni form'],
+  affairs:  ['Outstanding conduct issues','Disciplinary case pending','Community service incomplete','Student affairs form incomplete'],
+  library:  ['Unreturned library books','Outstanding library fines','Library account issues unresolved','Missing library clearance'],
+  bursary:  ['Outstanding school fees','Unpaid levies or dues','Fee payment verification pending','Missing bursary clearance form'],
+  esm:      ['ESM dues outstanding','ESM event obligation incomplete','ESM membership not active','Missing ESM clearance form'],
+  academic: ['Outstanding result issues','Academic transcript discrepancy','Pending academic review','Missing academic clearance form'],
+};
+
+const DEPT_REJECT_REASONS = {
+  chapel:   ['Did not meet minimum chapel requirements','Falsified attendance records submitted','Active chapel disciplinary case'],
+  hod:      ['Did not submit final project','Academic integrity violation','Incomplete coursework obligations'],
+  cedgs:    ['Did not complete CEDGS requirements','Falsified project records','CEDGS obligations not met'],
+  lab:      ['Unreturned or damaged lab equipment','Lab safety violation confirmed','Falsified lab records'],
+  college:  ['Did not meet college requirements','Academic integrity violation','College obligations not met'],
+  health:   ['Outstanding medical fees not cleared','Incomplete vaccination records','Health clearance criteria not met'],
+  sport:    ['Unreturned sport equipment','Sport misconduct record confirmed','Sport obligations not met'],
+  hall:     ['Unreturned hall property','Hall damage confirmed','Outstanding hall fees unpaid'],
+  ict:      ['Unreturned ICT equipment','Cybersecurity policy violation','ICT obligations not met'],
+  alumni:   ['Did not register with alumni association','Falsified alumni records','Alumni requirements not met'],
+  affairs:  ['Active disciplinary case','Code of conduct violation','Student affairs obligations not met'],
+  library:  ['Unreturned or lost library materials','Falsified library records','Library obligations not met'],
+  bursary:  ['Significant outstanding fees','Payment falsification suspected','Bursary obligations not met'],
+  esm:      ['Did not fulfill ESM requirements','Falsified ESM records','ESM obligations not met'],
+  academic: ['Academic integrity violation','Falsified academic records','Result irregularity confirmed'],
+};
+
+let pendingAction = null;
+
+function showReason(type) {
+  document.getElementById('flagReasonBox').classList.remove('show');
+  document.getElementById('rejectReasonBox').classList.remove('show');
+  document.getElementById('confirmSection').style.display = 'none';
+
+  if (type === 'flag') {
+    document.getElementById('flagReasonBox').classList.add('show');
+    document.getElementById('confirmBtn').style.background = 'var(--flagged)';
+    document.getElementById('confirmLabel').textContent = 'Confirm Flag';
+  } else {
+    document.getElementById('rejectReasonBox').classList.add('show');
+    document.getElementById('confirmBtn').style.background = 'var(--rejected)';
+    document.getElementById('confirmLabel').textContent = 'Confirm Rejection';
+  }
+  document.getElementById('confirmSection').style.display = 'block';
+  pendingAction = type;
+}
+
+function confirmAction() {
+  const comment = document.getElementById('commentBox').value.trim();
+  if (pendingAction === 'flag') {
+    const reason = document.getElementById('flagReason').value;
+    if (!reason) { showToast('Please select a flag reason.', 'error'); return; }
+    if (!comment) { document.getElementById('commentBox').classList.add('required-field'); showToast('Please add a comment explaining the flag.', 'error'); return; }
+    takeAction('flagged', reason);
+  } else {
+    const reason = document.getElementById('rejectReason').value;
+    if (!reason) { showToast('Please select a rejection reason.', 'error'); return; }
+    if (!comment) { document.getElementById('commentBox').classList.add('required-field'); showToast('Please add a comment explaining the rejection.', 'error'); return; }
+    takeAction('rejected', reason);
+  }
+}
+
+function takeAction(status, reason) {
+  document.getElementById('commentBox').classList.remove('required-field');
+
+  const labels  = { approved:'Approved', flagged:'Flagged', rejected:'Rejected' };
+  const classes = { approved:'badge-approved', flagged:'badge-flagged', rejected:'badge-rejected' };
+  const colors  = { approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', rejected:'var(--rejected-bg)' };
+  const icons   = { approved:'check_circle', flagged:'flag', rejected:'cancel' };
+  const toastColors = { approved:'var(--approved)', flagged:'var(--flagged)', rejected:'var(--rejected)' };
+
+  ['statusBadge','statusBadge2'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'badge ' + classes[status];
+    el.textContent = labels[status];
+  });
+  document.getElementById('statusBar').style.background = colors[status];
+
+  const comment = document.getElementById('commentBox').value.trim();
+  const tl = document.getElementById('timeline');
+  const entry = document.createElement('div');
+  entry.className = 'tl-item';
+  entry.innerHTML = `
+    <div class="tl-dot" style="background:${colors[status]};"><span class="material-symbols-outlined" style="color:${toastColors[status]};">${icons[status]}</span></div>
+    <div class="tl-content">
+      <div class="tl-title">Clearance ${labels[status].toLowerCase()}${reason ? ' — ' + reason : ''}</div>
+      ${comment ? `<div class="tl-body">${comment}</div>` : ''}
+      <div class="tl-time">Now · You</div>
+    </div>`;
+  tl.insertBefore(entry, tl.firstChild);
+
+  document.getElementById('flagReasonBox').classList.remove('show');
+  document.getElementById('rejectReasonBox').classList.remove('show');
+  document.getElementById('confirmSection').style.display = 'none';
+  document.getElementById('commentBox').value = '';
+  pendingAction = null;
+
+  // Persist decision to Supabase
+  (async () => {
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabase = createClient(
+      'https://nywyjkfgmfgutgudnbur.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
+    );
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const itemId = new URLSearchParams(window.location.search).get('item');
+    if (!itemId) return;
+
+    const { error } = await supabase.from('clearance_items').update({
+      status:      status,
+      reason:      reason || null,
+      comment:     comment || null,
+      reviewed_by: session.user.id,
+      reviewed_at: new Date().toISOString(),
+    }).eq('id', itemId);
+
+    if (!error) {
+      // Write audit log
+      await supabase.from('audit_logs').insert({
+        actor_id:  session.user.id,
+        action:    status + '_clearance_item',
+        target_id: itemId,
+        meta:      { reason, comment },
+      });
+    }
+  })();
+
+  const msgs = { approved:'Clearance approved. Student has been notified.', flagged:'Request flagged. Student has been notified.', rejected:'Request rejected. Student has been notified.' };
+  showToast(msgs[status], status);
+}
+
+function showToast(msg, type = 'approved') {
+  const toast = document.getElementById('toast');
+  const icon  = document.getElementById('toastIcon');
+  const colors = { approved:'#10B981', flagged:'#F97316', rejected:'#EF4444', error:'#EF4444' };
+  const icons  = { approved:'check_circle', flagged:'flag', rejected:'cancel', error:'error' };
+  toast.style.background = type === 'error' ? '#1A1A2E' : colors[type];
+  icon.textContent = icons[type] || 'check_circle';
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ── Session guard, student loader & department population ──
+(async function() {
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  const supabase = createClient(
+    'https://nywyjkfgmfgutgudnbur.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
+  );
+
+  const { data: { session: authSession } } = await supabase.auth.getSession();
+  if (!authSession) { window.location.href = '../login.html'; return; }
+
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authSession.user.id).single();
+  if (!profile || profile.role !== 'officer') { window.location.href = '../login.html'; return; }
+
+  const dept     = profile.department || 'chapel';
+  const deptName = DEPT_NAMES[dept] || dept;
+  const deptIcon = DEPT_ICONS[dept] || 'badge';
+  const initials = (profile.first_name[0] || '') + (profile.last_name[0] || '');
+
+  const chip = document.getElementById('deptChipName');
+  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+  document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials.toUpperCase() || 'CO');
+  document.querySelectorAll('a[href="../login.html"]').forEach(a => {
+    a.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (confirm('Log out of CMS? Any unsaved changes will be lost.')) {
+        await supabase.auth.signOut();
+        window.location.href = '../login.html';
+      }
+    });
+  });
+
+  // Load student from ?student=ID param
+  const studentId = parseInt(new URLSearchParams(window.location.search).get('student')) || 1;
+  const student   = REQUESTS.find(r => r.id === studentId) || REQUESTS[0];
+  const status    = getDeptStatus(student.id, dept);
+
+  // Student info
+  document.getElementById('studentName').textContent  = student.name;
+  document.getElementById('studentMatric').textContent = student.matric;
+  document.getElementById('studentAvatar').textContent = student.initials;
+  document.getElementById('studentAvatar').style.background = student.color;
+  document.getElementById('infoProg').textContent      = student.programme;
+  document.getElementById('infoCollege').textContent   = student.college;
+  document.getElementById('infoClearance').textContent = (student.type === 'Graduation' ? '🎓 ' : '📤 ') + student.type;
+  document.getElementById('infoSubmitted').textContent = student.submitted;
+  document.getElementById('infoClearanceDept').textContent = deptName;
+  document.getElementById('topbarName').textContent    = student.name;
+  document.getElementById('topbarMeta').textContent    = student.matric + ' · ' + deptName + ' Review';
+
+  // Status badges
+  const statusClasses = {approved:'badge-approved', flagged:'badge-flagged', pending:'badge-pending', rejected:'badge-rejected'};
+  const statusLabels  = {approved:'Approved', flagged:'Flagged', pending:'Pending', rejected:'Rejected'};
+  const statusBarBgs  = {approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', pending:'var(--pending-bg)', rejected:'var(--rejected-bg)'};
+  ['statusBadge','statusBadge2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.className = 'badge ' + statusClasses[status]; el.textContent = statusLabels[status]; }
+  });
+  const bar = document.getElementById('statusBar');
+  if (bar) bar.style.background = statusBarBgs[status];
+
+  // Documents — dept-specific
+  const docs = DEPT_DOCS[dept] || DEPT_DOCS['chapel'];
+  document.getElementById('docList').innerHTML = docs.map(d => `
+    <div class="doc-item">
+      <div class="doc-icon"><span class="material-symbols-outlined">${d.icon}</span></div>
+      <div class="doc-info">
+        <div class="doc-name">${d.name}</div>
+        <div class="doc-meta">${d.type} · ${d.size} · Uploaded ${student.submitted}</div>
+      </div>
+      <div class="doc-actions">
+        <button class="doc-btn"><span class="material-symbols-outlined">visibility</span>View</button>
+        <button class="doc-btn"><span class="material-symbols-outlined">download</span>Download</button>
+      </div>
+    </div>`).join('');
+
+  // Flag reasons — dept-specific
+  const flagReasons = DEPT_FLAG_REASONS[dept] || DEPT_FLAG_REASONS['chapel'];
+  document.getElementById('flagReason').innerHTML =
+    '<option value="">Select a reason…</option>' +
+    flagReasons.map(r => `<option value="${r}">${r}</option>`).join('') +
+    '<option value="Other">Other (specify in comment)</option>';
+
+  // Reject reasons — dept-specific
+  const rejectReasons = DEPT_REJECT_REASONS[dept] || DEPT_REJECT_REASONS['chapel'];
+  document.getElementById('rejectReason').innerHTML =
+    '<option value="">Select a reason…</option>' +
+    rejectReasons.map(r => `<option value="${r}">${r}</option>`).join('') +
+    '<option value="Other">Other (specify in comment)</option>';
+
+  // Timeline — based on current status for this dept
+  const tlColors  = {approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', pending:'var(--pending-bg)', rejected:'var(--rejected-bg)'};
+  const tlIColors = {approved:'var(--approved)',    flagged:'var(--flagged)',    pending:'var(--pending)',    rejected:'var(--rejected)'};
+  const tlIcons   = {approved:'check_circle', flagged:'flag', pending:'schedule', rejected:'cancel'};
+  const tlTitles  = {
+    approved: `Clearance approved for ${deptName}`,
+    flagged:  `Request flagged — ${flagReasons[0]}`,
+    rejected: `Clearance rejected — ${rejectReasons[0]}`,
+    pending:  'Awaiting review',
+  };
+  const tlBodies  = {
+    approved: `${deptName} clearance has been granted.`,
+    flagged:  'Student has been notified and must resolve this issue before clearance can be granted.',
+    rejected: 'Clearance request has been rejected. Student has been notified.',
+    pending:  `Request is pending review by ${deptName}.`,
+  };
+
+  const tlContainer = document.getElementById('timeline');
+  tlContainer.innerHTML = `
+    <div class="tl-item">
+      <div class="tl-dot" style="background:${tlColors[status]};"><span class="material-symbols-outlined" style="color:${tlIColors[status]};">${tlIcons[status]}</span></div>
+      <div class="tl-content">
+        <div class="tl-title">${tlTitles[status]}</div>
+        <div class="tl-body">${tlBodies[status]}</div>
+        <div class="tl-time">${student.submitted} · You</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:rgba(107,0,128,0.08);"><span class="material-symbols-outlined" style="color:var(--purple);">upload_file</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Documents submitted by student</div>
+        <div class="tl-body">${docs.map(d => d.name).join(', ')}</div>
+        <div class="tl-time">${student.submitted} · 10:05 AM · Student</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:rgba(107,0,128,0.08);"><span class="material-symbols-outlined" style="color:var(--purple);">send</span></div>
+      <div class="tl-content">
+        <div class="tl-title">Clearance request submitted</div>
+        <div class="tl-body">${student.type} clearance request sent to all 15 departments.</div>
+        <div class="tl-time">${student.submitted} · 9:20 AM · Student</div>
+      </div>
+    </div>`;
+
+  // Nav badge — show dept-specific pending count
+  const pendingCount = REQUESTS.filter(r => getDeptStatus(r.id, dept) === 'pending').length;
+  const navBadge = document.querySelector('.nav-badge');
+  if (navBadge) navBadge.textContent = pendingCount;
+
+  // Prev/Next navigation — wire up correct student IDs
+  const currentIdx = REQUESTS.findIndex(r => r.id === student.id);
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if (prevBtn) {
+    const prev = REQUESTS[currentIdx - 1];
+    if (prev) {
+      prevBtn.href = `officer-review.html?student=${prev.id}`;
+    } else {
+      prevBtn.style.opacity = '0.4';
+      prevBtn.style.pointerEvents = 'none';
+      prevBtn.title = 'No previous student';
+    }
+  }
+  if (nextBtn) {
+    const next = REQUESTS[currentIdx + 1];
+    if (next) {
+      nextBtn.href = `officer-review.html?student=${next.id}`;
+    } else {
+      nextBtn.style.opacity = '0.4';
+      nextBtn.style.pointerEvents = 'none';
+      nextBtn.title = 'No next student';
+    }
+  }
+})();
+</script>
+</body>
+</html>

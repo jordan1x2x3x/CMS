@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account | MTU Clearance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:       #6B0080;
+      --purple-dark:  #4A0058;
+      --purple-light: #8B20A0;
+      --green:        #76B82A;
+      --green-dark:   #5A8C20;
+      --green-light:  #8ED43A;
+      --surface:      #F4F6F9;
+      --white:        #FFFFFF;
+      --border:       #D1D9E6;
+      --text-main:    #1A0020;
+      --text-muted:   #5A6A80;
+      --error:        #EF4444;
+      --focus:        rgba(107,0,128,0.18);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--purple-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo {
+      width: 44px; height: 44px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2px;
+    }
+    .nav-title {
+      font-family: 'Newsreader', serif;
+      font-size: 1.1rem; font-weight: 700;
+      color: white;
+    }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: white; }
+    .nav-links a.active { color: #B5E048; }
+
+    /* ── PAGE WRAPPER ── */
+    .page-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .form-card {
+      width: 100%;
+      max-width: 620px;
+      background: var(--white);
+      border-radius: 14px;
+      box-shadow: 0 8px 40px rgba(27,58,107,0.10);
+      overflow: hidden;
+    }
+
+    /* ── CARD HEADER ── */
+    .card-header {
+      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 100%);
+      padding: 2rem 2.5rem 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .card-header-icon {
+      width: 48px; height: 48px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #B5E048; flex-shrink: 0;
+    }
+    .card-header-icon .material-symbols-outlined { font-size: 24px; }
+    .card-header-text h1 {
+      font-family: 'Newsreader', serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: white; margin-bottom: 2px;
+    }
+    .card-header-text p { color: rgba(255,255,255,0.6); font-size: 0.83rem; }
+
+    /* ── PROGRESS STEPS ── */
+    .step-bar {
+      display: flex;
+      padding: 1.2rem 2.5rem;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      background: #FAFBFD;
+    }
+    .step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      gap: 4px;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 60%;
+      width: 80%;
+      height: 2px;
+      background: var(--border);
+    }
+    .step.done:not(:last-child)::after { background: var(--green); }
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--text-muted);
+      position: relative; z-index: 1;
+      transition: background 0.3s, color 0.3s;
+    }
+    .step.active .step-dot { background: var(--purple); color: white; }
+    .step.done .step-dot { background: var(--green); color: white; }
+    .step-label {
+      font-size: 0.68rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.07em; text-align: center;
+    }
+    .step.active .step-label { color: var(--purple); }
+    .step.done .step-label { color: var(--green); }
+
+    /* ── FORM BODY ── */
+    .form-body { padding: 2rem 2.5rem; }
+
+    /* ── STEP PANELS ── */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .step-panel h3 {
+      font-size: 1rem; font-weight: 600;
+      color: var(--purple-dark);
+      margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .step-panel h3 .material-symbols-outlined { font-size: 18px; color: var(--green); }
+
+    /* ── FIELD GRID ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.2rem;
+    }
+    .field-grid .full { grid-column: 1 / -1; }
+
+    /* ── FIELDS ── */
+    .field { display: flex; flex-direction: column; }
+    label {
+      font-size: 0.7rem; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.09em;
+      margin-bottom: 5px;
+    }
+    .input-wrap {
+      position: relative; display: flex; align-items: center;
+    }
+    .input-icon {
+      position: absolute; left: 11px;
+      color: var(--text-muted); font-size: 17px;
+      pointer-events: none;
+    }
+    .input-wrap input,
+    .input-wrap select,
+    .input-wrap textarea {
+      width: 100%;
+      padding: 11px 11px 11px 38px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      color: var(--text-main);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+    }
+    .input-wrap input::placeholder,
+    .input-wrap textarea::placeholder { color: #A0AABB; }
+    .input-wrap input:focus,
+    .input-wrap select:focus,
+    .input-wrap textarea:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+    .toggle-pw {
+      position: absolute; right: 11px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); display: flex; align-items: center;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--purple); }
+    .toggle-pw .material-symbols-outlined { font-size: 17px; }
+
+    /* Conditional fields */
+    .conditional { display: none; }
+    .conditional.visible { display: block; }
+    .conditional-grid { display: none; }
+    .conditional-grid.visible { display: contents; }
+
+    /* Error states */
+    .field-error {
+      display: none;
+      font-size: 0.72rem;
+      color: var(--error);
+      margin-top: 3px;
+    }
+    .field.has-error .input-wrap input,
+    .field.has-error .input-wrap select {
+      border-color: var(--error);
+    }
+    .field.has-error .field-error { display: block; }
+
+    /* ── ROLE CARDS ── */
+    .role-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .role-card {
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .role-card:hover { border-color: var(--purple-light); background: #F9F0FF; }
+    .role-card.selected { border-color: var(--purple); background: #F5EEFF; }
+    .role-card input[type="radio"] { display: none; }
+    .role-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      background: var(--surface);
+    }
+    .role-icon .material-symbols-outlined { font-size: 20px; color: var(--purple); }
+    .role-card.selected .role-icon { background: var(--purple); }
+    .role-card.selected .role-icon .material-symbols-outlined { color: white; }
+    .role-info h4 { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+    .role-info p { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── ACCESS CODE NOTE ── */
+    .access-note {
+      background: #FFF7ED;
+      border-left: 3px solid #F97316;
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex; gap: 8px; align-items: flex-start;
+      margin-top: 0.75rem;
+    }
+    .access-note .material-symbols-outlined { color: #F97316; font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+    .access-note p { font-size: 0.77rem; color: #92400E; line-height: 1.5; }
+
+    /* ── PASSWORD STRENGTH ── */
+    .pw-strength-bar {
+      display: flex; gap: 4px; margin-top: 6px;
+    }
+    .pw-seg {
+      flex: 1; height: 3px; border-radius: 3px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .pw-strength-label {
+      font-size: 0.7rem; color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── NAV BUTTONS ── */
+    .form-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn-back {
+      background: none; border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 11px 24px;
+      font-family: 'Inter', sans-serif; font-size: 0.9rem;
+      font-weight: 500; color: var(--text-muted);
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-back:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-next, .btn-submit {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
+      color: white; border: none; border-radius: 8px;
+      padding: 12px 28px;
+      font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 7px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-next:hover, .btn-submit:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn-next:active, .btn-submit:active { transform: scale(0.98); }
+    .btn-submit { background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-light) 100%); }
+    .material-symbols-outlined { font-size: 18px; }
+
+    /* ── SIGNIN LINK ── */
+    .signin-prompt {
+      text-align: center;
+      padding: 1rem 2.5rem 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+    .signin-prompt a {
+      color: var(--purple); font-weight: 600;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .signin-prompt a:hover { color: var(--green); text-decoration: underline; }
+
+    /* ── SUCCESS STATE ── */
+    .success-panel {
+      display: none;
+      flex-direction: column; align-items: center;
+      text-align: center; padding: 3rem 2.5rem;
+      gap: 1rem;
+    }
+    .success-panel.active { display: flex; }
+    .success-icon {
+      width: 64px; height: 64px;
+      background: #D1FAE5; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .success-icon .material-symbols-outlined { font-size: 36px; color: var(--green); font-variation-settings:'FILL' 1; }
+    .success-panel h2 { font-family: 'Newsreader', serif; font-size: 1.5rem; color: var(--purple-dark); }
+    .success-panel p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; max-width: 340px; }
+    .btn-go-login {
+      margin-top: 0.5rem;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
+      color: white; border: none; border-radius: 8px;
+      padding: 12px 32px; font-family: 'Inter', sans-serif;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      transition: opacity 0.2s;
+    }
+    .btn-go-login:hover { opacity: 0.9; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--purple-dark);
+      color: rgba(255,255,255,0.45);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      font-size: 0.75rem;
+      flex-wrap: wrap; gap: 0.5rem;
+    }
+    footer span { color: rgba(255,255,255,0.6); font-family: 'Newsreader', serif; font-size: 0.9rem; font-weight: 600; }
+    footer a { color: rgba(255,255,255,0.45); text-decoration: none; margin: 0 0.5rem; }
+    footer a:hover { color: white; text-decoration: underline; }
+
+    @media (max-width: 580px) {
+      .page-wrapper { padding: 1rem 0.75rem 3rem; }
+      .form-body { padding: 1.5rem 1.25rem; }
+      .card-header { padding: 1.5rem 1.25rem; }
+      .step-bar { padding: 1rem 1.25rem; }
+      .signin-prompt { padding: 1rem 1.25rem 1.5rem; }
+      .field-grid, .role-cards { grid-template-columns: 1fr; }
+      .field-grid .full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo">
+      <img src="assets/mtu-logo.png" alt="MTU" style="width:100%;height:100%;object-fit:contain;" />
+    </div>
+    <span class="nav-title">Mountain Top University</span>
+  </a>
+  <div class="nav-links">
+    <a href="help.html">Help</a>
+    <a href="login.html">Sign In</a>
+    <a href="#" class="active">Register</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="form-card">
+
+    <!-- Card Header -->
+    <div class="card-header">
+      <div class="card-header-icon">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">person_add</span>
+      </div>
+      <div class="card-header-text">
+        <h1>Create Your Account</h1>
+        <p>MTU Clearance Portal — Register to get started</p>
+      </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="step-bar" id="stepBar">
+      <div class="step active" id="step-indicator-1">
+        <div class="step-dot">1</div>
+        <span class="step-label">Role</span>
+      </div>
+      <div class="step" id="step-indicator-2">
+        <div class="step-dot">2</div>
+        <span class="step-label">Profile</span>
+      </div>
+      <div class="step" id="step-indicator-3">
+        <div class="step-dot">3</div>
+        <span class="step-label">Security</span>
+      </div>
+    </div>
+
+    <!-- Form Body -->
+    <div class="form-body" id="formBody">
+      <form id="signupForm" novalidate>
+
+        <!-- ── STEP 1: Role Selection ── -->
+        <div class="step-panel active" id="panel-1">
+          <h3>
+            <span class="material-symbols-outlined">manage_accounts</span>
+            Select Your Role
+          </h3>
+          <div class="role-cards" id="roleCards">
+            <label class="role-card" id="rc-student">
+              <input type="radio" name="role" value="student" />
+              <div class="role-icon"><span class="material-symbols-outlined">school</span></div>
+              <div class="role-info">
+                <h4>Student</h4>
+              </div>
+            </label>
+            <label class="role-card" id="rc-officer">
+              <input type="radio" name="role" value="officer" />
+              <div class="role-icon"><span class="material-symbols-outlined">assignment_ind</span></div>
+              <div class="role-info">
+                <h4>Department Officer</h4>
+              </div>
+            </label>
+            <label class="role-card" id="rc-admin">
+              <input type="radio" name="role" value="admin" />
+              <div class="role-icon"><span class="material-symbols-outlined">admin_panel_settings</span></div>
+              <div class="role-info">
+                <h4>Admin</h4>
+              </div>
+            </label>
+            <label class="role-card" id="rc-super_admin">
+              <input type="radio" name="role" value="super_admin" />
+              <div class="role-icon"><span class="material-symbols-outlined">shield_person</span></div>
+              <div class="role-info">
+                <h4>Super Admin</h4>
+              </div>
+            </label>
+          </div>
+          <span class="field-error" id="role-error" style="display:none; margin-top:8px;">Please select a role to continue.</span>
+
+          <div class="form-nav">
+            <span></span>
+            <button type="button" class="btn-next" id="step1Next">
+              Continue <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 2: Profile Info ── -->
+        <div class="step-panel" id="panel-2">
+          <h3>
+            <span class="material-symbols-outlined">person</span>
+            Personal Information
+          </h3>
+
+          <div class="field-grid">
+            <!-- Full Name -->
+            <div class="field full" id="field-fullname">
+              <label for="fullname">Full Name</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">person</span>
+                <input type="text" id="fullname" name="fullname" placeholder="Enter your official full name" />
+              </div>
+              <span class="field-error">Full name is required.</span>
+            </div>
+
+            <!-- Email -->
+            <div class="field full" id="field-email">
+              <label for="email">Email Address</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">mail</span>
+                <input type="email" id="email" name="email" placeholder="yourname@mtu.edu.ng" />
+              </div>
+              <span class="field-error" id="email-error-msg">Enter a valid MTU email address.</span>
+            </div>
+
+            <!-- Matric Number (Students only) -->
+            <div class="field full conditional" id="field-matric">
+              <label for="matric">Matriculation Number</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">badge</span>
+                <input type="text" id="matric" name="matric" placeholder="MTU/20XX/XXXX" />
+              </div>
+              <span class="field-error">Matric number is required for students.</span>
+            </div>
+
+            <!-- College (Students only) -->
+            <div class="field full conditional" id="field-college">
+              <label for="college">College</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">account_balance</span>
+                <select id="college" name="college">
+                  <option value="" disabled selected>Select College</option>
+                  <option value="CBAS">CBAS — College of Basic and Applied Sciences</option>
+                  <option value="CHMS">CHMS — College of Humanities, Management and Social Sciences</option>
+                  <option value="CAHS">CAHS — College of Allied Health Sciences</option>
+                </select>
+              </div>
+              <span class="field-error">Please select your college.</span>
+            </div>
+
+            <!-- Department (Students only — cascades from college) -->
+            <div class="field conditional" id="field-department">
+              <label for="department">Department</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">school</span>
+                <select id="department" name="department" disabled>
+                  <option value="" disabled selected>Select College first</option>
+                </select>
+              </div>
+              <span class="field-error">Please select your department.</span>
+            </div>
+
+            <!-- Programme (Students only — cascades from department) -->
+            <div class="field conditional" id="field-programme">
+              <label for="programme">Programme</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">menu_book</span>
+                <select id="programme" name="programme" disabled>
+                  <option value="" disabled selected>Select Department first</option>
+                </select>
+              </div>
+              <span class="field-error">Please select your programme.</span>
+            </div>
+
+            <!-- Department (Officers only — the 15 clearance departments) -->
+            <div class="field full conditional" id="field-officer-dept">
+              <label for="officerDept">Clearance Department</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">badge</span>
+                <select id="officerDept" name="officerDept">
+                  <option value="" disabled selected>Select your clearance department</option>
+                  <option value="hod">Head of Department (HOD)</option>
+                  <option value="cedgs">CEDGS</option>
+                  <option value="lab">Lab Instructor</option>
+                  <option value="college">College Officer</option>
+                  <option value="chapel">University Chapel</option>
+                  <option value="health">Health Centre</option>
+                  <option value="sport">Sport Unit</option>
+                  <option value="hall">Hall of Residence</option>
+                  <option value="ict">ICT Unit</option>
+                  <option value="alumni">Alumni Association</option>
+                  <option value="affairs">Student Affairs</option>
+                  <option value="library">University Library</option>
+                  <option value="bursary">Bursary Unit</option>
+                  <option value="esm">ESM Unit</option>
+                  <option value="academic">Academic Affairs (Registrar)</option>
+                </select>
+              </div>
+              <p style="font-size:0.72rem;color:#6B7280;margin-top:4px;">You will only handle clearance requests for the department you select here.</p>
+              <span class="field-error">Please select your clearance department.</span>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn-back" id="step2Back">
+              <span class="material-symbols-outlined">arrow_back</span> Back
+            </button>
+            <button type="button" class="btn-next" id="step2Next">
+              Continue <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 3: Security ── -->
+        <div class="step-panel" id="panel-3">
+          <h3>
+            <span class="material-symbols-outlined">lock</span>
+            Account Security
+          </h3>
+
+          <div class="field-grid">
+            <!-- Access Code (non-student roles) -->
+            <div class="field full conditional" id="field-access-code">
+              <label for="accessCode">Access Code</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">key</span>
+                <input type="text" id="accessCode" name="accessCode"
+                  placeholder="Enter your one-time access code" />
+              </div>
+              <span class="field-error">Access code is required for this role.</span>
+              <div class="access-note">
+                <span class="material-symbols-outlined">warning</span>
+                <p>Access codes are issued by the Super Admin / ICT Unit. Contact them if you don't have one.</p>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="field full" id="field-password">
+              <label for="password">Create Password</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">lock</span>
+                <input type="password" id="password" name="password"
+                  placeholder="Minimum 8 characters" autocomplete="new-password" />
+                <button type="button" class="toggle-pw" id="togglePw1">
+                  <span class="material-symbols-outlined" id="pwIcon1">visibility</span>
+                </button>
+              </div>
+              <div class="pw-strength-bar">
+                <div class="pw-seg" id="seg1"></div>
+                <div class="pw-seg" id="seg2"></div>
+                <div class="pw-seg" id="seg3"></div>
+                <div class="pw-seg" id="seg4"></div>
+              </div>
+              <div class="pw-strength-label" id="pwStrengthLabel"></div>
+              <span class="field-error">Password must be at least 8 characters.</span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="field full" id="field-confirm-password">
+              <label for="confirmPassword">Confirm Password</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">lock_reset</span>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                  placeholder="Re-enter your password" autocomplete="new-password" />
+                <button type="button" class="toggle-pw" id="togglePw2">
+                  <span class="material-symbols-outlined" id="pwIcon2">visibility</span>
+                </button>
+              </div>
+              <span class="field-error" id="confirm-pw-error">Passwords do not match.</span>
+            </div>
+          </div>
+
+          <div class="form-nav">
+            <button type="button" class="btn-back" id="step3Back">
+              <span class="material-symbols-outlined">arrow_back</span> Back
+            </button>
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">how_to_reg</span>
+              Create Account
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Success State -->
+      <div class="success-panel" id="successPanel">
+        <div class="success-icon">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <h2>Account Created!</h2>
+        <p>Your MTU Clearance Portal account has been created successfully. You can now sign in with your credentials.</p>
+        <a href="login.html" class="btn-go-login">Go to Sign In</a>
+      </div>
+    </div>
+
+    <!-- Sign-in prompt -->
+    <div class="signin-prompt" id="signinPrompt">
+      Already have an account? <a href="login.html">Sign In</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Mountain Top University</span>
+  <div>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="help.html">Help Center</a>
+  </div>
+  <div>&copy; 2024 Mountain Top University. All rights reserved.</div>
+</footer>
+
+<script>
+  let currentStep = 1;
+  let selectedRole = '';
+
+  // ── MTU Academic Structure ──
+  const MTU_ACADEMIC = {
+    CBAS: {
+      label: 'College of Basic and Applied Sciences',
+      departments: {
+        'Computer Science and Mathematics': [
+          'B.Sc. Computer Science',
+          'B.Sc. Software Engineering',
+          'B.Sc. Cyber Security',
+          'B.Sc. Mathematics',
+        ],
+        'Biological Sciences': [
+          'B.Sc. Biology',
+          'B.Sc. Biotechnology',
+          'B.Sc. Microbiology',
+        ],
+        'Biochemistry': [
+          'B.Sc. Biochemistry',
+        ],
+        'Chemical Sciences': [
+          'B.Sc. Chemistry',
+          'B.Sc. Industrial Chemistry',
+        ],
+        'Food Science and Technology': [
+          'B.Sc. Food Science and Technology',
+        ],
+        'Physics': [
+          'B.Sc. Physics',
+          'B.Sc. Physics with Electronics',
+        ],
+        'Geosciences': [
+          'B.Sc. Geology',
+          'B.Sc. Geophysics',
+        ],
+      },
+    },
+    CHMS: {
+      label: 'College of Humanities, Management and Social Sciences',
+      departments: {
+        'Languages': [
+          'B.A. English Studies',
+          'B.A. French Studies',
+        ],
+        'Music': [
+          'B.A. Music',
+        ],
+        'Fine and Applied Arts': [
+          'B.A. Fine and Applied Arts',
+        ],
+        'Philosophy and Religious Studies': [
+          'B.A. Religious Studies',
+        ],
+        'Mass Communication': [
+          'B.Sc. Mass Communication',
+        ],
+        'Economics': [
+          'B.Sc. Economics',
+        ],
+        'Business Administration': [
+          'B.Sc. Business Administration',
+        ],
+        'Accounting and Finance': [
+          'B.Sc. Accounting',
+          'B.Sc. Finance',
+        ],
+        'Public Administration': [
+          'B.Sc. Public Administration',
+        ],
+        'Industrial Relations and Personnel Management': [
+          'B.Sc. Industrial Relations and Personnel Management',
+        ],
+      },
+    },
+    CAHS: {
+      label: 'College of Allied Health Sciences',
+      departments: {
+        'Nursing Science': [
+          'B.Sc. Nursing Science',
+        ],
+        'Medical Laboratory Science': [
+          'B.Sc. Medical Laboratory Science',
+        ],
+        'Nutrition and Dietetics': [
+          'B.Sc. Nutrition and Dietetics',
+        ],
+        'Public Health': [
+          'B.Sc. Public Health',
+        ],
+        'Biomedical Technology': [
+          'B.Sc. Biomedical Technology',
+        ],
+      },
+    },
+  };
+
+  // ── Role map: which fields each role needs ──
+  const ROLE_MAP = {
+    student:     { college: true,  dept: true,  matric: true,  programme: true,  officerDept: false, accessCode: false },
+    officer:     { college: false, dept: false, matric: false, programme: false, officerDept: true,  accessCode: true  },
+    admin:       { college: false, dept: false, matric: false, programme: false, officerDept: false, accessCode: true  },
+    super_admin: { college: false, dept: false, matric: false, programme: false, officerDept: false, accessCode: true  },
+  };
+
+  // ── Role card selection ──
+  document.querySelectorAll('.role-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      card.querySelector('input[type="radio"]').checked = true;
+      selectedRole = card.querySelector('input[type="radio"]').value;
+      document.getElementById('role-error').style.display = 'none';
+    });
+  });
+
+  // ── Show/hide conditional fields ──
+  function applyRoleFields(role) {
+    const cfg = ROLE_MAP[role] || {};
+    const toggleField = (id, show) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (show) {
+        el.classList.add('visible');
+      } else {
+        el.classList.remove('visible');
+        const inputs = el.querySelectorAll('input, select');
+        inputs.forEach(inp => { inp.value = ''; inp.disabled = false; });
+        el.classList.remove('has-error');
+      }
+    };
+    toggleField('field-matric',      cfg.matric);
+    toggleField('field-college',     cfg.college);
+    toggleField('field-department',  cfg.dept);
+    toggleField('field-programme',   cfg.programme);
+    toggleField('field-officer-dept', cfg.officerDept);
+    toggleField('field-access-code', cfg.accessCode);
+
+    // Reset cascade when role changes
+    if (cfg.dept) {
+      resetSelect('department', 'Select College first', true);
+      resetSelect('programme',  'Select Department first', true);
+    }
+  }
+
+  function resetSelect(id, placeholder, disabled) {
+    const el = document.getElementById(id);
+    el.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+    el.disabled = disabled;
+    el.value = '';
+  }
+
+  // ── College → Department cascade ──
+  document.getElementById('college').addEventListener('change', function () {
+    const college = this.value;
+    const deptSelect = document.getElementById('department');
+    const depts = college ? Object.keys(MTU_ACADEMIC[college].departments) : [];
+
+    deptSelect.innerHTML = `<option value="" disabled selected>Select Department</option>`;
+    depts.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      deptSelect.appendChild(opt);
+    });
+    deptSelect.disabled = false;
+    deptSelect.value = '';
+
+    resetSelect('programme', 'Select Department first', true);
+    document.getElementById('field-college').classList.remove('has-error');
+  });
+
+  // ── Department → Programme cascade ──
+  document.getElementById('department').addEventListener('change', function () {
+    const college = document.getElementById('college').value;
+    const dept = this.value;
+    const progSelect = document.getElementById('programme');
+    const progs = (college && dept) ? MTU_ACADEMIC[college].departments[dept] : [];
+
+    progSelect.innerHTML = `<option value="" disabled selected>Select Programme</option>`;
+    progs.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = p;
+      progSelect.appendChild(opt);
+    });
+    progSelect.disabled = false;
+    progSelect.value = '';
+
+    document.getElementById('field-department').classList.remove('has-error');
+  });
+
+  // ── Step navigation ──
+  function goTo(step) {
+    document.getElementById(`panel-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-indicator-${currentStep}`).classList.remove('active');
+    if (step > currentStep) {
+      document.getElementById(`step-indicator-${currentStep}`).classList.add('done');
+    } else {
+      document.getElementById(`step-indicator-${currentStep}`).classList.remove('done');
+    }
+    currentStep = step;
+    document.getElementById(`panel-${currentStep}`).classList.add('active');
+    document.getElementById(`step-indicator-${currentStep}`).classList.add('active');
+  }
+
+  document.getElementById('step1Next').addEventListener('click', () => {
+    if (!selectedRole) {
+      document.getElementById('role-error').style.display = 'block';
+      return;
+    }
+    applyRoleFields(selectedRole);
+    goTo(2);
+  });
+
+  document.getElementById('step2Back').addEventListener('click', () => goTo(1));
+  document.getElementById('step2Next').addEventListener('click', () => {
+    if (!validateStep2()) return;
+    goTo(3);
+  });
+  document.getElementById('step3Back').addEventListener('click', () => goTo(2));
+
+  // ── Validate Step 2 ──
+  function validateStep2() {
+    let valid = true;
+    const cfg = ROLE_MAP[selectedRole] || {};
+
+    const required = [
+      { id: 'fullname',    fieldId: 'field-fullname',    always: true },
+      { id: 'email',       fieldId: 'field-email',       always: true },
+      { id: 'matric',      fieldId: 'field-matric',      always: cfg.matric },
+      { id: 'college',     fieldId: 'field-college',     always: cfg.college },
+      { id: 'department',  fieldId: 'field-department',  always: cfg.dept },
+      { id: 'programme',   fieldId: 'field-programme',   always: cfg.programme },
+      { id: 'officerDept', fieldId: 'field-officer-dept', always: cfg.officerDept },
+    ];
+
+    required.forEach(({ id, fieldId, always }) => {
+      if (!always) return;
+      const el = document.getElementById(id);
+      const fieldEl = document.getElementById(fieldId);
+      if (!el || !el.value.trim()) {
+        if (fieldEl) fieldEl.classList.add('has-error');
+        valid = false;
+      } else {
+        if (fieldEl) fieldEl.classList.remove('has-error');
+      }
+    });
+
+    const emailEl = document.getElementById('email');
+    if (!emailEl.value.toLowerCase().endsWith('@mtu.edu.ng')) {
+      document.getElementById('field-email').classList.add('has-error');
+      document.getElementById('email-error-msg').textContent = 'Only MTU institutional emails are accepted (e.g. name@mtu.edu.ng).';
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  // ── Access codes per department (officer) and role ──
+  const DEPT_ACCESS_CODES = {
+    hod:      'HOD-MTU-2025',
+    cedgs:    'CDG-MTU-2025',
+    lab:      'LAB-MTU-2025',
+    college:  'CLG-MTU-2025',
+    chapel:   'CHP-MTU-2025',
+    health:   'HLT-MTU-2025',
+    sport:    'SPT-MTU-2025',
+    hall:     'HLL-MTU-2025',
+    ict:      'ICT-MTU-2025',
+    alumni:   'ALM-MTU-2025',
+    affairs:  'AFF-MTU-2025',
+    library:  'LIB-MTU-2025',
+    bursary:  'BUR-MTU-2025',
+    esm:      'ESM-MTU-2025',
+    academic: 'ACA-MTU-2025',
+  };
+  const ROLE_ACCESS_CODES = {
+    admin:       'ADMIN-MTU-2025',
+    super_admin: 'SUPER-MTU-2025',
+  };
+
+  function getExpectedCode() {
+    if (selectedRole === 'officer') {
+      const dept = document.getElementById('officerDept').value;
+      return DEPT_ACCESS_CODES[dept] || null;
+    }
+    return ROLE_ACCESS_CODES[selectedRole] || null;
+  }
+
+  // ── Validate Step 3 ──
+  function validateStep3() {
+    let valid = true;
+    const cfg = ROLE_MAP[selectedRole] || {};
+
+    if (cfg.accessCode) {
+      const ac = document.getElementById('accessCode');
+      const acField = document.getElementById('field-access-code');
+      const entered = ac.value.trim();
+      const expected = getExpectedCode();
+      const errorSpan = acField.querySelector('.field-error');
+
+      if (!entered) {
+        errorSpan.textContent = 'Access code is required for this role.';
+        acField.classList.add('has-error'); valid = false;
+      } else if (expected && entered !== expected) {
+        errorSpan.textContent = 'Invalid access code. Contact the Super Admin / ICT Unit.';
+        acField.classList.add('has-error'); valid = false;
+      } else {
+        acField.classList.remove('has-error');
+      }
+    }
+
+    const pw = document.getElementById('password');
+    const pwField = document.getElementById('field-password');
+    if (pw.value.length < 8) { pwField.classList.add('has-error'); valid = false; }
+    else { pwField.classList.remove('has-error'); }
+
+    const cpw = document.getElementById('confirmPassword');
+    const cpwField = document.getElementById('field-confirm-password');
+    if (cpw.value !== pw.value || !cpw.value) { cpwField.classList.add('has-error'); valid = false; }
+    else { cpwField.classList.remove('has-error'); }
+
+    return valid;
+  }
+
+  // ── Set to false to reconnect Supabase ─────────────────────
+  const MOCK_MODE = false;
+
+  // Mock access codes (only checked in mock mode)
+  const MOCK_CODES = {
+    'ADMIN-MTU-2025': 'admin', 'SUPER-MTU-2025': 'super_admin',
+    'HOD-MTU-2025': 'officer', 'CDG-MTU-2025': 'officer', 'LAB-MTU-2025': 'officer',
+    'COL-MTU-2025': 'officer', 'HLT-MTU-2025': 'officer', 'SPT-MTU-2025': 'officer',
+    'HLL-MTU-2025': 'officer', 'ICT-MTU-2025': 'officer', 'ALM-MTU-2025': 'officer',
+    'AFF-MTU-2025': 'officer', 'LIB-MTU-2025': 'officer', 'BUR-MTU-2025': 'officer',
+    'ESM-MTU-2025': 'officer', 'ACA-MTU-2025': 'officer', 'CHP-MTU-2025': 'officer',
+  };
+
+  // ── Form Submit ─────────────────────────────────────────────
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!validateStep3()) return;
+
+    const fullname  = (document.getElementById('fullname')?.value || '').trim();
+    const parts     = fullname.split(' ');
+    const firstName = parts[0] || '';
+    const lastName  = parts.slice(1).join(' ') || '';
+    const email     = document.getElementById('email').value.replace(/\s+/g, '').toLowerCase();
+    const password  = document.getElementById('password').value;
+    const accessCode = (document.getElementById('accessCode')?.value || '').trim().toUpperCase();
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account…';
+
+    if (MOCK_MODE) {
+      // ── Mock signup: save to localStorage ──────────────────
+      if (selectedRole !== 'student') {
+        const codeRole = MOCK_CODES[accessCode];
+        if (!codeRole) {
+          showSignupError('Invalid access code. Check the code and try again.');
+          resetSubmitBtn(submitBtn); return;
+        }
+        if (codeRole !== selectedRole) {
+          showSignupError(`This code is for "${codeRole}", not "${selectedRole}".`);
+          resetSubmitBtn(submitBtn); return;
+        }
+      }
+      const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
+      if (users.find(u => u.email === email)) {
+        showSignupError('An account with this email already exists.');
+        resetSubmitBtn(submitBtn); return;
+      }
+      const newUser = {
+        id: crypto.randomUUID(), role: selectedRole,
+        name: fullname, email, password,
+        matric: document.getElementById('matric')?.value?.trim().toUpperCase() || null,
+        department: document.getElementById('officerDept')?.value || document.getElementById('department')?.value || null,
+        college: document.getElementById('college')?.value || null,
+        programme: document.getElementById('programme')?.value || null,
+        createdAt: new Date().toISOString(),
+      };
+      users.push(newUser);
+      localStorage.setItem('cms_users', JSON.stringify(users));
+
+      // Show success panel
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('signinPrompt').style.display = 'none';
+      document.getElementById('successPanel').classList.add('active');
+      document.getElementById('stepBar').style.display = 'none';
+      [1,2,3].forEach(i => {
+        const s = document.getElementById(`step-indicator-${i}`);
+        if (s) { s.classList.remove('active'); s.classList.add('done'); }
+      });
+      return;
+    }
+
+    // ── Supabase signup ─────────────────────────────────────────
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabase = createClient(
+      'https://nywyjkfgmfgutgudnbur.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
+    );
+    if (selectedRole !== 'student') {
+      const { data: codeRow, error: codeErr } = await supabase.from('access_codes').select('id, intended_role, used_by, expires_at').eq('code', accessCode).single();
+      if (codeErr || !codeRow) { showSignupError('Access code lookup failed: ' + (codeErr?.message || 'code not found.')); resetSubmitBtn(submitBtn); return; }
+      if (codeRow.used_by) { showSignupError('This access code has already been used.'); resetSubmitBtn(submitBtn); return; }
+      if (new Date(codeRow.expires_at) < new Date()) { showSignupError('This access code has expired.'); resetSubmitBtn(submitBtn); return; }
+      if (codeRow.intended_role !== selectedRole) { showSignupError(`This code is for "${codeRow.intended_role}", not "${selectedRole}".`); resetSubmitBtn(submitBtn); return; }
+    }
+    if (!email || !email.includes('@')) { showSignupError('Email is missing or invalid.'); resetSubmitBtn(submitBtn); return; }
+    const { data: authData, error: authErr } = await supabase.auth.signUp({ email, password });
+    if (authErr) { showSignupError(`Signup failed: ${authErr.message}`); resetSubmitBtn(submitBtn); return; }
+    const userId = authData.user.id;
+    const { error: profileErr } = await supabase.rpc('create_profile', {
+      p_id: userId, p_role: selectedRole, p_first_name: firstName, p_last_name: lastName, p_email: email,
+      p_matric_number: document.getElementById('matric')?.value?.trim().toUpperCase() || null,
+      p_department: document.getElementById('officerDept')?.value || document.getElementById('department')?.value || null,
+      p_college: document.getElementById('college')?.value || null,
+      p_programme: document.getElementById('programme')?.value || null,
+    });
+    if (profileErr) { showSignupError('Profile save failed: ' + profileErr.message); resetSubmitBtn(submitBtn); return; }
+    if (selectedRole !== 'student') {
+      await supabase.from('access_codes').update({ used_by: userId, used_at: new Date().toISOString() }).eq('code', accessCode);
+    }
+
+    // Show success panel
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('signinPrompt').style.display = 'none';
+    document.getElementById('successPanel').classList.add('active');
+    document.getElementById('stepBar').style.display = 'none';
+    [1,2,3].forEach(i => {
+      const s = document.getElementById(`step-indicator-${i}`);
+      if (s) { s.classList.remove('active'); s.classList.add('done'); }
+    });
+  });
+
+  function showSignupError(msg) {
+    let box = document.getElementById('signupGlobalError');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'signupGlobalError';
+      box.style.cssText = 'background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.875rem;';
+      document.getElementById('signupForm').prepend(box);
+    }
+    box.textContent = msg;
+    box.style.display = 'block';
+  }
+
+  function resetSubmitBtn(btn) {
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+
+  // ── Password show/hide toggles ──
+  function setupToggle(btnId, iconId, inputId) {
+    const btn = document.getElementById(btnId);
+    const icon = document.getElementById(iconId);
+    const input = document.getElementById(inputId);
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const hidden = input.type === 'password';
+      input.type = hidden ? 'text' : 'password';
+      icon.textContent = hidden ? 'visibility_off' : 'visibility';
+    });
+  }
+  setupToggle('togglePw1', 'pwIcon1', 'password');
+  setupToggle('togglePw2', 'pwIcon2', 'confirmPassword');
+
+  // ── Password strength ──
+  const colors = ['#EF4444','#F97316','#F59E0B','#10B981'];
+  const labels = ['Weak','Fair','Good','Strong'];
+  document.getElementById('password').addEventListener('input', (e) => {
+    const v = e.target.value;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^a-zA-Z0-9]/.test(v)) score++;
+    [1,2,3,4].forEach(i => {
+      document.getElementById(`seg${i}`).style.background = i <= score ? colors[score-1] : 'var(--border)';
+    });
+    document.getElementById('pwStrengthLabel').textContent = v.length ? (labels[score-1] || '') : '';
+  });
+
+  // ── Clear errors on input ──
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', () => {
+      const field = el.closest('.field');
+      if (field) field.classList.remove('has-error');
+      const globalErr = document.getElementById('signupGlobalError');
+      if (globalErr) globalErr.style.display = 'none';
+    });
+  });
+
+  // ── Enter key → Continue ──
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (e.target.tagName === 'TEXTAREA') return;
+    if (e.target.tagName === 'BUTTON') return;
+    e.preventDefault();
+    const nextBtns = { 1: 'step1Next', 2: 'step2Next' };
+    const submitBtn = document.querySelector('#signupForm button[type="submit"], .btn-submit');
+    if (currentStep === 3 && submitBtn) {
+      submitBtn.click();
+    } else if (nextBtns[currentStep]) {
+      document.getElementById(nextBtns[currentStep]).click();
+    }
+  });
+</script>
+</body>
+</html>

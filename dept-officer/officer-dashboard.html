@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Officer Dashboard — MTU CMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A; --green-dark: #5a8d1e;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .dept-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .dept-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .dept-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .dept-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .dept-chip-role { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 2px; }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    /* ── Main ── */
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 36px; height: 36px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: background 0.15s; position: relative; }
+    .icon-btn:hover { background: var(--border); }
+    .icon-btn .material-symbols-outlined { font-size: 20px; }
+    .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; background: var(--flagged); border-radius: 50%; border: 1.5px solid var(--surface); }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .content { padding: 2rem; flex: 1; }
+
+    /* ── Alert banner ── */
+    .alert-banner { background: var(--pending-bg); border: 1.5px solid var(--pending); border-radius: 12px; padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+    .alert-banner .material-symbols-outlined { color: var(--pending); font-size: 20px; flex-shrink: 0; }
+    .alert-banner-text { flex: 1; font-size: 0.82rem; font-weight: 500; }
+    .alert-banner-text strong { color: var(--pending); }
+    .btn-alert { padding: 6px 16px; background: var(--pending); color: white; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap; }
+
+    /* ── Stats ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .stat-icon .material-symbols-outlined { font-size: 20px; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    .stat-trend { font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+    .trend-up { color: var(--approved); }
+    .trend-warn { color: var(--pending); }
+
+    /* ── Two-column layout ── */
+    .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; margin-bottom: 1.5rem; }
+
+    /* ── Card ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-header h3 { font-size: 0.9rem; font-weight: 700; }
+    .card-header-right { display: flex; align-items: center; gap: 8px; }
+    .btn-sm { padding: 6px 14px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--muted); transition: border-color 0.15s, color 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-sm:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-sm .material-symbols-outlined { font-size: 15px; }
+
+    /* ── Request rows ── */
+    .req-list { display: flex; flex-direction: column; }
+    .req-row { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); transition: background 0.12s; cursor: pointer; text-decoration: none; color: inherit; }
+    .req-row:last-child { border-bottom: none; }
+    .req-row:hover { background: var(--bg); }
+    .req-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--purple); color: white; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .req-info { flex: 1; min-width: 0; }
+    .req-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .req-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .req-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .req-time { font-size: 0.68rem; color: var(--muted); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-pending  { background: var(--pending-bg);  color: var(--pending); }
+    .badge-approved { background: var(--approved-bg); color: var(--approved); }
+    .badge-flagged  { background: var(--flagged-bg);  color: var(--flagged); }
+    .badge-rejected { background: var(--rejected-bg); color: var(--rejected); }
+
+    /* ── Summary panel ── */
+    .summary-list { display: flex; flex-direction: column; gap: 0; }
+    .summary-row { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 500; }
+    .summary-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .summary-count { font-size: 0.9rem; font-weight: 700; }
+
+    /* ── Donut chart (CSS) ── */
+    .donut-wrap { padding: 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .donut { width: 110px; height: 110px; border-radius: 50%; background: conic-gradient(var(--approved) 0% 53%, var(--pending) 53% 73%, var(--flagged) 73% 80%, #E5E7EB 80% 100%); position: relative; }
+    .donut::after { content: ''; position: absolute; inset: 22px; background: var(--surface); border-radius: 50%; }
+    .donut-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; font-size: 1.1rem; font-weight: 700; line-height: 1.1; }
+    .donut-label small { font-size: 0.55rem; color: var(--muted); font-weight: 500; }
+    .donut-legend { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .legend-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { display: flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 500; }
+    .legend-val { font-weight: 700; color: var(--text); }
+
+    /* ── Activity ── */
+    .activity-list { display: flex; flex-direction: column; }
+    .activity-item { display: flex; gap: 12px; padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .activity-icon .material-symbols-outlined { font-size: 15px; }
+    .activity-text { flex: 1; font-size: 0.8rem; line-height: 1.5; }
+    .activity-text strong { font-weight: 600; }
+    .activity-time { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="brand-text">CMS Portal<span>Mountain Top University</span></div>
+  </div>
+  <div class="dept-chip">
+    <div class="dept-chip-label">Your Department</div>
+    <div class="dept-chip-name" id="deptChipName"><span class="material-symbols-outlined">church</span>University Chapel</div>
+    <div class="dept-chip-role">Department Officer</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="officer-dashboard.html" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="officer-requests.html" class="nav-item"><span class="material-symbols-outlined">fact_check</span>Clearance Requests<span class="nav-badge" id="pendingNavBadge">8</span></a>
+    <a href="officer-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p id="topbarSub">University Chapel — Clearance Officer</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn"><span class="material-symbols-outlined">notifications</span><span class="notif-dot"></span></button>
+      <div class="topbar-avatar">CO</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <div class="alert-banner">
+      <span class="material-symbols-outlined">schedule</span>
+      <div class="alert-banner-text" id="alertBannerText"><strong>8 requests</strong> are pending your review. Students are waiting for Chapel clearance.</div>
+      <a href="officer-requests.html" class="btn-alert">Review Now</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-top">
+          <div>
+            <div class="stat-value">24</div>
+            <div class="stat-label">Total Requests</div>
+          </div>
+          <div class="stat-icon" style="background:rgba(107,0,128,0.08);">
+            <span class="material-symbols-outlined" style="color:var(--purple);">inbox</span>
+          </div>
+        </div>
+        <div class="stat-trend trend-up"><span class="material-symbols-outlined" style="font-size:14px;">trending_up</span>+4 this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div>
+            <div class="stat-value" style="color:var(--pending);">8</div>
+            <div class="stat-label">Pending Review</div>
+          </div>
+          <div class="stat-icon" style="background:var(--pending-bg);">
+            <span class="material-symbols-outlined" style="color:var(--pending);">schedule</span>
+          </div>
+        </div>
+        <div class="stat-trend trend-warn"><span class="material-symbols-outlined" style="font-size:14px;">warning</span>Needs attention</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div>
+            <div class="stat-value" style="color:var(--approved);">13</div>
+            <div class="stat-label">Approved</div>
+          </div>
+          <div class="stat-icon" style="background:var(--approved-bg);">
+            <span class="material-symbols-outlined" style="color:var(--approved);">check_circle</span>
+          </div>
+        </div>
+        <div class="stat-trend trend-up"><span class="material-symbols-outlined" style="font-size:14px;">trending_up</span>54% approval rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div>
+            <div class="stat-value" style="color:var(--flagged);">3</div>
+            <div class="stat-label">Flagged</div>
+          </div>
+          <div class="stat-icon" style="background:var(--flagged-bg);">
+            <span class="material-symbols-outlined" style="color:var(--flagged);">flag</span>
+          </div>
+        </div>
+        <div class="stat-trend" style="color:var(--muted);">Awaiting student action</div>
+      </div>
+    </div>
+
+    <!-- Two columns -->
+    <div class="two-col">
+
+      <!-- Pending requests -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Pending Requests</h3>
+          <a href="officer-requests.html" class="btn-sm"><span class="material-symbols-outlined">open_in_new</span>View All</a>
+        </div>
+        <div class="req-list" id="pendingList">
+          <a href="officer-review.html?student=1" class="req-row">
+            <div class="req-avatar" style="background:#6B0080;">OJ</div>
+            <div class="req-info">
+              <div class="req-name">Odunukwe C. Jordan</div>
+              <div class="req-meta">MTU/CSC/2021/001 · Graduation · B.Sc Computer Science</div>
+            </div>
+            <div class="req-right">
+              <span class="badge badge-flagged">Flagged</span>
+              <span class="req-time">2 days ago</span>
+            </div>
+          </a>
+          <a href="officer-review.html?student=2" class="req-row">
+            <div class="req-avatar" style="background:#0e7490;">AM</div>
+            <div class="req-info">
+              <div class="req-name">Adeyemi Miracle</div>
+              <div class="req-meta">MTU/BCH/2021/014 · Graduation · B.Sc Biochemistry</div>
+            </div>
+            <div class="req-right">
+              <span class="badge badge-pending">Pending</span>
+              <span class="req-time">3 days ago</span>
+            </div>
+          </a>
+          <a href="officer-review.html?student=3" class="req-row">
+            <div class="req-avatar" style="background:#065f46;">EO</div>
+            <div class="req-info">
+              <div class="req-name">Eze Oluwaseun</div>
+              <div class="req-meta">MTU/NRS/2021/007 · Graduation · B.Sc Nursing Science</div>
+            </div>
+            <div class="req-right">
+              <span class="badge badge-pending">Pending</span>
+              <span class="req-time">3 days ago</span>
+            </div>
+          </a>
+          <a href="officer-review.html?student=4" class="req-row">
+            <div class="req-avatar" style="background:#92400e;">FK</div>
+            <div class="req-info">
+              <div class="req-name">Fashola Kehinde</div>
+              <div class="req-meta">MTU/MLS/2021/022 · Graduation · B.Sc Medical Lab Science</div>
+            </div>
+            <div class="req-right">
+              <span class="badge badge-pending">Pending</span>
+              <span class="req-time">4 days ago</span>
+            </div>
+          </a>
+          <a href="officer-review.html?student=5" class="req-row">
+            <div class="req-avatar" style="background:#1e3a5f;">NB</div>
+            <div class="req-info">
+              <div class="req-name">Nwosu Blessing</div>
+              <div class="req-meta">MTU/ECO/2021/031 · Graduation · B.Sc Economics</div>
+            </div>
+            <div class="req-right">
+              <span class="badge badge-pending">Pending</span>
+              <span class="req-time">5 days ago</span>
+            </div>
+          </a>
+          <a href="officer-review.html?student=6" class="req-row">
+            <div class="req-avatar" style="background:#5b21b6;">IA</div>
+            <div class="req-info">
+              <div class="req-name">Ibrahim Aisha</div>
+              <div class="req-meta">MTU/PHL/2020/008 · Withdrawal · B.A Philosophy</div>
+            </div>
+            <div class="req-right">
+              <span class="badge badge-pending">Pending</span>
+              <span class="req-time">6 days ago</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right panel -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+        <!-- Breakdown donut -->
+        <div class="card">
+          <div class="card-header"><h3>Request Breakdown</h3></div>
+          <div class="donut-wrap">
+            <div style="position:relative;">
+              <div class="donut" id="donutChart"></div>
+              <div class="donut-label" id="donutLabel">
+                54%<small>approved</small>
+              </div>
+            </div>
+            <div class="donut-legend" style="padding:0 0.5rem;">
+              <div class="legend-row">
+                <div class="legend-label"><div class="legend-dot" style="background:var(--approved);"></div>Approved</div>
+                <div class="legend-val">13</div>
+              </div>
+              <div class="legend-row">
+                <div class="legend-label"><div class="legend-dot" style="background:var(--pending);"></div>Pending</div>
+                <div class="legend-val">5</div>
+              </div>
+              <div class="legend-row">
+                <div class="legend-label"><div class="legend-dot" style="background:var(--flagged);"></div>Flagged</div>
+                <div class="legend-val">3</div>
+              </div>
+              <div class="legend-row">
+                <div class="legend-label"><div class="legend-dot" style="background:#E5E7EB;"></div>Rejected</div>
+                <div class="legend-val">3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent activity -->
+        <div class="card">
+          <div class="card-header"><h3>Recent Activity</h3></div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon" style="background:var(--approved-bg);"><span class="material-symbols-outlined" style="color:var(--approved);">check</span></div>
+              <div class="activity-text">
+                <strong>Chukwu Emeka</strong> — clearance approved
+                <div class="activity-time">Today, 9:14 AM</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:var(--flagged-bg);"><span class="material-symbols-outlined" style="color:var(--flagged);">flag</span></div>
+              <div class="activity-text">
+                <strong>Odunukwe C. Jordan</strong> — flagged for chapel attendance
+                <div class="activity-time">Yesterday, 3:42 PM</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:var(--approved-bg);"><span class="material-symbols-outlined" style="color:var(--approved);">check</span></div>
+              <div class="activity-text">
+                <strong>Taiwo Samuel</strong> — clearance approved
+                <div class="activity-time">Yesterday, 11:20 AM</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon" style="background:var(--rejected-bg);"><span class="material-symbols-outlined" style="color:var(--rejected);">close</span></div>
+              <div class="activity-text">
+                <strong>Bello Fatima</strong> — clearance rejected
+                <div class="activity-time">2 days ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+const REQUESTS = [
+  { id:1,  name:'Odunukwe C. Jordan',   matric:'MTU/CSC/2021/001', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 14, 2026', initials:'OJ', color:'#6B0080' },
+  { id:2,  name:'Adeyemi Miracle',       matric:'MTU/BCH/2021/014', programme:'B.Sc Biochemistry',               college:'CBAS', type:'Graduation', submitted:'Apr 13, 2026', initials:'AM', color:'#0e7490' },
+  { id:3,  name:'Eze Oluwaseun',         matric:'MTU/NRS/2021/007', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 13, 2026', initials:'EO', color:'#065f46' },
+  { id:4,  name:'Fashola Kehinde',       matric:'MTU/MLS/2021/022', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 12, 2026', initials:'FK', color:'#92400e' },
+  { id:5,  name:'Nwosu Blessing',        matric:'MTU/ECO/2021/031', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 11, 2026', initials:'NB', color:'#1e3a5f' },
+  { id:6,  name:'Ibrahim Aisha',         matric:'MTU/PHL/2020/008', programme:'B.A Philosophy',                  college:'CHMS', type:'Withdrawal', submitted:'Apr 10, 2026', initials:'IA', color:'#5b21b6' },
+  { id:7,  name:'Okonkwo David',         matric:'MTU/CSC/2021/019', programme:'B.Sc Software Engineering',       college:'CBAS', type:'Graduation', submitted:'Apr 09, 2026', initials:'OD', color:'#be185d' },
+  { id:8,  name:'Lawal Fatimah',         matric:'MTU/ACF/2021/005', programme:'B.Sc Accounting and Finance',     college:'CHMS', type:'Graduation', submitted:'Apr 09, 2026', initials:'LF', color:'#b45309' },
+  { id:9,  name:'Chukwu Emeka',          matric:'MTU/CSC/2020/003', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 08, 2026', initials:'CE', color:'#0f766e' },
+  { id:10, name:'Adeola Tunde',          matric:'MTU/PHY/2021/011', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Apr 07, 2026', initials:'AT', color:'#7c3aed' },
+  { id:11, name:'Bello Fatima',          matric:'MTU/NUT/2020/016', programme:'B.Sc Nutrition & Dietetics',      college:'CAHS', type:'Graduation', submitted:'Apr 06, 2026', initials:'BF', color:'#dc2626' },
+  { id:12, name:'Taiwo Samuel',          matric:'MTU/MCS/2021/009', programme:'B.Sc Mass Communication',         college:'CHMS', type:'Graduation', submitted:'Apr 05, 2026', initials:'TS', color:'#059669' },
+  { id:13, name:'Obi Grace',             matric:'MTU/BIO/2021/027', programme:'B.Sc Biological Sciences',        college:'CBAS', type:'Graduation', submitted:'Apr 05, 2026', initials:'OG', color:'#0369a1' },
+  { id:14, name:'Hassan Musa',           matric:'MTU/GEO/2021/033', programme:'B.Sc Geosciences',                college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'HM', color:'#4d7c0f' },
+  { id:15, name:'Amara Chisom',          matric:'MTU/CHM/2021/018', programme:'B.Sc Chemical Sciences',          college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'AC', color:'#9333ea' },
+  { id:16, name:'Daniels Victor',        matric:'MTU/BMT/2021/041', programme:'B.Sc Biomedical Technology',      college:'CAHS', type:'Graduation', submitted:'Apr 03, 2026', initials:'DV', color:'#c2410c' },
+  { id:17, name:'Yusuf Khadijat',        matric:'MTU/FST/2021/012', programme:'B.Sc Food Science & Technology',  college:'CBAS', type:'Graduation', submitted:'Apr 03, 2026', initials:'YK', color:'#0891b2' },
+  { id:18, name:'Nnamdi Peter',          matric:'MTU/ECO/2021/025', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'NP', color:'#65a30d' },
+  { id:19, name:'Oke Christiana',        matric:'MTU/PHL/2021/006', programme:'B.A Philosophy & Religion',       college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'OC', color:'#b91c1c' },
+  { id:20, name:'Adeleye Rotimi',        matric:'MTU/MLS/2021/038', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'AR', color:'#0f172a' },
+  { id:21, name:'Nnaji Chidinma',        matric:'MTU/NRS/2021/029', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'NC', color:'#92400e' },
+  { id:22, name:'Okeke Emmanuel',        matric:'MTU/CSC/2020/044', programme:'B.Sc Cyber Security',             college:'CBAS', type:'Withdrawal', submitted:'Mar 31, 2026', initials:'OE', color:'#312e81' },
+  { id:23, name:'Adeleke Rukayat',       matric:'MTU/BAD/2021/017', programme:'B.Sc Business Administration',   college:'CHMS', type:'Graduation', submitted:'Mar 30, 2026', initials:'AR', color:'#166534' },
+  { id:24, name:'Musa Hauwa',            matric:'MTU/PHY/2020/052', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Mar 29, 2026', initials:'MH', color:'#0c4a6e' },
+];
+
+function getDeptStatus(studentId, dept) {
+  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+  const saved = decisions.find(d => d.studentId === studentId && d.dept === dept);
+  if (saved) return saved.status;
+  const chapelMap = {
+    1:'flagged', 2:'pending', 3:'pending', 4:'pending', 5:'pending',
+    6:'pending', 7:'pending', 8:'pending', 9:'flagged', 10:'flagged',
+    11:'rejected', 12:'approved', 13:'approved', 14:'approved', 15:'approved',
+    16:'approved', 17:'approved', 18:'approved', 19:'approved', 20:'approved',
+    21:'approved', 22:'approved', 23:'approved', 24:'approved'
+  };
+  if (dept === 'chapel') return chapelMap[studentId] || 'pending';
+  const seeds = {hod:3,cedgs:7,lab:11,college:17,health:19,sport:23,hall:29,ict:31,alumni:37,affairs:41,library:43,bursary:47,esm:53,academic:59};
+  const v = (studentId * (seeds[dept] || 13)) % 97;
+  if (v < 10) return 'rejected';
+  if (v < 24) return 'flagged';
+  if (v < 50) return 'pending';
+  return 'approved';
+}
+
+(function() {
+  const DEPT_NAMES = {
+    hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
+    college:'College Officer', chapel:'University Chapel', health:'Health Centre',
+    sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
+    alumni:'Alumni Association', affairs:'Student Affairs', library:'University Library',
+    bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
+  };
+  const DEPT_ICONS = {
+    hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
+    chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
+    ict:'computer', alumni:'groups', affairs:'diversity_3', library:'menu_book',
+    bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
+  };
+
+  const session = JSON.parse(localStorage.getItem('cms_session') || 'null');
+  if (!session || session.role !== 'officer') { window.location.href = '../login.html'; return; }
+
+  const dept     = session.department || 'chapel';
+  const deptName = DEPT_NAMES[dept] || dept;
+  const deptIcon = DEPT_ICONS[dept] || 'badge';
+  const initials = ((session.firstName||'')[0]||'') + ((session.lastName||'')[0]||'');
+
+  // Sidebar / topbar
+  const chip = document.getElementById('deptChipName');
+  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+  const sub = document.getElementById('topbarSub');
+  if (sub) sub.textContent = deptName + ' — Clearance Officer';
+  document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials.toUpperCase() || 'CO');
+  document.querySelectorAll('a[href="../login.html"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Log out of CMS? Any unsaved changes will be lost.')) {
+        localStorage.removeItem('cms_session');
+        window.location.href = '../login.html';
+      }
+    });
+  });
+
+  // Compute counts
+  const counts = {approved:0, pending:0, flagged:0, rejected:0};
+  REQUESTS.forEach(r => { counts[getDeptStatus(r.id, dept)]++; });
+  const total = REQUESTS.length;
+  const approvalPct = Math.round(counts.approved / total * 100);
+
+  // Stat cards
+  const statVals = document.querySelectorAll('.stat-value');
+  if (statVals[0]) statVals[0].textContent = total;
+  if (statVals[1]) statVals[1].textContent = counts.pending;
+  if (statVals[2]) statVals[2].textContent = counts.approved;
+  if (statVals[3]) statVals[3].textContent = counts.flagged;
+  const trendEls = document.querySelectorAll('.stat-trend');
+  if (trendEls[2]) trendEls[2].innerHTML = `<span class="material-symbols-outlined" style="font-size:14px;">trending_up</span>${approvalPct}% approval rate`;
+
+  // Alert banner
+  const alertText = document.getElementById('alertBannerText');
+  if (alertText) alertText.innerHTML = `<strong>${counts.pending} request${counts.pending === 1 ? '' : 's'}</strong> are pending your review. Students are waiting for ${deptName} clearance.`;
+
+  // Nav badge
+  const navBadge = document.getElementById('pendingNavBadge');
+  if (navBadge) navBadge.textContent = counts.pending;
+
+  // Donut chart
+  const ap = counts.approved / total * 100;
+  const pp = ap + counts.pending / total * 100;
+  const fp = pp + counts.flagged / total * 100;
+  const donut = document.getElementById('donutChart');
+  if (donut) donut.style.background = `conic-gradient(var(--approved) 0% ${ap}%, var(--pending) ${ap}% ${pp}%, var(--flagged) ${pp}% ${fp}%, #E5E7EB ${fp}% 100%)`;
+  const donutLabel = document.getElementById('donutLabel');
+  if (donutLabel) donutLabel.innerHTML = `${approvalPct}%<small>approved</small>`;
+
+  // Donut legend values
+  const legendVals = document.querySelectorAll('.legend-val');
+  if (legendVals[0]) legendVals[0].textContent = counts.approved;
+  if (legendVals[1]) legendVals[1].textContent = counts.pending;
+  if (legendVals[2]) legendVals[2].textContent = counts.flagged;
+  if (legendVals[3]) legendVals[3].textContent = counts.rejected;
+
+  // Pending requests list — show up to 6 actionable (pending/flagged)
+  const timeLabels = {
+    'Apr 14':'2 days ago', 'Apr 13':'3 days ago', 'Apr 12':'4 days ago',
+    'Apr 11':'5 days ago', 'Apr 10':'6 days ago', 'Apr 09':'7 days ago',
+    'Apr 08':'8 days ago', 'Apr 07':'9 days ago', 'Apr 06':'10 days ago',
+    'Apr 05':'11 days ago','Apr 04':'12 days ago','Apr 03':'13 days ago',
+    'Apr 02':'14 days ago','Apr 01':'15 days ago','Mar 31':'16 days ago',
+    'Mar 30':'17 days ago','Mar 29':'18 days ago',
+  };
+  const actionable = REQUESTS.filter(r => {
+    const s = getDeptStatus(r.id, dept);
+    return s === 'pending' || s === 'flagged';
+  }).slice(0, 6);
+
+  const pendingList = document.getElementById('pendingList');
+  if (pendingList) {
+    if (actionable.length === 0) {
+      pendingList.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:0.82rem;">No pending requests — all cleared!</div>';
+    } else {
+      pendingList.innerHTML = actionable.map(r => {
+        const status = getDeptStatus(r.id, dept);
+        const badgeClass = status === 'flagged' ? 'badge-flagged' : 'badge-pending';
+        const badgeText  = status === 'flagged' ? 'Flagged' : 'Pending';
+        const dateKey = Object.keys(timeLabels).find(k => r.submitted.startsWith(k));
+        const timeAgo = dateKey ? timeLabels[dateKey] : r.submitted;
+        return `<a href="officer-review.html?student=${r.id}" class="req-row">
+          <div class="req-avatar" style="background:${r.color};">${r.initials}</div>
+          <div class="req-info">
+            <div class="req-name">${r.name}</div>
+            <div class="req-meta">${r.matric} · ${r.type} · ${r.programme}</div>
+          </div>
+          <div class="req-right">
+            <span class="badge ${badgeClass}">${badgeText}</span>
+            <span class="req-time">${timeAgo}</span>
+          </div>
+        </a>`;
+      }).join('');
+    }
+  }
+
+  // Recent activity — dept-aware last 4 actions
+  const recentStudents = REQUESTS.slice(0, 8);
+  const activityData = recentStudents
+    .map(r => ({ r, status: getDeptStatus(r.id, dept) }))
+    .filter(({status}) => status !== 'pending')
+    .slice(0, 4);
+  const activityList = document.querySelector('.activity-list');
+  if (activityList && activityData.length > 0) {
+    const actIcons   = {approved:'check', flagged:'flag', rejected:'close'};
+    const actBgs     = {approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', rejected:'var(--rejected-bg)'};
+    const actColors  = {approved:'var(--approved)',    flagged:'var(--flagged)',    rejected:'var(--rejected)'};
+    const actLabels  = {approved:'clearance approved', flagged:`flagged for ${deptName.toLowerCase()} review`, rejected:'clearance rejected'};
+    const actTimes   = ['Today, 9:14 AM','Yesterday, 3:42 PM','Yesterday, 11:20 AM','2 days ago'];
+    activityList.innerHTML = activityData.map(({r, status}, i) => `
+      <div class="activity-item">
+        <div class="activity-icon" style="background:${actBgs[status]};"><span class="material-symbols-outlined" style="color:${actColors[status]};">${actIcons[status]}</span></div>
+        <div class="activity-text">
+          <strong>${r.name}</strong> — ${actLabels[status]}
+          <div class="activity-time">${actTimes[i] || r.submitted}</div>
+        </div>
+      </div>`).join('');
+  }
+})();
+</script>
+</body>
+</html>

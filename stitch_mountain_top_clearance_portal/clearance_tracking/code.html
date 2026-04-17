@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clearance Tracking | Mountain Top University</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts: Manrope & Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#b6c4ff",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#00164e",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#6ffbbe",
+                    "on-primary-fixed-variant": "#264191",
+                    "on-primary-container": "#90a8ff",
+                    "surface-bright": "#f8f9ff",
+                    "error": "#ba1a1a",
+                    "on-background": "#0d1c2e",
+                    "inverse-surface": "#233144",
+                    "surface-dim": "#ccdbf3",
+                    "on-secondary-container": "#306d58",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#d5e3fc",
+                    "primary-container": "#1e3a8a",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#4059aa",
+                    "primary-fixed": "#dce1ff",
+                    "outline": "#757682",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "primary-fixed-dim": "#b6c4ff",
+                    "surface-container-high": "#dce9ff",
+                    "surface-container-low": "#eff4ff",
+                    "surface-container": "#e6eeff",
+                    "on-primary": "#ffffff",
+                    "surface": "#f8f9ff",
+                    "on-surface": "#0d1c2e",
+                    "secondary-fixed": "#b0f0d6",
+                    "outline-variant": "#c5c5d3",
+                    "primary": "#00236f",
+                    "on-tertiary-fixed": "#002113",
+                    "background": "#f8f9ff",
+                    "secondary-fixed-dim": "#95d3ba",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed": "#002117",
+                    "secondary": "#2b6954",
+                    "on-surface-variant": "#444651",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#adedd3",
+                    "tertiary": "#00311f",
+                    "on-secondary-fixed-variant": "#0b513d",
+                    "surface-container-highest": "#d5e3fc",
+                    "tertiary-container": "#004a31",
+                    "on-tertiary-container": "#27c38a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        h1, h2, .font-headline { font-family: 'Manrope', sans-serif; }
+        
+        /* Atmospheric Layering */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center h-16 px-6 w-full">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold tracking-tight text-blue-900 dark:text-blue-200">Mountain Top University</span>
+<div class="hidden md:flex gap-6">
+<a class="text-blue-700 dark:text-blue-300 font-bold border-b-2 border-blue-700 font-manrope text-sm font-medium tracking-wide" href="#">Clearance Portal</a>
+<a class="text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium tracking-wide hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">Documents</a>
+<a class="text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium tracking-wide hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">Profile</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-blue-900 dark:text-blue-400 hover:bg-slate-50 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/20">
+<img alt="User profile photo" data-alt="professional headshot of a male university student with a confident expression in a bright studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcXgKb-2dsDY12s7y0daTCHNVK2zCV7GizQ8BFYScnWWg77ccHrbg7WzqE1NFdgTskzViqek5rwgG1w-p1VUzKzqo3e4TwTrZTAMuwhNSzS2bUYGrDFUzuuyXVd96frCUTQOcUPlaS3fZqQdUfT4-ytErVxoRh09jAHnVFqH0AqsedxwygOy01mVn8X9Y3eCaOrJGGRHlClIrjHUks7JuLwvtyCAnRZ8bdChUNfXccr_x0c8R7PqsGadjvgw_vpBkvRSyKJ0tYJw"/>
+</div>
+</div>
+</div>
+<div class="bg-slate-100 dark:bg-slate-800 h-[1px] w-full absolute bottom-0"></div>
+</nav>
+<!-- SideNavBar -->
+<aside class="hidden md:flex h-screen w-72 flex flex-col fixed left-0 top-0 bg-slate-50 dark:bg-slate-950 border-r border-slate-100 dark:border-slate-800 z-40 pt-16">
+<div class="flex flex-col gap-2 p-4 h-full">
+<div class="px-4 py-6">
+<h2 class="text-lg font-black text-blue-900 dark:text-blue-200">MTU Clearance</h2>
+<p class="text-[11px] font-inter font-semibold uppercase tracking-[0.05em] text-slate-500">Academic Portal</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 font-inter text-[13px] font-semibold uppercase tracking-[0.05em] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+                </a>
+<a class="flex items-center gap-3 bg-white dark:bg-slate-900 text-blue-800 dark:text-blue-300 rounded-xl px-4 py-3 shadow-sm font-inter text-[13px] font-semibold uppercase tracking-[0.05em] active:translate-x-1" href="#">
+<span class="material-symbols-outlined">account_balance</span> Departmental Status
+                </a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 font-inter text-[13px] font-semibold uppercase tracking-[0.05em] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">upload_file</span> Document Uploads
+                </a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 font-inter text-[13px] font-semibold uppercase tracking-[0.05em] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">payments</span> Fee Clearance
+                </a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 font-inter text-[13px] font-semibold uppercase tracking-[0.05em] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">verified</span> Final Certificate
+                </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-200/50 flex flex-col gap-1">
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-inter text-[13px] font-semibold uppercase tracking-[0.05em] hover:bg-blue-50 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+                </a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 font-inter text-[13px] font-semibold uppercase tracking-[0.05em] hover:bg-blue-50 transition-all" href="#">
+<span class="material-symbols-outlined">logout</span> Logout
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-72 pt-24 px-6 pb-12 min-h-screen bg-surface">
+<div class="max-w-6xl mx-auto">
+<!-- Hero Header -->
+<header class="mb-12">
+<h1 class="text-5xl font-extrabold tracking-tight text-on-surface mb-2">Clearance Tracker</h1>
+<p class="text-on-surface-variant font-medium text-lg">Academic Year 2023/2024 • Final Semester</p>
+</header>
+<!-- Asymmetric Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Vertical Progress Stepper (4-Cols) -->
+<section class="lg:col-span-4 space-y-4">
+<div class="bg-surface-container-low p-8 rounded-full">
+<h3 class="text-[11px] font-inter font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-8">Clearance Progress</h3>
+<div class="relative space-y-0">
+<!-- Approved: HOD -->
+<div class="flex gap-6 pb-10 relative">
+<div class="absolute left-4 top-8 bottom-0 w-0.5 bg-tertiary-fixed-dim"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-on-tertiary-container flex items-center justify-center shadow-lg shadow-tertiary/20">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Head of Department</h4>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-tertiary-fixed text-on-tertiary-fixed-variant uppercase tracking-wider">Approved</span>
+</div>
+</div>
+<!-- Approved: Library -->
+<div class="flex gap-6 pb-10 relative">
+<div class="absolute left-4 top-8 bottom-0 w-0.5 bg-gradient-to-b from-tertiary-fixed-dim to-error/30"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-on-tertiary-container flex items-center justify-center shadow-lg shadow-tertiary/20">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Library Services</h4>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-tertiary-fixed text-on-tertiary-fixed-variant uppercase tracking-wider">Approved</span>
+</div>
+</div>
+<!-- Flagged: Chapel -->
+<div class="flex gap-6 pb-10 relative">
+<div class="absolute left-4 top-8 bottom-0 w-0.5 bg-slate-200"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-error flex items-center justify-center shadow-lg shadow-error/20 scale-110">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">University Chapel</h4>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-error-container text-on-error-container uppercase tracking-wider">Flagged</span>
+<p class="text-xs text-error font-medium mt-1 italic">Reason: Attendance low (45%)</p>
+</div>
+</div>
+<!-- Pending: Bursary -->
+<div class="flex gap-6 pb-10 relative">
+<div class="absolute left-4 top-8 bottom-0 w-0.5 bg-slate-200"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-surface-container-highest border-2 border-outline-variant/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-outline text-sm">schedule</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface-variant">Bursary / Accounts</h4>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container-high text-on-surface-variant uppercase tracking-wider">Pending</span>
+</div>
+</div>
+<!-- Locked: Sports -->
+<div class="flex gap-6 relative">
+<div class="relative z-10 w-8 h-8 rounded-full bg-surface-container border-2 border-outline-variant/10 flex items-center justify-center opacity-50">
+<span class="material-symbols-outlined text-outline text-sm">lock</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface-variant/50">Sports Directorate</h4>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-surface-container-low text-on-surface-variant/50 uppercase tracking-wider">Locked</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Action & Detail Area (8-Cols) -->
+<section class="lg:col-span-8 space-y-8">
+<!-- Critical Alert Card (Active/Flagged) -->
+<div class="bg-error-container/40 p-8 rounded-full border-l-4 border-error relative overflow-hidden">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+<h3 class="text-xl font-headline font-extrabold text-on-error-container">Chapel Attendance Issue</h3>
+</div>
+<p class="text-on-error-container/80 text-sm leading-relaxed max-w-md">
+                                    Your clearance is currently paused by the University Chapel due to low service attendance records. Please visit the Chaplaincy office or complete the 'Make-up Seminar' to proceed.
+                                </p>
+</div>
+<button class="bg-error hover:bg-red-800 text-white font-inter font-bold px-8 py-4 rounded-md transition-all shadow-xl shadow-error/20 active:scale-95 flex items-center gap-2">
+                                Fix Now <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Requirements Section -->
+<div class="bg-surface-container-lowest p-8 rounded-full shadow-sm">
+<h3 class="text-sm font-label font-bold uppercase tracking-widest text-secondary mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">checklist</span>
+                            Department Requirements: University Chapel
+                        </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="p-5 rounded-xl bg-surface-container-low">
+<div class="flex items-start justify-between mb-2">
+<span class="text-xs font-bold text-on-surface-variant uppercase">Requirement</span>
+<span class="material-symbols-outlined text-error text-sm">cancel</span>
+</div>
+<p class="font-headline font-bold text-on-surface">Service Attendance</p>
+<p class="text-xs text-on-surface-variant mt-1">Minimum 75% attendance required for semester.</p>
+</div>
+<div class="p-5 rounded-xl bg-surface-container-low opacity-60">
+<div class="flex items-start justify-between mb-2">
+<span class="text-xs font-bold text-on-surface-variant uppercase">Requirement</span>
+<span class="material-symbols-outlined text-on-tertiary-container text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="font-headline font-bold text-on-surface">Community Service</p>
+<p class="text-xs text-on-surface-variant mt-1">10 hours of verified community engagement.</p>
+</div>
+</div>
+</div>
+<!-- Timeline History -->
+<div class="bg-surface-container-low p-8 rounded-full">
+<h3 class="text-[11px] font-inter font-bold uppercase tracking-[0.1em] text-on-surface-variant mb-6">Action History</h3>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<div class="pt-1">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<p class="font-bold text-on-surface text-sm">Flagged by Chaplaincy Office</p>
+<span class="text-[10px] font-bold text-on-surface-variant/60">OCT 14, 2023 • 09:12 AM</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1">Reviewer Note: Attendance logs show incomplete participation in Friday evening services.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="pt-1">
+<div class="w-2 h-2 rounded-full bg-on-tertiary-container"></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<p class="font-bold text-on-surface text-sm">Approved by Main Library</p>
+<span class="text-[10px] font-bold text-on-surface-variant/60">OCT 12, 2023 • 02:45 PM</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1">Status: All materials returned. No outstanding fines.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="pt-1">
+<div class="w-2 h-2 rounded-full bg-on-tertiary-container"></div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<p class="font-bold text-on-surface text-sm">Approved by HOD (Computer Science)</p>
+<span class="text-[10px] font-bold text-on-surface-variant/60">OCT 10, 2023 • 11:30 AM</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-1">Academic records verified. Final project uploaded.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Graphic Card -->
+<footer class="mt-16 rounded-full overflow-hidden bg-primary p-12 text-center relative">
+<div class="absolute inset-0 opacity-10" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAsocgS8YhOqSIDSVMksYbu48shOHEGCsYde8_cG4MgRUFm1NJjZYlqs72qynyVtLyHOznoOzfphlc9liT13sjcsWDtnih8Blm8hScWv1lYXFNPIg1MunIc48t0FOK03cTX3IlMpLxqt8q-IcvSvRRO9rbK6MTrCRoBrzakk0k2OXbt37RGTnjnvPH_5bCRWr61GlUBupwwPTyRfry6-_CrsQEDdZqwBjuG1RW-cZGyTKKiBIcU_Lpt4vjgUQmhg1B7JCaC7NGSFQ');"></div>
+<div class="relative z-10">
+<h2 class="text-white text-3xl font-headline font-extrabold mb-4">Graduation Ceremony Eligibility</h2>
+<p class="text-white/70 max-w-lg mx-auto mb-8">Once all departments are cleared, you will receive a digital certificate and your graduation gown collection voucher.</p>
+<div class="flex justify-center gap-4">
+<div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-4">
+<p class="text-white/50 text-[10px] font-bold uppercase tracking-widest">Days Remaining</p>
+<p class="text-white text-2xl font-headline font-bold">42</p>
+</div>
+<div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-6 py-4">
+<p class="text-white/50 text-[10px] font-bold uppercase tracking-widest">Cleared Status</p>
+<p class="text-white text-2xl font-headline font-bold">2/5</p>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</main>
+<!-- Mobile Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 z-50 px-6 py-3">
+<div class="flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold">HOME</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+<span class="text-[10px] font-bold">STATUS</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">upload_file</span>
+<span class="text-[10px] font-bold">DOCS</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">ME</span>
+</button>
+</div>
+</nav>
+</body></html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — MTU CMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080;
+      --purple-dark: #4a0059;
+      --purple-mid: #8b00a8;
+      --green: #76B82A;
+      --green-dark: #5a8d1e;
+      --approved: #10B981;
+      --pending: #F59E0B;
+      --flagged: #F97316;
+      --rejected: #EF4444;
+      --bg: #F4F6FA;
+      --surface: #FFFFFF;
+      --text: #1A1A2E;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%);
+      display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100;
+    }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .profile-chip { margin: 0.75rem; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 0.65rem 0.75rem; display: flex; align-items: center; gap: 10px; }
+    .profile-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .profile-info { overflow: hidden; }
+    .profile-name { color: white; font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-role { color: rgba(255,255,255,0.5); font-size: 0.65rem; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 2px; }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    /* Main */
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 36px; height: 36px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: background 0.15s; }
+    .icon-btn:hover { background: var(--border); }
+    .icon-btn .material-symbols-outlined { font-size: 20px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    .content { padding: 2rem; flex: 1; max-width: 900px; }
+
+    /* Settings layout */
+    .settings-tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin-bottom: 1.5rem; width: fit-content; }
+    .settings-tab { padding: 8px 18px; border-radius: 9px; border: none; background: transparent; font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .settings-tab.active { background: var(--purple); color: white; }
+
+    .settings-section { display: none; }
+    .settings-section.active { display: block; }
+
+    .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 1.25rem; overflow: hidden; }
+    .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .card-header-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(107,0,128,0.08); color: var(--purple); display: flex; align-items: center; justify-content: center; }
+    .card-header-icon .material-symbols-outlined { font-size: 17px; }
+    .card-header h3 { font-size: 0.9rem; font-weight: 600; }
+    .card-header p { font-size: 0.73rem; color: var(--muted); margin-top: 1px; }
+    .card-body { padding: 1.25rem; }
+
+    /* Avatar upload */
+    .avatar-row { display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem; }
+    .avatar-preview { width: 72px; height: 72px; border-radius: 50%; background: var(--purple); color: white; font-size: 1.6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid var(--border); }
+    .avatar-actions { display: flex; flex-direction: column; gap: 6px; }
+    .btn-sm { padding: 6px 14px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-sm.primary { background: var(--purple); color: white; }
+    .btn-sm.primary:hover { background: var(--purple-dark); }
+    .btn-sm.outline { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+    .btn-sm.outline:hover { border-color: var(--purple); color: var(--purple); }
+    .avatar-hint { font-size: 0.7rem; color: var(--muted); }
+
+    /* Form fields */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-grid.single { grid-template-columns: 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+    .form-group input, .form-group select { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.83rem; color: var(--text); background: var(--bg); transition: border-color 0.15s; outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--purple); background: white; }
+    .form-group input:disabled, .form-group select:disabled { background: #f0f0f0; color: var(--muted); cursor: not-allowed; }
+    .form-hint { font-size: 0.68rem; color: var(--muted); }
+    .field-lock { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+    .field-lock .material-symbols-outlined { font-size: 13px; }
+
+    /* Toggle switch */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-row:first-child { padding-top: 0; }
+    .toggle-info { flex: 1; }
+    .toggle-info strong { font-size: 0.83rem; font-weight: 600; display: block; margin-bottom: 2px; }
+    .toggle-info span { font-size: 0.72rem; color: var(--muted); }
+    .toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; margin-left: 1rem; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 100px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle input:checked + .toggle-slider { background: var(--green); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    /* Password strength */
+    .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+    .pw-seg { height: 3px; flex: 1; border-radius: 2px; background: var(--border); transition: background 0.2s; }
+    .pw-seg.filled-1 { background: var(--rejected); }
+    .pw-seg.filled-2 { background: var(--flagged); }
+    .pw-seg.filled-3 { background: var(--pending); }
+    .pw-seg.filled-4 { background: var(--approved); }
+    .pw-label { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
+
+    /* Danger zone */
+    .danger-card { background: #FEF2F2; border: 1.5px solid #FECACA; border-radius: 14px; padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+    .danger-card-info strong { font-size: 0.85rem; font-weight: 600; color: var(--rejected); display: block; margin-bottom: 2px; }
+    .danger-card-info span { font-size: 0.73rem; color: #991B1B; }
+    .btn-danger { padding: 8px 18px; background: var(--rejected); color: white; border: none; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .btn-danger:hover { background: #DC2626; }
+
+    /* Info badge */
+    .info-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(107,0,128,0.08); color: var(--purple); border-radius: 100px; padding: 3px 10px; font-size: 0.7rem; font-weight: 600; }
+    .info-badge .material-symbols-outlined { font-size: 13px; }
+
+    /* Save row */
+    .save-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 1rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+    .btn-primary { padding: 9px 22px; background: var(--purple); color: white; border: none; border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 6px; }
+    .btn-primary:hover { background: var(--purple-dark); }
+    .btn-primary .material-symbols-outlined { font-size: 17px; }
+    .btn-cancel { padding: 9px 18px; background: transparent; border: 1.5px solid var(--border); border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.83rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: border-color 0.15s; }
+    .btn-cancel:hover { border-color: var(--muted); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--text); color: white; padding: 12px 18px; border-radius: 10px; font-size: 0.82rem; font-weight: 500; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(80px); opacity: 0; transition: transform 0.3s, opacity 0.3s; z-index: 200; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast .material-symbols-outlined { font-size: 18px; color: var(--green); }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="brand-text">CMS Portal<span>Mountain Top University</span></div>
+  </div>
+  <div class="profile-chip">
+    <div class="profile-avatar">OJ</div>
+    <div class="profile-info">
+      <div class="profile-name">Odunukwe C. Jordan</div>
+      <div class="profile-role">Student · MTU/CSC/2021/001</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a href="student-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="clearance-tracking.html" class="nav-item"><span class="material-symbols-outlined">fact_check</span>Clearance Status<span class="nav-badge">1</span></a>
+    <a href="document-upload.html" class="nav-item"><span class="material-symbols-outlined">upload_file</span>Document Uploads</a>
+    <a href="final-certificate.html" class="nav-item"><span class="material-symbols-outlined">workspace_premium</span>Final Certificate</a>
+    <div class="nav-label" style="margin-top:0.5rem;">Account</div>
+    <a href="student-settings.html" class="nav-item active"><span class="material-symbols-outlined">settings</span>Settings</a>
+    <a href="student-help.html" class="nav-item"><span class="material-symbols-outlined">help</span>Help Center</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Settings</h1>
+      <p>Manage your profile, security, and preferences</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <div class="topbar-avatar">OJ</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Tabs -->
+    <div class="settings-tabs">
+      <button class="settings-tab active" onclick="switchTab('profile', this)">Profile</button>
+      <button class="settings-tab" onclick="switchTab('security', this)">Security</button>
+      <button class="settings-tab" onclick="switchTab('notifications', this)">Notifications</button>
+      <button class="settings-tab" onclick="switchTab('account', this)">Account</button>
+    </div>
+
+    <!-- Profile Tab -->
+    <div class="settings-section active" id="tab-profile">
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">person</span></div>
+          <div>
+            <h3>Profile Photo</h3>
+            <p>Your photo appears on your certificate and profile</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="avatar-row">
+            <div class="avatar-preview" id="avatarPreview">OJ</div>
+            <div class="avatar-actions">
+              <button class="btn-sm primary" onclick="document.getElementById('avatarInput').click()">Upload Photo</button>
+              <button class="btn-sm outline" onclick="removeAvatar()">Remove</button>
+              <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewAvatar(event)" />
+            </div>
+          </div>
+          <p class="avatar-hint">JPG or PNG · Max 2MB · Square crop recommended</p>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">badge</span></div>
+          <div>
+            <h3>Personal Information</h3>
+            <p>Update your contact details</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid" style="margin-bottom:1rem;">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" value="Odunukwe" />
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" value="Jordan" />
+            </div>
+            <div class="form-group">
+              <label>Middle Name</label>
+              <input type="text" value="Chidire" />
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" placeholder="+234 800 000 0000" />
+            </div>
+            <div class="form-group form-grid single" style="grid-column:1/-1;">
+              <label>Institution Email</label>
+              <input type="email" value="odunukwe.jordan@mtu.edu.ng" disabled />
+              <div class="field-lock"><span class="material-symbols-outlined">lock</span> Institution email cannot be changed. Contact ICT for issues.</div>
+            </div>
+            <div class="form-group form-grid single" style="grid-column:1/-1;">
+              <label>Personal Email (Recovery)</label>
+              <input type="email" placeholder="your personal email" />
+              <p class="form-hint">Used for password recovery only. Not used for login.</p>
+            </div>
+          </div>
+          <div class="save-row">
+            <button class="btn-cancel">Cancel</button>
+            <button class="btn-primary" onclick="showToast('Profile updated successfully')"><span class="material-symbols-outlined">save</span>Save Changes</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">school</span></div>
+          <div>
+            <h3>Academic Information</h3>
+            <p>Your academic records — locked and managed by the Registrar</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Matric Number</label>
+              <input type="text" value="MTU/CSC/2021/001" disabled />
+              <div class="field-lock"><span class="material-symbols-outlined">lock</span> Managed by Registrar</div>
+            </div>
+            <div class="form-group">
+              <label>Academic Session</label>
+              <input type="text" value="2024/2025" disabled />
+              <div class="field-lock"><span class="material-symbols-outlined">lock</span> Managed by Registrar</div>
+            </div>
+            <div class="form-group">
+              <label>College</label>
+              <input type="text" value="College of Basic and Applied Sciences (CBAS)" disabled />
+              <div class="field-lock"><span class="material-symbols-outlined">lock</span> Managed by Registrar</div>
+            </div>
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" value="Computer Science and Mathematics" disabled />
+              <div class="field-lock"><span class="material-symbols-outlined">lock</span> Managed by Registrar</div>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Programme</label>
+              <input type="text" value="B.Sc Computer Science" disabled />
+              <div class="field-lock"><span class="material-symbols-outlined">lock</span> Managed by Registrar</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;">
+            <span class="info-badge"><span class="material-symbols-outlined">info</span>To correct any academic record, visit the Registrar's Office</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Tab -->
+    <div class="settings-section" id="tab-security">
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">lock</span></div>
+          <div>
+            <h3>Change Password</h3>
+            <p>Choose a strong password you don't use elsewhere</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid single" style="gap:1rem; margin-bottom:1rem;">
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" id="currentPw" placeholder="Enter current password" />
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="newPw" placeholder="At least 8 characters" oninput="checkPwStrength(this.value)" />
+              <div class="pw-strength">
+                <div class="pw-seg" id="seg1"></div>
+                <div class="pw-seg" id="seg2"></div>
+                <div class="pw-seg" id="seg3"></div>
+                <div class="pw-seg" id="seg4"></div>
+              </div>
+              <div class="pw-label" id="pwLabel">Enter a new password</div>
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirmPw" placeholder="Repeat new password" />
+            </div>
+          </div>
+          <div class="save-row">
+            <button class="btn-cancel">Cancel</button>
+            <button class="btn-primary" onclick="changePassword()"><span class="material-symbols-outlined">lock_reset</span>Update Password</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">devices</span></div>
+          <div>
+            <h3>Active Sessions</h3>
+            <p>Devices currently signed into your account</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:rgba(118,184,42,0.06); border:1.5px solid rgba(118,184,42,0.2); border-radius:10px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span class="material-symbols-outlined" style="color:var(--green); font-size:22px;">computer</span>
+                <div>
+                  <div style="font-size:0.82rem; font-weight:600;">Chrome on Windows 11</div>
+                  <div style="font-size:0.7rem; color:var(--muted);">Current session · Lagos, Nigeria · Just now</div>
+                </div>
+              </div>
+              <span class="info-badge" style="background:rgba(16,185,129,0.1); color:var(--approved);">Current</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:10px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span class="material-symbols-outlined" style="color:var(--muted); font-size:22px;">smartphone</span>
+                <div>
+                  <div style="font-size:0.82rem; font-weight:600;">Chrome on Android</div>
+                  <div style="font-size:0.7rem; color:var(--muted);">Lagos, Nigeria · 2 days ago</div>
+                </div>
+              </div>
+              <button class="btn-sm outline" onclick="showToast('Session revoked')">Revoke</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications Tab -->
+    <div class="settings-section" id="tab-notifications">
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">notifications</span></div>
+          <div>
+            <h3>Email Notifications</h3>
+            <p>Choose what updates you receive by email</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Clearance Status Updates</strong>
+              <span>When a department approves, flags, or rejects your clearance</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Document Verification</strong>
+              <span>When a document you submitted is reviewed</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Certificate Ready</strong>
+              <span>When your final clearance certificate is available for download</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>System Announcements</strong>
+              <span>General announcements from the Registrar's office</span>
+            </div>
+            <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Reminders</strong>
+              <span>Pending document upload and outstanding clearance reminders</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="save-row">
+            <button class="btn-primary" onclick="showToast('Notification preferences saved')"><span class="material-symbols-outlined">save</span>Save Preferences</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">mark_chat_read</span></div>
+          <div>
+            <h3>In-App Notifications</h3>
+            <p>Control what appears in your notification bell</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Department Comments</strong>
+              <span>When an officer leaves a comment on your clearance</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <strong>Status Changes</strong>
+              <span>Real-time alerts when department status changes</span>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Tab -->
+    <div class="settings-section" id="tab-account">
+      <div class="settings-card">
+        <div class="card-header">
+          <div class="card-header-icon"><span class="material-symbols-outlined">manage_accounts</span></div>
+          <div>
+            <h3>Account Overview</h3>
+            <p>Your account status and clearance type</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Account Status</label>
+              <div style="display:flex; align-items:center; gap:8px; padding:9px 12px; background:rgba(16,185,129,0.07); border:1.5px solid rgba(16,185,129,0.2); border-radius:9px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--approved);flex-shrink:0;"></span>
+                <span style="font-size:0.82rem; font-weight:600; color:var(--approved);">Active</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Clearance Type</label>
+              <div style="padding:9px 12px; background:rgba(107,0,128,0.06); border:1.5px solid rgba(107,0,128,0.15); border-radius:9px; font-size:0.82rem; font-weight:600; color:var(--purple);">Graduation Clearance</div>
+            </div>
+            <div class="form-group">
+              <label>Date Enrolled</label>
+              <input type="text" value="September 2021" disabled />
+            </div>
+            <div class="form-group">
+              <label>Expected Graduation</label>
+              <input type="text" value="July 2025" disabled />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-header" style="background:transparent; border:none; padding:0 0 0.5rem; margin-bottom:0.25rem;">
+        <h3 style="font-size:0.85rem; font-weight:700; color:var(--rejected);">Danger Zone</h3>
+      </div>
+
+      <div class="danger-card">
+        <div class="danger-card-info">
+          <strong>Withdraw Clearance Application</strong>
+          <span>This will cancel your active clearance request. You can re-apply later.</span>
+        </div>
+        <button class="btn-danger" onclick="confirmDanger('Withdraw clearance application?')">Withdraw Application</button>
+      </div>
+
+      <div class="danger-card">
+        <div class="danger-card-info">
+          <strong>Download My Data</strong>
+          <span>Get a copy of all your clearance records, documents, and account data.</span>
+        </div>
+        <button class="btn-danger" style="background:#6B7280;" onclick="showToast('Your data export will be emailed to you within 24 hours')">Request Export</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="material-symbols-outlined">check_circle</span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+  function switchTab(name, btn) {
+    document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.settings-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.querySelector('.material-symbols-outlined').textContent = isError ? 'error' : 'check_circle';
+    toast.querySelector('.material-symbols-outlined').style.color = isError ? 'var(--rejected)' : 'var(--green)';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function previewAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB', true); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const p = document.getElementById('avatarPreview');
+      p.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    };
+    reader.readAsDataURL(file);
+    showToast('Photo uploaded — save changes to apply');
+  }
+
+  function removeAvatar() {
+    const p = document.getElementById('avatarPreview');
+    p.innerHTML = 'OJ';
+    document.getElementById('avatarInput').value = '';
+    showToast('Photo removed — save changes to apply');
+  }
+
+  function checkPwStrength(val) {
+    const segs = [document.getElementById('seg1'), document.getElementById('seg2'), document.getElementById('seg3'), document.getElementById('seg4')];
+    const lbl = document.getElementById('pwLabel');
+    segs.forEach(s => { s.className = 'pw-seg'; });
+    if (!val) { lbl.textContent = 'Enter a new password'; return; }
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+    for (let i = 0; i < score; i++) segs[i].classList.add('filled-' + score);
+    lbl.textContent = labels[score - 1] || 'Too short';
+  }
+
+  function changePassword() {
+    const cur = document.getElementById('currentPw').value;
+    const nw = document.getElementById('newPw').value;
+    const cf = document.getElementById('confirmPw').value;
+    if (!cur || !nw || !cf) { showToast('Please fill all password fields', true); return; }
+    if (nw.length < 8) { showToast('Password must be at least 8 characters', true); return; }
+    if (nw !== cf) { showToast('Passwords do not match', true); return; }
+    // TODO: call Supabase auth.updateUser({ password: nw })
+    showToast('Password updated successfully');
+    document.getElementById('currentPw').value = '';
+    document.getElementById('newPw').value = '';
+    document.getElementById('confirmPw').value = '';
+    checkPwStrength('');
+  }
+
+  function confirmDanger(msg) {
+    if (confirm(msg + '\n\nThis action cannot be undone.')) {
+      // TODO: call Supabase to cancel clearance record
+      showToast('Application withdrawn. Redirecting…');
+      setTimeout(() => { window.location.href = 'student-dashboard.html'; }, 2000);
+    }
+  }
+</script>
+</body>
+</html>

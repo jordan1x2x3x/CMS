@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | Mountain Top University Clearance Portal</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Newsreader & Work Sans -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&amp;family=Work+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#100069",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#464554",
+                        "tertiary-container": "#8f3400",
+                        "surface-container": "#f0ecf8",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#c1beff",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#5148d7",
+                        "inverse-primary": "#c3c0ff",
+                        "on-background": "#1b1b23",
+                        "tertiary-fixed": "#ffdbcd",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-primary-fixed-variant": "#372abf",
+                        "outline-variant": "#c7c4d7",
+                        "tertiary-fixed-dim": "#ffb597",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#c3c0ff",
+                        "surface-container-highest": "#e4e1ed",
+                        "on-secondary-container": "#4c4a84",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface": "#fcf8ff",
+                        "surface-variant": "#e4e1ed",
+                        "surface-container-low": "#f6f2fe",
+                        "surface-bright": "#fcf8ff",
+                        "background": "#fcf8ff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#16124c",
+                        "surface-dim": "#dcd8e4",
+                        "secondary": "#5a5893",
+                        "inverse-surface": "#302f39",
+                        "on-secondary-fixed-variant": "#42407a",
+                        "on-error": "#ffffff",
+                        "primary-container": "#4338ca",
+                        "surface-container-high": "#eae6f3",
+                        "inverse-on-surface": "#f3effb",
+                        "on-tertiary-container": "#ffb393",
+                        "secondary-container": "#c0bdff",
+                        "primary": "#2a14b4",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-surface": "#1b1b23",
+                        "primary-fixed": "#e3dfff",
+                        "secondary-fixed": "#e3dfff",
+                        "outline": "#777586",
+                        "tertiary": "#692400"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Work Sans", "sans-serif"],
+                        "label": ["Work Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .serif-display { font-family: 'Newsreader', serif; }
+        .sans-body { font-family: 'Work Sans', sans-serif; }
+        .indigo-gradient {
+            background: linear-gradient(135deg, #4338ca 0%, #2a14b4 100%);
+        }
+        .glass-panel {
+            background-color: rgba(246, 242, 254, 0.8);
+            backdrop-filter: blur(24px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation Bar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center px-8 py-4 w-full max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-bold tracking-tight text-blue-900 dark:text-white serif-display">Mountain Top University</span>
+</div>
+<div class="flex items-center gap-8">
+<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-800 dark:hover:text-blue-200 transition-colors sans-body text-[10px] tracking-widest uppercase" href="#">Help</a>
+<a class="text-blue-700 dark:text-blue-300 font-semibold border-b-2 border-blue-700 hover:text-blue-800 transition-colors sans-body text-[10px] tracking-widest uppercase" href="#">Sign In</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="min-h-screen w-full flex items-center justify-center relative overflow-hidden pt-16">
+<!-- Background Imagery (Subtle Architectural) -->
+<div class="absolute inset-0 z-0">
+<img alt="Academic Architecture" class="w-full h-full object-cover opacity-20 grayscale brightness-110" data-alt="Modern university campus architecture with clean lines and large windows under a clear sky in soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI5og_1UTmsq2Gi1nEAKYk1V_mBYpc-BN9F_0RYKCiDTEtE55WlVEi6JSU6E-u8Zy8pQFgK8qX2GnsyhnHEKWE78UGxtSYciv96Zz5V4Rc6p9gqoQLuttqr1xDFfwxk37Iw5zUE85gG_D47L8OoPEmMFBwGNxsfj5okKaV7zrpDeaEK9YRm0RqG_DD9caCmabQgcslU2cT4U_fV_cJUWkCIs1ptXjSGP_ZZ5xRAsk5Qd-un5N75N3_nkAxgjJkKqD-9BivYxfs4w"/>
+<div class="absolute inset-0 bg-gradient-to-tr from-surface via-surface/90 to-surface-container-low/50"></div>
+</div>
+<!-- Login Container -->
+<div class="relative z-10 w-full max-w-lg px-6">
+<!-- Asymmetric Layout Header -->
+<div class="mb-12 ml-4">
+<span class="text-primary font-medium tracking-[0.2em] text-[10px] uppercase block mb-2">Student &amp; Staff Services</span>
+<h1 class="serif-display text-5xl md:text-6xl text-on-background font-bold tracking-tight leading-none mb-4">
+                    Clearance <br/>
+<span class="text-primary">Portal</span>
+</h1>
+<div class="h-1 w-24 bg-primary-container"></div>
+</div>
+<!-- Login Card -->
+<div class="surface-container-lowest glass-panel rounded-xl p-10 md:p-12 shadow-[0_32px_64px_-4px_rgba(27,27,35,0.06)] border border-outline-variant/15">
+<form class="space-y-8">
+<!-- Identity Input -->
+<div class="space-y-2">
+<label class="sans-body text-xs font-semibold text-on-surface-variant uppercase tracking-wider ml-1" for="identifier">Matriculation Number / Staff ID</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-low border border-outline-variant/15 rounded-md px-4 py-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline/50" id="identifier" name="identifier" placeholder="MTU/2024/001" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline/40">badge</span>
+</div>
+</div>
+<!-- Password Input -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<label class="sans-body text-xs font-semibold text-on-surface-variant uppercase tracking-wider" for="password">Password</label>
+<a class="text-xs text-primary font-medium hover:underline transition-all" href="#">Forgot Password?</a>
+</div>
+<div class="relative group">
+<input class="w-full bg-surface-container-low border border-outline-variant/15 rounded-md px-4 py-4 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline/50" id="password" name="password" placeholder="••••••••" type="password"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline/40">lock</span>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-4">
+<button class="indigo-gradient w-full py-4 text-on-primary font-semibold rounded-md shadow-lg shadow-primary/20 hover:scale-[0.98] active:scale-[0.95] transition-all duration-200 flex items-center justify-center gap-2 group" type="submit">
+<span>Sign In</span>
+<span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">login</span>
+</button>
+</div>
+</form>
+<!-- Scholarly Annotation -->
+<div class="mt-12 flex items-start gap-4 p-4 rounded-lg bg-surface-container-high/50 border-l-4 border-primary">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">info</span>
+<p class="text-xs leading-relaxed text-on-surface-variant font-medium">
+                        Ensure you are using your official university credentials. For technical issues, please contact the <a class="text-primary underline" href="#">IT Support Unit</a> at the Senate Building.
+                    </p>
+</div>
+</div>
+<!-- Portal Stats / Social Proof -->
+<div class="mt-12 flex justify-between px-4 text-on-surface-variant/60 sans-body text-[11px] uppercase tracking-widest font-semibold">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+                    SECURE ACCESS
+                </div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                    2.4K ACTIVE USERS
+                </div>
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-slate-50 dark:bg-slate-950 w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-6 mt-12">
+<div class="text-lg font-bold text-blue-900 dark:text-white serif-display">Mountain Top University</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-slate-500 hover:underline hover:text-blue-800 transition-opacity duration-300 sans-body text-sm" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:underline hover:text-blue-800 transition-opacity duration-300 sans-body text-sm" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:underline hover:text-blue-800 transition-opacity duration-300 sans-body text-sm" href="#">Campus Map</a>
+<a class="text-slate-500 hover:underline hover:text-blue-800 transition-opacity duration-300 sans-body text-sm" href="#">Directory</a>
+</div>
+<div class="text-slate-500 sans-body text-sm">© 2024 Mountain Top University. All rights reserved.</div>
+</footer>
+</body></html>

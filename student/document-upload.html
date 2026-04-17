@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Upload | MTU Clearance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:       #6B0080;
+      --purple-dark:  #4A0058;
+      --purple-light: #8B20A0;
+      --green:        #76B82A;
+      --green-dark:   #5A8C20;
+      --surface:      #F4F6F9;
+      --white:        #FFFFFF;
+      --border:       #E2E8F0;
+      --text-main:    #1A0020;
+      --text-muted:   #64748B;
+      --sidebar-w:    260px;
+      --approved:     #10B981;
+      --approved-bg:  #D1FAE5;
+      --pending:      #F59E0B;
+      --pending-bg:   #FEF3C7;
+      --flagged:      #F97316;
+      --flagged-bg:   #FFEDD5;
+      --rejected:     #EF4444;
+      --rejected-bg:  #FEE2E2;
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: var(--sidebar-w); background: var(--purple-dark); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; overflow-y: auto; }
+    .sidebar-brand { padding: 1.5rem 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .brand-icon { width: 38px; height: 38px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+    .brand-icon .material-symbols-outlined { font-size: 22px; font-variation-settings: 'FILL' 1; }
+    .brand-name { font-family: 'Newsreader', serif; font-size: 0.95rem; font-weight: 700; color: white; line-height: 1.2; }
+    .brand-sub { font-size: 0.65rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
+    .sidebar-profile { margin: 1rem 1rem 0.5rem; background: rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+    .profile-avatar { width: 34px; height: 34px; background: var(--purple-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    .profile-name { font-size: 0.8rem; font-weight: 600; color: white; }
+    .profile-matric { font-size: 0.65rem; color: rgba(255,255,255,0.45); }
+    .sidebar-nav { padding: 0.75rem; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 2px; }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Top bar */
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; gap: 1rem; }
+    .topbar-title { font-family: 'Newsreader', serif; font-size: 1.05rem; font-weight: 700; color: var(--purple-dark); white-space: nowrap; }
+    .search-bar { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 12px; flex: 1; max-width: 340px; }
+    .search-bar input { border: none; background: none; outline: none; font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text-main); width: 100%; }
+    .search-bar input::placeholder { color: #A0AABB; }
+    .search-bar .material-symbols-outlined { font-size: 18px; color: var(--text-muted); }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--surface); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); position: relative; transition: background 0.15s; }
+    .icon-btn:hover { background: var(--border); }
+    .icon-btn .material-symbols-outlined { font-size: 19px; }
+    .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background: var(--flagged); border-radius: 50%; border: 2px solid white; }
+
+    /* ── PAGE CONTENT ── */
+    .content { padding: 2rem; flex: 1; }
+    .page-heading { margin-bottom: 1.75rem; }
+    .page-heading h1 { font-family: 'Newsreader', serif; font-size: 1.7rem; font-weight: 700; color: var(--purple-dark); }
+    .page-heading p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; max-width: 560px; line-height: 1.6; }
+
+    /* ── TWO-COLUMN LAYOUT ── */
+    .upload-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+
+    /* ── DOCUMENT LIST ── */
+    .doc-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .doc-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: box-shadow 0.15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .doc-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+    .doc-card.action-needed { border-left: 4px solid var(--flagged); }
+    .doc-card.approved      { border-left: 4px solid var(--approved); }
+    .doc-card.pending       { border-left: 4px solid var(--pending); }
+    .doc-card.not-started   { border-left: 4px solid var(--border); opacity: 0.75; }
+
+    .doc-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+    .doc-card-left { display: flex; align-items: flex-start; gap: 12px; }
+    .doc-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .doc-icon .material-symbols-outlined { font-size: 22px; font-variation-settings: 'FILL' 1; }
+    .doc-name { font-size: 0.92rem; font-weight: 700; color: var(--text-main); }
+    .doc-sub  { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
+    .status-badge .material-symbols-outlined { font-size: 12px; font-variation-settings: 'FILL' 1; }
+    .s-action  { background: var(--rejected-bg); color: var(--rejected); }
+    .s-pending { background: var(--pending-bg);  color: var(--pending); }
+    .s-approved{ background: var(--approved-bg); color: var(--approved); }
+    .s-none    { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+
+    .doc-card-body { padding-top: 0.75rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .doc-req { font-size: 0.78rem; color: var(--text-muted); }
+    .doc-req strong { color: var(--text-main); font-weight: 600; display: block; margin-bottom: 2px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .doc-file { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--purple); font-weight: 500; }
+    .doc-file .material-symbols-outlined { font-size: 16px; }
+
+    /* Card action buttons */
+    .btn-upload { display: flex; align-items: center; gap: 6px; background: var(--purple); color: white; border: none; border-radius: 8px; padding: 9px 18px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+    .btn-upload:hover { opacity: 0.88; }
+    .btn-view { display: flex; align-items: center; gap: 6px; background: none; color: var(--purple); border: 1.5px solid var(--purple); border-radius: 8px; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .btn-view:hover { background: #F5EEFF; }
+    .btn-download { display: flex; align-items: center; gap: 6px; background: var(--approved); color: white; border: none; border-radius: 8px; padding: 9px 18px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; }
+    .btn-download:hover { opacity: 0.88; }
+    .btn-disabled { display: flex; align-items: center; gap: 6px; background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: not-allowed; white-space: nowrap; }
+    .btn-upload .material-symbols-outlined,
+    .btn-view .material-symbols-outlined,
+    .btn-download .material-symbols-outlined,
+    .btn-disabled .material-symbols-outlined { font-size: 16px; }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel { display: flex; flex-direction: column; gap: 1rem; position: sticky; top: 80px; }
+
+    /* Drop zone */
+    .drop-zone {
+      background: var(--white);
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: var(--purple); background: #F9F0FF; }
+    .drop-zone-icon {
+      width: 56px; height: 56px;
+      background: #F0EAF5;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+    }
+    .drop-zone-icon .material-symbols-outlined { font-size: 28px; color: var(--purple); font-variation-settings: 'FILL' 1; }
+    .drop-zone h3 { font-size: 0.95rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 6px; }
+    .drop-zone p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; }
+    .btn-select {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--purple); color: white; border: none; border-radius: 8px;
+      padding: 10px 20px; font-family: 'Inter', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-select:hover { opacity: 0.88; }
+    .drop-zone-or { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.75rem; }
+
+    /* Hidden file input */
+    #fileInput { display: none; }
+
+    /* Selected file preview */
+    .file-preview { display: none; align-items: center; gap: 8px; background: var(--surface); border-radius: 8px; padding: 10px 12px; margin-top: 0.75rem; }
+    .file-preview.visible { display: flex; }
+    .file-preview-name { font-size: 0.78rem; font-weight: 600; color: var(--text-main); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-preview-size { font-size: 0.68rem; color: var(--text-muted); }
+    .file-preview-remove { background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; padding: 0; transition: color 0.15s; }
+    .file-preview-remove:hover { color: var(--rejected); }
+    .file-preview-remove .material-symbols-outlined { font-size: 16px; }
+
+    /* Upload progress bar */
+    .upload-progress { display: none; margin-top: 0.75rem; }
+    .upload-progress.visible { display: block; }
+    .progress-bar-wrap { height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--green); border-radius: 100px; width: 0; transition: width 0.3s; }
+    .progress-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Guidelines */
+    .guidelines-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .guidelines-card h4 { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.9rem; }
+    .guideline-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 0.75rem; }
+    .guideline-item:last-child { margin-bottom: 0; }
+    .guideline-check { width: 22px; height: 22px; background: var(--approved-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .guideline-check .material-symbols-outlined { font-size: 13px; color: var(--approved); font-variation-settings: 'FILL' 1; }
+    .guideline-title { font-size: 0.8rem; font-weight: 600; color: var(--text-main); }
+    .guideline-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 1px; }
+
+    /* Help card */
+    .help-card {
+      background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 100%);
+      border-radius: 12px;
+      padding: 1.25rem;
+      color: white;
+    }
+    .help-card h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 4px; }
+    .help-card p { font-size: 0.75rem; color: rgba(255,255,255,0.7); line-height: 1.5; margin-bottom: 1rem; }
+    .btn-chat {
+      width: 100%; background: white; color: var(--purple-dark); border: none;
+      border-radius: 8px; padding: 9px; font-family: 'Inter', sans-serif;
+      font-size: 0.8rem; font-weight: 700; cursor: pointer; letter-spacing: 0.04em;
+      transition: opacity 0.2s;
+    }
+    .btn-chat:hover { opacity: 0.9; }
+
+    /* Toast notification */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: var(--approved); color: white;
+      border-radius: 10px; padding: 12px 18px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      z-index: 200;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast .material-symbols-outlined { font-size: 18px; font-variation-settings: 'FILL' 1; }
+
+    footer { padding: 1rem 2rem; text-align: center; font-size: 0.72rem; color: var(--text-muted); border-top: 1px solid var(--border); background: var(--white); }
+
+    @media (max-width: 1024px) {
+      .upload-layout { grid-template-columns: 1fr; }
+      .right-panel { position: static; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <span class="material-symbols-outlined">account_balance</span>
+    </div>
+    <div>
+      <div class="brand-name">MTU Clearance</div>
+      <div class="brand-sub">Student Portal</div>
+    </div>
+  </div>
+
+  <div class="sidebar-profile">
+    <div class="profile-avatar">OJ</div>
+    <div>
+      <div class="profile-name">Odunukwe C. Jordan</div>
+      <div class="profile-matric">MTU/CSC/2021/001</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a href="student-dashboard.html" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>
+      Dashboard
+    </a>
+    <a href="clearance-tracking.html" class="nav-item">
+      <span class="material-symbols-outlined">fact_check</span>
+      Clearance Status
+      <span class="nav-badge">1</span>
+    </a>
+    <a href="document-upload.html" class="nav-item active">
+      <span class="material-symbols-outlined">upload_file</span>
+      Document Uploads
+    </a>
+    <a href="final-certificate.html" class="nav-item">
+      <span class="material-symbols-outlined">workspace_premium</span>
+      Final Certificate
+    </a>
+    <div class="nav-label" style="margin-top:0.5rem;">Account</div>
+    <a href="student-settings.html" class="nav-item">
+      <span class="material-symbols-outlined">settings</span>
+      Settings
+    </a>
+    <a href="student-help.html" class="nav-item">
+      <span class="material-symbols-outlined">help</span>
+      Help Center
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger">
+      <span class="material-symbols-outlined">logout</span>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <span class="topbar-title">MTU Clearance Portal</span>
+    <div class="search-bar">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" placeholder="Search documents..." />
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">help</span>
+      </button>
+      <div class="profile-avatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <div class="page-heading">
+      <h1>Document Management</h1>
+      <p>Upload and manage your required academic documents. Ensure all files meet the specified university guidelines for verification.</p>
+    </div>
+
+    <div class="upload-layout">
+
+      <!-- ── DOCUMENT LIST ── -->
+      <div class="doc-list">
+
+        <!-- 1. Bursary — Action Needed -->
+        <div class="doc-card action-needed">
+          <div class="doc-card-top">
+            <div class="doc-card-left">
+              <div class="doc-icon" style="background:var(--rejected-bg);">
+                <span class="material-symbols-outlined" style="color:var(--rejected);">account_balance_wallet</span>
+              </div>
+              <div>
+                <div class="doc-name">Bursary: School Fee Receipt</div>
+                <div class="doc-sub">Academic Session 2023/2024</div>
+              </div>
+            </div>
+            <span class="status-badge s-action">
+              <span class="material-symbols-outlined">error</span>
+              Action Needed
+            </span>
+          </div>
+          <div class="doc-card-body">
+            <div class="doc-req">
+              <strong>Requirement</strong>
+              Official digital receipt (PDF, max 5MB)
+            </div>
+            <button class="btn-upload" onclick="triggerUpload('bursary')">
+              <span class="material-symbols-outlined">upload</span>
+              Upload Now
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. HOD — Pending Review -->
+        <div class="doc-card pending">
+          <div class="doc-card-top">
+            <div class="doc-card-left">
+              <div class="doc-icon" style="background:#F0EAF5;">
+                <span class="material-symbols-outlined" style="color:var(--purple);">inventory_2</span>
+              </div>
+              <div>
+                <div class="doc-name">HOD: Project CD / Soft Copy</div>
+                <div class="doc-sub">Final Year Project Repository</div>
+              </div>
+            </div>
+            <span class="status-badge s-pending">
+              <span class="material-symbols-outlined">hourglass_empty</span>
+              Pending Review
+            </span>
+          </div>
+          <div class="doc-card-body">
+            <div class="doc-req">
+              <strong>Uploaded File</strong>
+              <span class="doc-file">
+                <span class="material-symbols-outlined">folder_zip</span>
+                My_Project_Final.zip (12.4 MB)
+              </span>
+            </div>
+            <button class="btn-view">
+              <span class="material-symbols-outlined">visibility</span>
+              View Submission
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. CEDGS — Approved -->
+        <div class="doc-card approved">
+          <div class="doc-card-top">
+            <div class="doc-card-left">
+              <div class="doc-icon" style="background:var(--approved-bg);">
+                <span class="material-symbols-outlined" style="color:var(--approved);">workspace_premium</span>
+              </div>
+              <div>
+                <div class="doc-name">CEDGS: Poise / Entrepreneurship Proof</div>
+                <div class="doc-sub">Certificate of Completion</div>
+              </div>
+            </div>
+            <span class="status-badge s-approved">
+              <span class="material-symbols-outlined">check_circle</span>
+              Approved
+            </span>
+          </div>
+          <div class="doc-card-body">
+            <div class="doc-req">
+              <strong>Verification Date</strong>
+              Sept 12, 2023
+            </div>
+            <button class="btn-download">
+              <span class="material-symbols-outlined">download</span>
+              Download Receipt
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Chapel — Action Needed -->
+        <div class="doc-card action-needed">
+          <div class="doc-card-top">
+            <div class="doc-card-left">
+              <div class="doc-icon" style="background:var(--flagged-bg);">
+                <span class="material-symbols-outlined" style="color:var(--flagged);">church</span>
+              </div>
+              <div>
+                <div class="doc-name">Chapel: Attendance Clearance Form</div>
+                <div class="doc-sub">Chaplaincy Unit — 2023/2024</div>
+              </div>
+            </div>
+            <span class="status-badge s-action">
+              <span class="material-symbols-outlined">flag</span>
+              Flagged
+            </span>
+          </div>
+          <div class="doc-card-body">
+            <div class="doc-req">
+              <strong>Requirement</strong>
+              Signed attendance clearance letter from Chaplain (PDF)
+            </div>
+            <button class="btn-upload" onclick="triggerUpload('chapel')">
+              <span class="material-symbols-outlined">upload</span>
+              Upload Letter
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. Alumni — Not Started -->
+        <div class="doc-card not-started">
+          <div class="doc-card-top">
+            <div class="doc-card-left">
+              <div class="doc-icon" style="background:var(--surface);">
+                <span class="material-symbols-outlined" style="color:var(--text-muted);">groups</span>
+              </div>
+              <div>
+                <div class="doc-name">Alumni: Alumni Fee Payment Proof</div>
+                <div class="doc-sub">Graduating Class Contributions</div>
+              </div>
+            </div>
+            <span class="status-badge s-none">
+              <span class="material-symbols-outlined">remove_circle</span>
+              Not Started
+            </span>
+          </div>
+          <div class="doc-card-body">
+            <div class="doc-req">
+              <strong>Requirement</strong>
+              Payment must be cleared first
+            </div>
+            <button class="btn-disabled" disabled>
+              <span class="material-symbols-outlined">lock</span>
+              Upload Disabled
+            </button>
+          </div>
+        </div>
+
+        <!-- 6. Library — Not Started -->
+        <div class="doc-card not-started">
+          <div class="doc-card-top">
+            <div class="doc-card-left">
+              <div class="doc-icon" style="background:var(--surface);">
+                <span class="material-symbols-outlined" style="color:var(--text-muted);">menu_book</span>
+              </div>
+              <div>
+                <div class="doc-name">Library: Book Return Confirmation</div>
+                <div class="doc-sub">University Library Clearance</div>
+              </div>
+            </div>
+            <span class="status-badge s-none">
+              <span class="material-symbols-outlined">lock</span>
+              Locked
+            </span>
+          </div>
+          <div class="doc-card-body">
+            <div class="doc-req">
+              <strong>Locked Until</strong>
+              CEDGS, HOD &amp; College Officer clearances met (all approved — unlocks after Chapel resolved)
+            </div>
+            <button class="btn-disabled" disabled>
+              <span class="material-symbols-outlined">lock</span>
+              Upload Disabled
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /doc-list -->
+
+      <!-- ── RIGHT PANEL ── -->
+      <div class="right-panel">
+
+        <!-- Drop zone -->
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <div class="drop-zone-icon">
+            <span class="material-symbols-outlined">cloud_upload</span>
+          </div>
+          <h3>Drop your file here</h3>
+          <p>Select a document from your device to begin the verification process.</p>
+          <button class="btn-select" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+            <span class="material-symbols-outlined" style="font-size:16px;">folder_open</span>
+            Select Document
+          </button>
+          <div class="drop-zone-or">or drag and drop here</div>
+
+          <!-- File preview -->
+          <div class="file-preview" id="filePreview">
+            <span class="material-symbols-outlined" style="font-size:18px;color:var(--purple);">description</span>
+            <span class="file-preview-name" id="fileName">—</span>
+            <span class="file-preview-size" id="fileSize"></span>
+            <button class="file-preview-remove" onclick="event.stopPropagation(); clearFile()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <!-- Upload progress -->
+          <div class="upload-progress" id="uploadProgress">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-label" id="progressLabel">Uploading…</div>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" />
+
+        <!-- Guidelines -->
+        <div class="guidelines-card">
+          <h4>Upload Guidelines</h4>
+
+          <div class="guideline-item">
+            <div class="guideline-check">
+              <span class="material-symbols-outlined">check</span>
+            </div>
+            <div>
+              <div class="guideline-title">Valid Formats</div>
+              <div class="guideline-desc">PDF, JPEG, or PNG only. No .docx files.</div>
+            </div>
+          </div>
+
+          <div class="guideline-item">
+            <div class="guideline-check">
+              <span class="material-symbols-outlined">check</span>
+            </div>
+            <div>
+              <div class="guideline-title">Size Limit</div>
+              <div class="guideline-desc">Individual files must not exceed 5MB.</div>
+            </div>
+          </div>
+
+          <div class="guideline-item">
+            <div class="guideline-check">
+              <span class="material-symbols-outlined">check</span>
+            </div>
+            <div>
+              <div class="guideline-title">Legibility</div>
+              <div class="guideline-desc">Ensure scanned text is clear and fully readable.</div>
+            </div>
+          </div>
+
+          <div class="guideline-item">
+            <div class="guideline-check">
+              <span class="material-symbols-outlined">check</span>
+            </div>
+            <div>
+              <div class="guideline-title">Official Documents Only</div>
+              <div class="guideline-desc">Submit original university-issued documents. No edits or alterations.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help card -->
+        <div class="help-card">
+          <h4>Need help?</h4>
+          <p>Struggling with document verification? Our support team is online and ready to assist you.</p>
+          <button class="btn-chat">CHAT WITH SUPPORT</button>
+        </div>
+
+      </div><!-- /right-panel -->
+    </div><!-- /upload-layout -->
+
+  </div><!-- /content -->
+
+  <footer>
+    &copy; 2024 Mountain Top University &mdash; Academic Portal &nbsp;|&nbsp; Support: registrar@mtu.edu.ng
+  </footer>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="material-symbols-outlined">check_circle</span>
+  <span id="toastMsg">Document uploaded successfully!</span>
+</div>
+
+<script>
+  // ── File input handler ──
+  const fileInput = document.getElementById('fileInput');
+  const dropZone  = document.getElementById('dropZone');
+  const filePreview = document.getElementById('filePreview');
+  const fileName  = document.getElementById('fileName');
+  const fileSize  = document.getElementById('fileSize');
+  const uploadProgress = document.getElementById('uploadProgress');
+  const progressFill   = document.getElementById('progressFill');
+  const progressLabel  = document.getElementById('progressLabel');
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+  });
+
+  function handleFile(file) {
+    const maxMB = 5;
+    const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+
+    if (file.size > maxMB * 1024 * 1024) {
+      showToast('File exceeds 5MB limit. Please choose a smaller file.', false);
+      return;
+    }
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!allowed.includes(file.type)) {
+      showToast('Invalid format. Use PDF, JPEG, or PNG only.', false);
+      return;
+    }
+
+    fileName.textContent = file.name;
+    fileSize.textContent = `${sizeMB} MB`;
+    filePreview.classList.add('visible');
+
+    // Simulate upload progress
+    uploadProgress.classList.add('visible');
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 18;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        progressLabel.textContent = 'Upload complete!';
+        progressFill.style.background = 'var(--approved)';
+        showToast(`"${file.name}" uploaded successfully!`, true);
+      } else {
+        progressLabel.textContent = `Uploading… ${Math.round(progress)}%`;
+      }
+      progressFill.style.width = `${Math.min(progress, 100)}%`;
+    }, 120);
+  }
+
+  function clearFile() {
+    fileInput.value = '';
+    filePreview.classList.remove('visible');
+    uploadProgress.classList.remove('visible');
+    progressFill.style.width = '0';
+    progressFill.style.background = 'var(--green)';
+    progressLabel.textContent = 'Uploading…';
+  }
+
+  function triggerUpload(dept) {
+    document.getElementById('dropZone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    fileInput.click();
+  }
+
+  // ── Drag and drop ──
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  // ── Toast ──
+  function showToast(msg, success = true) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.style.background = success ? 'var(--approved)' : 'var(--rejected)';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3500);
+  }
+</script>
+</body>
+</html>

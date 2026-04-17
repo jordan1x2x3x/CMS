@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clearance Status | MTU Clearance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple:#6B0080; --purple-dark:#4A0058; --purple-light:#8B20A0;
+      --green:#76B82A; --green-dark:#5A8C20;
+      --surface:#F4F6F9; --white:#FFFFFF; --border:#E2E8F0;
+      --text-main:#1A0020; --text-muted:#64748B; --sidebar-w:260px;
+      --approved:#10B981; --approved-bg:#D1FAE5;
+      --pending:#F59E0B;  --pending-bg:#FEF3C7;
+      --flagged:#F97316;  --flagged-bg:#FFEDD5;
+      --rejected:#EF4444; --rejected-bg:#FEE2E2;
+    }
+    body { font-family:'Inter',sans-serif; background:var(--surface); color:var(--text-main); display:flex; min-height:100vh; }
+
+    /* SIDEBAR */
+    .sidebar { width:var(--sidebar-w); background:var(--purple-dark); display:flex; flex-direction:column; position:fixed; top:0; left:0; height:100vh; z-index:100; overflow-y:auto; }
+    .sidebar-brand { padding:1.5rem 1.25rem 1rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .brand-icon { width:38px; height:38px; background:var(--green); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; flex-shrink:0; }
+    .brand-icon .material-symbols-outlined { font-size:22px; font-variation-settings:'FILL' 1; }
+    .brand-name { font-family:'Newsreader',serif; font-size:0.95rem; font-weight:700; color:white; line-height:1.2; }
+    .brand-sub  { font-size:0.65rem; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:0.1em; }
+    .sidebar-profile { margin:1rem 1rem 0.5rem; background:rgba(255,255,255,0.07); border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
+    .profile-avatar { width:34px; height:34px; background:var(--purple-light); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:13px; font-weight:700; flex-shrink:0; }
+    .profile-name   { font-size:0.8rem; font-weight:600; color:white; }
+    .profile-matric { font-size:0.65rem; color:rgba(255,255,255,0.45); }
+    .sidebar-nav { padding:0.75rem; flex:1; display:flex; flex-direction:column; gap:2px; }
+    .nav-label { font-size:0.6rem; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.12em; padding:0.6rem 0.75rem 0.3rem; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.82rem; font-weight:500; transition:background 0.15s,color 0.15s; }
+    .nav-item .material-symbols-outlined { font-size:19px; flex-shrink:0; }
+    .nav-item:hover { background:rgba(255,255,255,0.07); color:white; }
+    .nav-item.active { background:var(--green); color:white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings:'FILL' 1; }
+    .nav-badge { margin-left:auto; background:var(--flagged); color:white; font-size:0.6rem; font-weight:700; padding:2px 6px; border-radius:100px; }
+    .sidebar-footer { padding:0.75rem; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:2px; }
+    .nav-item.danger { color:rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background:rgba(239,68,68,0.12); color:#FCA5A5; }
+
+    /* MAIN */
+    .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+    .topbar { background:var(--white); border-bottom:1px solid var(--border); padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+    .topbar-left h2 { font-family:'Newsreader',serif; font-size:1.1rem; font-weight:700; color:var(--purple-dark); }
+    .topbar-left p  { font-size:0.75rem; color:var(--text-muted); }
+    .topbar-right { display:flex; align-items:center; gap:12px; }
+    .icon-btn { width:38px; height:38px; border-radius:50%; border:none; background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted); position:relative; transition:background 0.15s; }
+    .icon-btn:hover { background:var(--border); }
+    .icon-btn .material-symbols-outlined { font-size:20px; }
+    .notif-dot { position:absolute; top:7px; right:7px; width:8px; height:8px; background:var(--flagged); border-radius:50%; border:2px solid white; }
+
+    /* CONTENT */
+    .content { padding:2rem; flex:1; }
+    .page-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:1.75rem; gap:1rem; flex-wrap:wrap; }
+    .page-header h1 { font-family:'Newsreader',serif; font-size:1.6rem; font-weight:700; color:var(--purple-dark); }
+    .page-header p  { font-size:0.82rem; color:var(--text-muted); margin-top:3px; max-width:480px; }
+    .completion-chip { display:flex; align-items:center; gap:12px; background:var(--white); border:1px solid var(--border); border-radius:10px; padding:12px 18px; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+    .completion-pct { font-family:'Newsreader',serif; font-size:1.8rem; font-weight:700; color:var(--purple); line-height:1; }
+    .completion-label { font-size:0.65rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; }
+
+    /* LAYOUT */
+    .tracking-layout { display:grid; grid-template-columns:300px 1fr; gap:1.25rem; align-items:start; }
+
+    /* STEPPER */
+    .stepper-card { background:var(--white); border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); position:sticky; top:80px; max-height:calc(100vh - 120px); display:flex; flex-direction:column; }
+    .stepper-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .stepper-header h3 { font-size:0.85rem; font-weight:700; color:var(--text-main); }
+    .stepper-header p  { font-size:0.72rem; color:var(--text-muted); margin-top:2px; }
+    .stepper-list { padding:0.75rem 1rem; display:flex; flex-direction:column; gap:0; overflow-y:auto; flex:1; }
+
+    .stepper-item {
+      display:flex; align-items:flex-start; gap:10px;
+      padding:8px 6px; border-radius:8px;
+      cursor:pointer; position:relative;
+      transition:background 0.12s;
+    }
+    .stepper-item:hover { background:var(--surface); }
+    .stepper-item.selected { background:#F5EEFF; }
+    .stepper-item:not(:last-child)::after {
+      content:''; position:absolute; left:17px; top:34px;
+      width:2px; height:calc(100% - 10px); background:var(--border); z-index:0;
+    }
+    .stepper-item.s-approved:not(:last-child)::after { background:var(--approved); }
+
+    .stepper-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative; z-index:1; }
+    .stepper-dot .material-symbols-outlined { font-size:14px; }
+    .s-approved .stepper-dot { background:var(--approved); color:white; }
+    .s-approved .stepper-dot .material-symbols-outlined { font-variation-settings:'FILL' 1; }
+    .s-flagged  .stepper-dot { background:var(--flagged); color:white; }
+    .s-pending  .stepper-dot { background:var(--pending); color:white; }
+    .s-locked   .stepper-dot { background:var(--border); color:var(--text-muted); }
+    .s-na       .stepper-dot { background:#E2E8F0; color:var(--text-muted); }
+
+    .stepper-info { flex:1; min-width:0; padding-top:4px; }
+    .stepper-name { font-size:0.78rem; font-weight:600; color:var(--text-main); line-height:1.3; }
+    .s-locked .stepper-name, .s-na .stepper-name { color:var(--text-muted); }
+    .stepper-badge { display:inline-block; font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; padding:2px 7px; border-radius:100px; margin-top:3px; }
+    .b-approved { background:var(--approved-bg); color:var(--approved); }
+    .b-flagged  { background:var(--flagged-bg);  color:var(--flagged); }
+    .b-pending  { background:var(--pending-bg);  color:var(--pending); }
+    .b-locked   { background:#F0EAF5; color:var(--purple-light); }
+    .b-na       { background:#F1F5F9; color:var(--text-muted); }
+
+    /* DETAIL PANEL */
+    .detail-col { display:flex; flex-direction:column; gap:1.25rem; }
+
+    /* Detail card */
+    .detail-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+    .detail-card.border-flagged  { border-left:4px solid var(--flagged); }
+    .detail-card.border-approved { border-left:4px solid var(--approved); }
+    .detail-card.border-pending  { border-left:4px solid var(--pending); }
+    .detail-card.border-locked   { border-left:4px solid var(--border); }
+    .detail-card.border-na       { border-left:4px solid #CBD5E1; }
+
+    .detail-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
+    .detail-tag { font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; }
+    .detail-title { font-family:'Newsreader',serif; font-size:1.25rem; font-weight:700; color:var(--text-main); margin-top:3px; }
+    .detail-icon .material-symbols-outlined { font-size:32px; font-variation-settings:'FILL' 1; }
+
+    .issue-box { border-radius:8px; padding:1rem; margin-bottom:1rem; }
+    .issue-row { display:flex; gap:8px; align-items:baseline; font-size:0.82rem; margin-bottom:6px; }
+    .issue-row:last-child { margin-bottom:0; }
+    .issue-row strong { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; flex-shrink:0; }
+
+    .req-list { display:flex; flex-direction:column; gap:8px; margin-bottom:1rem; }
+    .req-item { display:flex; align-items:flex-start; gap:8px; font-size:0.8rem; color:var(--text-muted); }
+    .req-item .material-symbols-outlined { font-size:15px; flex-shrink:0; margin-top:1px; font-variation-settings:'FILL' 1; }
+    .req-check   { color:var(--approved); }
+    .req-pending { color:var(--pending); }
+    .req-cross   { color:var(--rejected); }
+    .req-lock    { color:var(--purple-light); }
+
+    .action-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .btn-primary-action { background:var(--purple); color:white; border:none; border-radius:8px; padding:10px 20px; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; transition:opacity 0.2s; }
+    .btn-primary-action:hover { opacity:0.88; }
+    .btn-primary-action.green { background:var(--green); }
+    .btn-primary-action.orange { background:var(--flagged); }
+    .btn-secondary-action { background:none; border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-family:'Inter',sans-serif; font-size:0.82rem; font-weight:600; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; gap:6px; transition:border-color 0.2s,color 0.2s; }
+    .btn-secondary-action:hover { border-color:var(--purple); color:var(--purple); }
+
+    .info-note { background:var(--surface); border-radius:8px; padding:10px 14px; font-size:0.78rem; color:var(--text-muted); line-height:1.6; margin-top:0.75rem; }
+    .info-note strong { color:var(--text-main); }
+
+    /* Grad card */
+    .grad-card { background:linear-gradient(135deg,var(--purple-dark),var(--purple)); border-radius:12px; padding:1.5rem; color:white; position:relative; overflow:hidden; }
+    .grad-card::after { content:''; position:absolute; top:-30px; right:-30px; width:140px; height:140px; background:rgba(255,255,255,0.06); border-radius:50%; }
+    .grad-card h4 { font-family:'Newsreader',serif; font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+    .grad-card p  { font-size:0.8rem; color:rgba(255,255,255,0.7); line-height:1.6; }
+
+    footer { padding:1rem 2rem; text-align:center; font-size:0.72rem; color:var(--text-muted); border-top:1px solid var(--border); background:var(--white); }
+
+    @media (max-width:1100px) { .tracking-layout { grid-template-columns:1fr; } .stepper-card { position:static; max-height:none; } }
+    @media (max-width:768px)  { .sidebar { transform:translateX(-100%); } .main { margin-left:0; } }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon"><span class="material-symbols-outlined">account_balance</span></div>
+    <div><div class="brand-name">MTU Clearance</div><div class="brand-sub">Student Portal</div></div>
+  </div>
+  <div class="sidebar-profile">
+    <div class="profile-avatar">OJ</div>
+    <div><div class="profile-name">Odunukwe C. Jordan</div><div class="profile-matric">MTU/CSC/2021/001</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a href="student-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="clearance-tracking.html" class="nav-item active"><span class="material-symbols-outlined">fact_check</span>Clearance Status<span class="nav-badge">1</span></a>
+    <a href="document-upload.html" class="nav-item"><span class="material-symbols-outlined">upload_file</span>Document Uploads</a>
+    <a href="final-certificate.html" class="nav-item"><span class="material-symbols-outlined">workspace_premium</span>Final Certificate</a>
+    <div class="nav-label" style="margin-top:0.5rem;">Account</div>
+    <a href="student-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+    <a href="student-help.html" class="nav-item"><span class="material-symbols-outlined">help</span>Help Center</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h2>Clearance Status</h2>
+      <p>Track your progress across all 15 departments</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn"><span class="material-symbols-outlined">notifications</span><span class="notif-dot"></span></button>
+      <div class="profile-avatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <h1>Progress Tracker</h1>
+        <p>Click any department in the stepper to view its requirements and status details.</p>
+      </div>
+      <div class="completion-chip">
+        <div><div class="completion-label">Total Completion</div><div class="completion-pct">53%</div></div>
+        <span class="material-symbols-outlined" style="font-size:32px;color:var(--purple);font-variation-settings:'FILL' 1;">verified</span>
+      </div>
+    </div>
+
+    <div class="tracking-layout">
+
+      <!-- STEPPER -->
+      <div class="stepper-card">
+        <div class="stepper-header">
+          <h3>All Departments (15)</h3>
+          <p>Click a department to view details</p>
+        </div>
+        <div class="stepper-list" id="stepperList"></div>
+      </div>
+
+      <!-- DETAIL PANEL -->
+      <div class="detail-col" id="detailPanel"></div>
+
+    </div>
+  </div>
+
+  <footer>&copy; 2024 Mountain Top University &mdash; Academic Portal &nbsp;|&nbsp; Support: registrar@mtu.edu.ng</footer>
+</div>
+
+<script>
+const DEPTS = [
+  {
+    id:'hod', name:'Head of Department (HOD)', status:'approved', icon:'school',
+    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
+    requirements:[
+      {done:true,  text:'4 bonded project copies submitted'},
+      {done:true,  text:'4 CDs with digital thesis'},
+      {done:true,  text:'Plagiarism result verified (<15%)'},
+      {done:true,  text:'HOD & Supervisor signatures obtained'},
+    ],
+    note:'Cleared on July 14, 2024. No further action required.',
+    actions:[],
+  },
+  {
+    id:'cedgs', name:'CEDGS', status:'approved', icon:'payments',
+    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
+    requirements:[
+      {done:true, text:'CEDGS fee payment confirmed'},
+      {done:true, text:'HOD signature verified'},
+      {done:true, text:'Poise/Entrepreneurship fee proof submitted'},
+    ],
+    note:'Cleared on July 10, 2024.',
+    actions:[],
+  },
+  {
+    id:'lab', name:'Lab Instructor', status:'approved', icon:'science',
+    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
+    requirements:[
+      {done:true, text:'No damaged or missing lab equipment confirmed'},
+      {done:true, text:'Lab access card returned'},
+    ],
+    note:'No equipment damage recorded. Cleared on July 8, 2024.',
+    actions:[],
+  },
+  {
+    id:'college', name:'College Officer', status:'approved', icon:'corporate_fare',
+    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
+    requirements:[
+      {done:true, text:'HOD signature verified (prerequisite met)'},
+      {done:true, text:'College officer review completed'},
+    ],
+    note:'Cleared on July 11, 2024.',
+    actions:[],
+  },
+  {
+    id:'chapel', name:'University Chapel', status:'flagged', icon:'church',
+    tag:'Flagged — Action Required', tagClass:'b-flagged', borderClass:'border-flagged', tagColor:'var(--flagged)',
+    issue:{
+      label:'Chapel Attendance',
+      rows:[
+        {k:'Issue',       v:'Chapel attendance shows 14 misses — exceeds the 10-miss limit.'},
+        {k:'Requirement', v:'Maximum of 10 chapel session misses allowed for clearance.'},
+        {k:'Next Step',   v:'Visit the Chaplaincy Unit with your ID card or contact the Chapel officer.'},
+      ],
+      bg:'var(--flagged-bg)', color:'#92400E',
+    },
+    requirements:[
+      {done:false, text:'Chapel attendance within allowed limit (≤10 misses)'},
+      {done:false, text:'Signed clearance letter from Chaplain (if exemption applies)'},
+    ],
+    actions:[
+      {label:'Resolve Issue', icon:'open_in_new', style:'orange'},
+      {label:'Contact Chaplaincy', icon:'mail', style:'secondary'},
+    ],
+  },
+  {
+    id:'health', name:'Health Centre', status:'approved', icon:'local_hospital',
+    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
+    requirements:[
+      {done:true, text:'No outstanding medical bills or damages'},
+      {done:true, text:'Health centre records reviewed'},
+    ],
+    note:'Cleared on July 9, 2024.',
+    actions:[],
+  },
+  {
+    id:'sport', name:'Sport Unit', status:'approved', icon:'sports',
+    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
+    requirements:[
+      {done:true, text:'No sport equipment damage or loss'},
+      {done:true, text:'Sport unit clearance signed off'},
+    ],
+    note:'Cleared on July 9, 2024.',
+    actions:[],
+  },
+  {
+    id:'hall', name:'Hall of Residence', status:'approved', icon:'home',
+    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
+    requirements:[
+      {done:true, text:'No property damage recorded'},
+      {done:true, text:'Room key returned'},
+      {done:true, text:'Hostel dues fully paid'},
+    ],
+    note:'Cleared on July 7, 2024. Required by Student Affairs before they can clear you.',
+    actions:[],
+  },
+  {
+    id:'ict', name:'ICT Unit', status:'pending', icon:'computer',
+    tag:'Pending Review', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
+    requirements:[
+      {done:true,  text:'HOD signature verified (prerequisite met)'},
+      {done:false, text:'ICT officer review completed'},
+    ],
+    note:'Request submitted July 15, 2024. Estimated review: 1–2 working days.',
+    actions:[
+      {label:'View Submission', icon:'visibility', style:'secondary'},
+    ],
+  },
+  {
+    id:'alumni', name:'Alumni Association', status:'pending', icon:'groups',
+    tag:'Pending Review', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
+    requirements:[
+      {done:false, text:'Alumni fee payment proof uploaded'},
+      {done:false, text:'Alumni association review completed'},
+    ],
+    note:'Upload your alumni fee payment receipt to proceed.',
+    actions:[
+      {label:'Upload Payment Proof', icon:'upload', style:'primary'},
+    ],
+  },
+  {
+    id:'affairs', name:'Student Affairs', status:'pending', icon:'diversity_3',
+    tag:'Pending Review', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
+    requirements:[
+      {done:true,  text:'Hall of Residence clearance obtained (prerequisite met)'},
+      {done:false, text:'Student Affairs officer review completed'},
+    ],
+    note:'Awaiting Student Affairs officer review. Prerequisite (Hostel clearance) is met.',
+    actions:[],
+  },
+  {
+    id:'library', name:'University Library', status:'locked', icon:'menu_book',
+    tag:'Locked', tagClass:'b-locked', borderClass:'border-locked', tagColor:'var(--purple-light)',
+    requirements:[
+      {lock:true, text:'All borrowed books returned'},
+      {lock:true, text:'Library fines fully paid'},
+    ],
+    note:'🔒 Requires CEDGS, HOD & College Officer clearances (all met) + Chapel (flagged). Resolve Chapel first to unlock Library.',
+    actions:[],
+  },
+  {
+    id:'bursary', name:'Bursary Unit', status:'locked', icon:'account_balance_wallet',
+    tag:'Locked', tagClass:'b-locked', borderClass:'border-locked', tagColor:'var(--purple-light)',
+    requirements:[
+      {lock:true, text:'School fees receipt (final session) uploaded'},
+      {lock:true, text:'No outstanding debt confirmed'},
+    ],
+    note:'🔒 Final debt check. Available after Library clearance is obtained.',
+    actions:[],
+  },
+  {
+    id:'esm', name:'ESM Unit (Ensemble for Spiritual Music)', status:'pending', icon:'music_note',
+    tag:'Pending', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
+    requirements:[
+      {done:false, text:'Attend all mandatory ESM sessions for the semester'},
+      {done:false, text:'Obtain ESM clearance form from the ESM Office'},
+      {done:false, text:'ESM Coordinator signature on clearance form'},
+      {done:false, text:'Submit signed form to the Student Affairs portal'},
+    ],
+    note:'ESM (Ensemble for Spiritual Music) is a mandatory general course for all students regardless of department or programme. Every student must obtain ESM clearance before graduation or withdrawal.',
+    actions:['Visit ESM Office', 'Upload Clearance Form'],
+  },
+  {
+    id:'academic', name:'Academic Affairs (Registrar)', status:'locked', icon:'verified',
+    tag:'Locked — Final Step', tagClass:'b-locked', borderClass:'border-locked', tagColor:'var(--purple-light)',
+    requirements:[
+      {lock:true, text:'All 14 departments fully cleared'},
+      {lock:true, text:'Final verification by Registrar'},
+      {lock:true, text:'Clearance certificate generated'},
+    ],
+    note:'🔒 This is the final step. All other departments must be approved before Academic Affairs can clear you.',
+    actions:[],
+  },
+];
+
+const STATUS_DOT = {
+  approved: {cls:'s-approved', icon:'check'},
+  flagged:  {cls:'s-flagged',  icon:'priority_high'},
+  pending:  {cls:'s-pending',  icon:'schedule'},
+  locked:   {cls:'s-locked',   icon:'lock'},
+  na:       {cls:'s-na',       icon:'remove'},
+};
+
+let selected = 4; // default: Chapel (flagged)
+
+function renderStepper() {
+  const list = document.getElementById('stepperList');
+  list.innerHTML = DEPTS.map((d, i) => {
+    const dot = STATUS_DOT[d.status];
+    const isSelected = i === selected;
+    return `
+      <div class="stepper-item ${dot.cls} ${isSelected ? 'selected' : ''}" onclick="selectDept(${i})">
+        <div class="stepper-dot"><span class="material-symbols-outlined">${dot.icon}</span></div>
+        <div class="stepper-info">
+          <div class="stepper-name">${i+1}. ${d.name}</div>
+          <span class="stepper-badge ${d.tagClass}">${d.tag}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderDetail(i) {
+  const d = DEPTS[i];
+  const panel = document.getElementById('detailPanel');
+
+  let issueHTML = '';
+  if (d.issue) {
+    const rows = d.issue.rows.map(r =>
+      `<div class="issue-row"><strong style="color:${d.issue.color||'inherit'}">${r.k}:</strong><span>${r.v}</span></div>`
+    ).join('');
+    issueHTML = `<div class="issue-box" style="background:${d.issue.bg}">${rows}</div>`;
+  }
+
+  const reqHTML = d.requirements.map(r => {
+    const iconCls = r.lock ? 'req-lock' : r.done ? 'req-check' : 'req-pending';
+    const icon    = r.lock ? 'lock' : r.done ? 'check_circle' : 'radio_button_unchecked';
+    return `<div class="req-item"><span class="material-symbols-outlined ${iconCls}">${icon}</span>${r.text}</div>`;
+  }).join('');
+
+  const actHTML = d.actions.map(a => {
+    if (a.style === 'secondary') {
+      return `<button class="btn-secondary-action"><span class="material-symbols-outlined" style="font-size:16px;">${a.icon}</span>${a.label}</button>`;
+    }
+    const cls = a.style === 'orange' ? 'orange' : a.style === 'green' ? 'green' : '';
+    return `<button class="btn-primary-action ${cls}"><span class="material-symbols-outlined" style="font-size:16px;">${a.icon}</span>${a.label}</button>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="detail-card ${d.borderClass}">
+      <div class="detail-top">
+        <div>
+          <div class="detail-tag" style="color:${d.tagColor}">${d.tag}</div>
+          <div class="detail-title">${d.name}</div>
+        </div>
+        <div class="detail-icon" style="color:${d.tagColor}">
+          <span class="material-symbols-outlined">${d.icon}</span>
+        </div>
+      </div>
+      ${issueHTML}
+      ${d.requirements.length ? `<div class="req-list">${reqHTML}</div>` : ''}
+      ${d.note ? `<div class="info-note">${d.note}</div>` : ''}
+      ${actHTML ? `<div class="action-row" style="margin-top:1rem;">${actHTML}</div>` : ''}
+    </div>
+    <div class="grad-card">
+      <h4>Graduation Eligibility</h4>
+      <p>Once all 15 departments show the green "Approved" badge, your final clearance certificate will be automatically generated and available for download on the Final Certificate page.</p>
+    </div>`;
+}
+
+function selectDept(i) {
+  selected = i;
+  renderStepper();
+  renderDetail(i);
+  document.getElementById('detailPanel').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// Init — honour ?dept=N from dashboard links
+const _deptParam = new URLSearchParams(location.search).get('dept');
+if (_deptParam !== null) {
+  const _idx = parseInt(_deptParam, 10);
+  if (!isNaN(_idx) && _idx >= 0 && _idx < DEPTS.length) selected = _idx;
+}
+renderStepper();
+renderDetail(selected);
+</script>
+</body>
+</html>

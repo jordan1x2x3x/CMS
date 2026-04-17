@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Help Center — MTU CMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080;
+      --purple-dark: #4a0059;
+      --purple-mid: #8b00a8;
+      --green: #76B82A;
+      --green-dark: #5a8d1e;
+      --approved: #10B981;
+      --pending: #F59E0B;
+      --flagged: #F97316;
+      --rejected: #EF4444;
+      --bg: #F4F6FA;
+      --surface: #FFFFFF;
+      --text: #1A1A2E;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .profile-chip { margin: 0.75rem; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 0.65rem 0.75rem; display: flex; align-items: center; gap: 10px; }
+    .profile-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .profile-name { color: white; font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-role { color: rgba(255,255,255,0.5); font-size: 0.65rem; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 2px; }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    /* Main */
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 36px; height: 36px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: background 0.15s; }
+    .icon-btn:hover { background: var(--border); }
+    .icon-btn .material-symbols-outlined { font-size: 20px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    .content { padding: 2rem; flex: 1; }
+
+    /* Search */
+    .help-hero { background: linear-gradient(135deg, var(--purple-dark), var(--purple)); border-radius: 16px; padding: 2.5rem 2rem; text-align: center; color: white; margin-bottom: 2rem; }
+    .help-hero h2 { font-family: 'Newsreader', serif; font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .help-hero p { font-size: 0.85rem; opacity: 0.75; margin-bottom: 1.5rem; }
+    .search-wrap { position: relative; max-width: 480px; margin: 0 auto; }
+    .search-wrap .material-symbols-outlined { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 20px; pointer-events: none; }
+    .search-input { width: 100%; padding: 12px 16px 12px 44px; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.88rem; outline: none; color: var(--text); }
+    .search-input:focus { box-shadow: 0 0 0 3px rgba(118,184,42,0.4); }
+
+    /* Quick links */
+    .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .quick-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; text-decoration: none; color: inherit; }
+    .quick-card:hover { border-color: var(--purple); box-shadow: 0 4px 16px rgba(107,0,128,0.08); }
+    .quick-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(107,0,128,0.08); color: var(--purple); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; }
+    .quick-icon .material-symbols-outlined { font-size: 22px; }
+    .quick-card h4 { font-size: 0.82rem; font-weight: 600; margin-bottom: 3px; }
+    .quick-card p { font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
+
+    /* FAQ */
+    .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+    .faq-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 2rem; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .faq-q { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: background 0.15s; gap: 1rem; }
+    .faq-q:hover { background: var(--bg); }
+    .faq-q .material-symbols-outlined { font-size: 18px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+    .faq-item.open .faq-q .material-symbols-outlined { transform: rotate(180deg); }
+    .faq-a { display: none; padding: 0 1.25rem 1rem; font-size: 0.82rem; color: var(--muted); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+    .faq-item.open .faq-a { display: block; }
+    .faq-a a { color: var(--purple); text-decoration: none; font-weight: 500; }
+    .faq-a a:hover { text-decoration: underline; }
+
+    /* Contact cards */
+    .contact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .contact-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start; }
+    .contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .contact-icon .material-symbols-outlined { font-size: 20px; }
+    .contact-icon.green { background: rgba(118,184,42,0.1); color: var(--green-dark); }
+    .contact-icon.purple { background: rgba(107,0,128,0.08); color: var(--purple); }
+    .contact-icon.orange { background: rgba(249,115,22,0.1); color: var(--flagged); }
+    .contact-info h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 3px; }
+    .contact-info p { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+    .contact-info a { color: var(--purple); font-size: 0.75rem; text-decoration: none; font-weight: 500; }
+    .contact-info a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="brand-text">CMS Portal<span>Mountain Top University</span></div>
+  </div>
+  <div class="profile-chip">
+    <div class="profile-avatar">OJ</div>
+    <div class="profile-info">
+      <div class="profile-name">Odunukwe C. Jordan</div>
+      <div class="profile-role">Student · MTU/CSC/2021/001</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a href="student-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="clearance-tracking.html" class="nav-item"><span class="material-symbols-outlined">fact_check</span>Clearance Status<span class="nav-badge">1</span></a>
+    <a href="document-upload.html" class="nav-item"><span class="material-symbols-outlined">upload_file</span>Document Uploads</a>
+    <a href="final-certificate.html" class="nav-item"><span class="material-symbols-outlined">workspace_premium</span>Final Certificate</a>
+    <div class="nav-label" style="margin-top:0.5rem;">Account</div>
+    <a href="student-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+    <a href="student-help.html" class="nav-item active"><span class="material-symbols-outlined">help</span>Help Center</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Help Center</h1>
+      <p>Guides, FAQs, and support contacts</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <div class="topbar-avatar">OJ</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Hero Search -->
+    <div class="help-hero">
+      <h2>How can we help you?</h2>
+      <p>Search our guides or browse topics below</p>
+      <div class="search-wrap">
+        <span class="material-symbols-outlined">search</span>
+        <input class="search-input" type="text" placeholder="Search for help articles…" oninput="filterFAQ(this.value)" />
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="quick-grid">
+      <a href="clearance-tracking.html" class="quick-card">
+        <div class="quick-icon"><span class="material-symbols-outlined">fact_check</span></div>
+        <h4>Track My Clearance</h4>
+        <p>See which departments have approved or flagged you</p>
+      </a>
+      <a href="document-upload.html" class="quick-card">
+        <div class="quick-icon"><span class="material-symbols-outlined">upload_file</span></div>
+        <h4>Upload Documents</h4>
+        <p>Submit required supporting documents for departments</p>
+      </a>
+      <a href="student-dashboard.html" class="quick-card">
+        <div class="quick-icon"><span class="material-symbols-outlined">add_circle</span></div>
+        <h4>Submit Clearance Request</h4>
+        <p>Start a new graduation or withdrawal clearance</p>
+      </a>
+      <a href="final-certificate.html" class="quick-card">
+        <div class="quick-icon"><span class="material-symbols-outlined">workspace_premium</span></div>
+        <h4>Download Certificate</h4>
+        <p>Get your final clearance certificate when all cleared</p>
+      </a>
+      <a href="student-settings.html" class="quick-card">
+        <div class="quick-icon"><span class="material-symbols-outlined">lock_reset</span></div>
+        <h4>Reset Password</h4>
+        <p>Update your account password in Settings</p>
+      </a>
+      <a href="#faq" class="quick-card">
+        <div class="quick-icon"><span class="material-symbols-outlined">quiz</span></div>
+        <h4>FAQ</h4>
+        <p>Answers to the most common clearance questions</p>
+      </a>
+    </div>
+
+    <!-- FAQ -->
+    <div id="faq">
+      <div class="section-title">Frequently Asked Questions</div>
+      <div class="faq-list" id="faqList">
+
+        <div class="faq-item" data-q="how do i submit a clearance request">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            How do I submit a clearance request?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">Go to your <a href="student-dashboard.html">Dashboard</a> and click the <strong>Start Clearance Request</strong> button. Select your clearance type (Graduation or Withdrawal), read and accept the declaration, then submit. Your request will be distributed to all 15 departments automatically.</div>
+        </div>
+
+        <div class="faq-item" data-q="why is my chapel clearance flagged">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            Why is my Chapel clearance flagged?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">A flagged status from Chapel usually means outstanding chapel attendance or tithe records. Visit the <a href="clearance-tracking.html">Clearance Status</a> page, click on Chapel in the stepper, and follow the listed action steps — you may need to visit the Chapel Office in person or upload an attendance record.</div>
+        </div>
+
+        <div class="faq-item" data-q="what documents do i need to upload">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            What documents do I need to upload?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">Required documents vary by department. The <a href="document-upload.html">Document Uploads</a> page lists each document with its current status. Only documents marked <strong>Action Needed</strong> or <strong>Not Started</strong> require your attention. Accepted formats: PDF, JPEG, PNG (max 5MB each).</div>
+        </div>
+
+        <div class="faq-item" data-q="why can't i download my certificate">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            Why can't I download my certificate yet?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">Your final clearance certificate is only available after all 15 departments have approved your clearance. You currently have 1 flagged and several pending departments. Resolve the flagged Chapel issue first — visit <a href="clearance-tracking.html">Clearance Status</a> for details.</div>
+        </div>
+
+        <div class="faq-item" data-q="how long does department approval take">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            How long does department approval take?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">Processing times vary by department. Most departments process within 3–5 working days after submission. Departments like Library and Bursary may take longer if there are outstanding fees. If a department has not acted after 7 working days, contact the Registrar's Office.</div>
+        </div>
+
+        <div class="faq-item" data-q="i submitted a wrong document can i re-upload">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            I submitted a wrong document. Can I re-upload?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">Yes. Go to <a href="document-upload.html">Document Uploads</a>, find the relevant document card, and upload a corrected file. If the document was already approved, you will need to contact the relevant department officer to re-open the submission window.</div>
+        </div>
+
+        <div class="faq-item" data-q="what is the difference between graduation and withdrawal clearance">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            What is the difference between Graduation and Withdrawal clearance?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a"><strong>Graduation Clearance</strong> is for students who have completed their programme and are proceeding to receive their degree. <strong>Withdrawal Clearance</strong> is for students who are leaving the university before completing their programme. Both types require sign-off from all 15 departments.</div>
+        </div>
+
+        <div class="faq-item" data-q="i forgot my password how do i reset it">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            I forgot my password. How do I reset it?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">On the <a href="../login.html">Login page</a>, click <strong>Forgot password?</strong> and enter your institution email address. A reset link will be sent to your personal recovery email (if set) or your MTU email. You can also update your password directly from <a href="student-settings.html">Settings → Security</a>.</div>
+        </div>
+
+        <div class="faq-item" data-q="my matric number is wrong who do i contact">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            My matric number or academic record is incorrect. Who do I contact?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">Academic records (matric number, college, department, programme) are managed by the Registrar's Office and cannot be changed within the portal. Visit the Registrar's Office in person with your original admission letter and a valid student ID for corrections.</div>
+        </div>
+
+        <div class="faq-item" data-q="can i cancel or withdraw my clearance application">
+          <div class="faq-q" onclick="toggleFAQ(this)">
+            Can I cancel or withdraw my clearance application?
+            <span class="material-symbols-outlined">expand_more</span>
+          </div>
+          <div class="faq-a">Yes. Go to <a href="student-settings.html">Settings → Account</a> and click <strong>Withdraw Application</strong>. This will cancel your active clearance request. Note: departments that have already approved your request will need to re-approve if you re-apply.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Contact Support -->
+    <div class="section-title">Still need help?</div>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-icon purple"><span class="material-symbols-outlined">support_agent</span></div>
+        <div class="contact-info">
+          <h4>ICT Help Desk</h4>
+          <p>For portal access issues, login problems, and technical errors.</p>
+          <a href="mailto:ict@mtu.edu.ng">ict@mtu.edu.ng</a>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon green"><span class="material-symbols-outlined">school</span></div>
+        <div class="contact-info">
+          <h4>Registrar's Office</h4>
+          <p>For academic record corrections, clearance delays, and official queries.</p>
+          <a href="mailto:registrar@mtu.edu.ng">registrar@mtu.edu.ng</a>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon orange"><span class="material-symbols-outlined">location_on</span></div>
+        <div class="contact-info">
+          <h4>Walk-in Support</h4>
+          <p>Registrar's Office — Admin Block, Ground Floor<br />Mon – Fri: 8am – 4pm</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function toggleFAQ(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  function filterFAQ(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.faq-item').forEach(item => {
+      const text = item.dataset.q + ' ' + item.textContent.toLowerCase();
+      item.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>

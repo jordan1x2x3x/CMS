@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clearance Requests — MTU CMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A; --green-dark: #5a8d1e;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .dept-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .dept-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .dept-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .dept-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .dept-chip-role { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 2px; }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 36px; height: 36px; border: none; background: var(--bg); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+    .icon-btn .material-symbols-outlined { font-size: 20px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+    .content { padding: 2rem; flex: 1; }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap .material-symbols-outlined { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 18px; pointer-events: none; }
+    .search-input { width: 100%; padding: 9px 12px 9px 38px; border: 1.5px solid var(--border); border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.83rem; background: var(--surface); color: var(--text); outline: none; }
+    .search-input:focus { border-color: var(--purple); }
+    .filter-tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+    .filter-tab { padding: 6px 14px; border-radius: 8px; border: none; background: transparent; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: background 0.15s, color 0.15s; white-space: nowrap; }
+    .filter-tab.active { background: var(--purple); color: white; font-weight: 600; }
+    .select-filter { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-family: 'Inter', sans-serif; font-size: 0.8rem; background: var(--surface); color: var(--text); outline: none; cursor: pointer; }
+
+    /* ── Table ── */
+    .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 0.75rem 1.25rem; text-align: left; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; background: var(--bg); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(107,0,128,0.03); }
+    tbody td { padding: 0.9rem 1.25rem; font-size: 0.83rem; vertical-align: middle; }
+    .student-cell { display: flex; align-items: center; gap: 10px; }
+    .s-avatar { width: 36px; height: 36px; border-radius: 50%; color: white; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .s-name { font-weight: 600; }
+    .s-matric { font-size: 0.71rem; color: var(--muted); margin-top: 1px; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+    .badge-pending  { background: var(--pending-bg);  color: var(--pending); }
+    .badge-approved { background: var(--approved-bg); color: var(--approved); }
+    .badge-flagged  { background: var(--flagged-bg);  color: var(--flagged); }
+    .badge-rejected { background: var(--rejected-bg); color: var(--rejected); }
+    .clearance-type { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 600; }
+    .action-btn { padding: 5px 12px; border-radius: 7px; border: 1.5px solid var(--border); background: transparent; font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; color: var(--purple); border-color: rgba(107,0,128,0.25); transition: background 0.15s; }
+    .action-btn:hover { background: rgba(107,0,128,0.06); }
+    .table-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .table-footer-info { font-size: 0.75rem; color: var(--muted); }
+    .pagination { display: flex; gap: 4px; }
+    .page-btn { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border); background: transparent; font-family: 'Inter', sans-serif; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+    .page-btn.active { background: var(--purple); color: white; border-color: var(--purple); }
+    .page-btn:hover:not(.active) { border-color: var(--purple); color: var(--purple); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" style="width:100%;height:100%;object-fit:contain;" /></div>
+    <div class="brand-text">CMS Portal<span>Mountain Top University</span></div>
+  </div>
+  <div class="dept-chip">
+    <div class="dept-chip-label">Your Department</div>
+    <div class="dept-chip-name" id="deptChipName"><span class="material-symbols-outlined">church</span>University Chapel</div>
+    <div class="dept-chip-role">Department Officer</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <a href="officer-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="officer-requests.html" class="nav-item active"><span class="material-symbols-outlined">fact_check</span>Clearance Requests<span class="nav-badge">8</span></a>
+    <a href="officer-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Clearance Requests</h1>
+      <p id="topbarSub">University Chapel · 24 total requests</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+      <div class="topbar-avatar">CO</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined">search</span>
+        <input class="search-input" type="text" placeholder="Search by name or matric number…" oninput="filterTable(this.value)" />
+      </div>
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">All (24)</button>
+        <button class="filter-tab" onclick="setFilter('pending', this)">Pending (8)</button>
+        <button class="filter-tab" onclick="setFilter('flagged', this)">Flagged (3)</button>
+        <button class="filter-tab" onclick="setFilter('approved', this)">Approved (13)</button>
+        <button class="filter-tab" onclick="setFilter('rejected', this)">Rejected (0)</button>
+      </div>
+      <select class="select-filter" onchange="setTypeFilter(this.value)">
+        <option value="">All Types</option>
+        <option value="Graduation">Graduation</option>
+        <option value="Withdrawal">Withdrawal</option>
+      </select>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table id="reqTable">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Programme</th>
+              <th>Clearance Type</th>
+              <th>Submitted</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="reqBody">
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <div class="table-footer-info" id="tableInfo">Showing 24 of 24 requests</div>
+        <div class="pagination">
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn"><span class="material-symbols-outlined" style="font-size:14px;">chevron_right</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const REQUESTS = [
+  { id:1,  name:'Odunukwe C. Jordan',   matric:'MTU/CSC/2021/001', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 14, 2026', initials:'OJ', color:'#6B0080' },
+  { id:2,  name:'Adeyemi Miracle',       matric:'MTU/BCH/2021/014', programme:'B.Sc Biochemistry',               college:'CBAS', type:'Graduation', submitted:'Apr 13, 2026', initials:'AM', color:'#0e7490' },
+  { id:3,  name:'Eze Oluwaseun',         matric:'MTU/NRS/2021/007', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 13, 2026', initials:'EO', color:'#065f46' },
+  { id:4,  name:'Fashola Kehinde',       matric:'MTU/MLS/2021/022', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 12, 2026', initials:'FK', color:'#92400e' },
+  { id:5,  name:'Nwosu Blessing',        matric:'MTU/ECO/2021/031', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 11, 2026', initials:'NB', color:'#1e3a5f' },
+  { id:6,  name:'Ibrahim Aisha',         matric:'MTU/PHL/2020/008', programme:'B.A Philosophy',                  college:'CHMS', type:'Withdrawal', submitted:'Apr 10, 2026', initials:'IA', color:'#5b21b6' },
+  { id:7,  name:'Okonkwo David',         matric:'MTU/CSC/2021/019', programme:'B.Sc Software Engineering',       college:'CBAS', type:'Graduation', submitted:'Apr 09, 2026', initials:'OD', color:'#be185d' },
+  { id:8,  name:'Lawal Fatimah',         matric:'MTU/ACF/2021/005', programme:'B.Sc Accounting and Finance',     college:'CHMS', type:'Graduation', submitted:'Apr 09, 2026', initials:'LF', color:'#b45309' },
+  { id:9,  name:'Chukwu Emeka',          matric:'MTU/CSC/2020/003', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 08, 2026', initials:'CE', color:'#0f766e' },
+  { id:10, name:'Adeola Tunde',          matric:'MTU/PHY/2021/011', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Apr 07, 2026', initials:'AT', color:'#7c3aed' },
+  { id:11, name:'Bello Fatima',          matric:'MTU/NUT/2020/016', programme:'B.Sc Nutrition & Dietetics',      college:'CAHS', type:'Graduation', submitted:'Apr 06, 2026', initials:'BF', color:'#dc2626' },
+  { id:12, name:'Taiwo Samuel',          matric:'MTU/MCS/2021/009', programme:'B.Sc Mass Communication',         college:'CHMS', type:'Graduation', submitted:'Apr 05, 2026', initials:'TS', color:'#059669' },
+  { id:13, name:'Obi Grace',             matric:'MTU/BIO/2021/027', programme:'B.Sc Biological Sciences',        college:'CBAS', type:'Graduation', submitted:'Apr 05, 2026', initials:'OG', color:'#0369a1' },
+  { id:14, name:'Hassan Musa',           matric:'MTU/GEO/2021/033', programme:'B.Sc Geosciences',                college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'HM', color:'#4d7c0f' },
+  { id:15, name:'Amara Chisom',          matric:'MTU/CHM/2021/018', programme:'B.Sc Chemical Sciences',          college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'AC', color:'#9333ea' },
+  { id:16, name:'Daniels Victor',        matric:'MTU/BMT/2021/041', programme:'B.Sc Biomedical Technology',      college:'CAHS', type:'Graduation', submitted:'Apr 03, 2026', initials:'DV', color:'#c2410c' },
+  { id:17, name:'Yusuf Khadijat',        matric:'MTU/FST/2021/012', programme:'B.Sc Food Science & Technology',  college:'CBAS', type:'Graduation', submitted:'Apr 03, 2026', initials:'YK', color:'#0891b2' },
+  { id:18, name:'Nnamdi Peter',          matric:'MTU/ECO/2021/025', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'NP', color:'#65a30d' },
+  { id:19, name:'Oke Christiana',        matric:'MTU/PHL/2021/006', programme:'B.A Philosophy & Religion',       college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'OC', color:'#b91c1c' },
+  { id:20, name:'Adeleye Rotimi',        matric:'MTU/MLS/2021/038', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'AR', color:'#0f172a' },
+  { id:21, name:'Nnaji Chidinma',        matric:'MTU/NRS/2021/029', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'NC', color:'#92400e' },
+  { id:22, name:'Okeke Emmanuel',        matric:'MTU/CSC/2020/044', programme:'B.Sc Cyber Security',             college:'CBAS', type:'Withdrawal', submitted:'Mar 31, 2026', initials:'OE', color:'#312e81' },
+  { id:23, name:'Adeleke Rukayat',       matric:'MTU/BAD/2021/017', programme:'B.Sc Business Administration',   college:'CHMS', type:'Graduation', submitted:'Mar 30, 2026', initials:'AR', color:'#166534' },
+  { id:24, name:'Musa Hauwa',            matric:'MTU/PHY/2020/052', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Mar 29, 2026', initials:'MH', color:'#0c4a6e' },
+];
+
+let currentDept = 'chapel';
+let activeFilter = 'all';
+let activeType = '';
+let searchQuery = '';
+
+function getDeptStatus(studentId, dept) {
+  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+  const saved = decisions.find(d => d.studentId === studentId && d.dept === dept);
+  if (saved) return saved.status;
+  const chapelMap = {
+    1:'flagged', 2:'pending', 3:'pending', 4:'pending', 5:'pending',
+    6:'pending', 7:'pending', 8:'pending', 9:'flagged', 10:'flagged',
+    11:'rejected', 12:'approved', 13:'approved', 14:'approved', 15:'approved',
+    16:'approved', 17:'approved', 18:'approved', 19:'approved', 20:'approved',
+    21:'approved', 22:'approved', 23:'approved', 24:'approved'
+  };
+  if (dept === 'chapel') return chapelMap[studentId] || 'pending';
+  const seeds = {hod:3,cedgs:7,lab:11,college:17,health:19,sport:23,hall:29,ict:31,alumni:37,affairs:41,library:43,bursary:47,esm:53,academic:59};
+  const v = (studentId * (seeds[dept] || 13)) % 97;
+  if (v < 10) return 'rejected';
+  if (v < 24) return 'flagged';
+  if (v < 50) return 'pending';
+  return 'approved';
+}
+
+function badgeHTML(status) {
+  const map = { pending:'badge-pending', approved:'badge-approved', flagged:'badge-flagged', rejected:'badge-rejected' };
+  const label = status.charAt(0).toUpperCase() + status.slice(1);
+  return `<span class="badge ${map[status]}">${label}</span>`;
+}
+
+function updateFilterTabs() {
+  const counts = {all:REQUESTS.length, pending:0, flagged:0, approved:0, rejected:0};
+  REQUESTS.forEach(r => { counts[getDeptStatus(r.id, currentDept)]++; });
+  const tabs = document.querySelectorAll('.filter-tab');
+  const order = ['all','pending','flagged','approved','rejected'];
+  const names = {all:'All', pending:'Pending', flagged:'Flagged', approved:'Approved', rejected:'Rejected'};
+  tabs.forEach((tab, i) => {
+    const key = order[i];
+    if (key) tab.textContent = `${names[key]} (${counts[key]})`;
+  });
+  const badge = document.querySelector('.nav-badge');
+  if (badge) badge.textContent = counts.pending;
+}
+
+function renderTable() {
+  const body = document.getElementById('reqBody');
+  const filtered = REQUESTS.filter(r => {
+    const status = getDeptStatus(r.id, currentDept);
+    const matchFilter = activeFilter === 'all' || status === activeFilter;
+    const matchType   = !activeType || r.type === activeType;
+    const matchSearch = !searchQuery || r.name.toLowerCase().includes(searchQuery) || r.matric.toLowerCase().includes(searchQuery);
+    return matchFilter && matchType && matchSearch;
+  });
+  document.getElementById('tableInfo').textContent = `Showing ${filtered.length} of ${REQUESTS.length} requests`;
+  if (filtered.length === 0) {
+    body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem 1.25rem;color:var(--muted);font-size:0.83rem;">No requests match your search or filter.</td></tr>`;
+    return;
+  }
+  body.innerHTML = filtered.map(r => {
+    const status = getDeptStatus(r.id, currentDept);
+    return `<tr onclick="location.href='officer-review.html?student=${r.id}'">
+      <td>
+        <div class="student-cell">
+          <div class="s-avatar" style="background:${r.color};">${r.initials}</div>
+          <div>
+            <div class="s-name">${r.name}</div>
+            <div class="s-matric">${r.matric}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:0.78rem;">${r.programme}</td>
+      <td><span class="clearance-type">${r.type === 'Graduation' ? '🎓' : '📤'} ${r.type}</span></td>
+      <td style="color:var(--muted);font-size:0.78rem;">${r.submitted}</td>
+      <td>${badgeHTML(status)}</td>
+      <td><button class="action-btn" onclick="event.stopPropagation();location.href='officer-review.html?student=${r.id}'">Review</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function setTypeFilter(v) { activeType = v; renderTable(); }
+function filterTable(v) { searchQuery = v.toLowerCase(); renderTable(); }
+
+// ── Session guard & department population ──
+(function() {
+  const DEPT_NAMES = {
+    hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
+    college:'College Officer', chapel:'University Chapel', health:'Health Centre',
+    sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
+    alumni:'Alumni Association', affairs:'Student Affairs', library:'University Library',
+    bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
+  };
+  const DEPT_ICONS = {
+    hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
+    chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
+    ict:'computer', alumni:'groups', affairs:'diversity_3', library:'menu_book',
+    bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
+  };
+
+  const session = JSON.parse(localStorage.getItem('cms_session') || 'null');
+  if (!session || session.role !== 'officer') { window.location.href = '../login.html'; return; }
+
+  currentDept = session.department || 'chapel';
+  const deptName = DEPT_NAMES[currentDept] || currentDept;
+  const deptIcon = DEPT_ICONS[currentDept] || 'badge';
+  const initials = ((session.firstName||'')[0]||'') + ((session.lastName||'')[0]||'');
+
+  const chip = document.getElementById('deptChipName');
+  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+
+  const sub = document.getElementById('topbarSub');
+  if (sub) sub.textContent = deptName + ' · ' + REQUESTS.length + ' total requests';
+
+  document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials.toUpperCase() || 'CO');
+  document.querySelectorAll('a[href="../login.html"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Log out of CMS? Any unsaved changes will be lost.')) {
+        localStorage.removeItem('cms_session');
+        window.location.href = '../login.html';
+      }
+    });
+  });
+
+  updateFilterTabs();
+  renderTable();
+})();
+</script>
+</body>
+</html>

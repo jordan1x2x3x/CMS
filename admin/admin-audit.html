@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Log — MTU CMS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .role-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .role-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .role-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .role-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .role-chip-sub { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+    .content { padding: 2rem; flex: 1; }
+
+    .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .search-box { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 7px 14px; flex: 1; min-width: 200px; }
+    .search-box input { border: none; background: none; font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text); outline: none; width: 100%; }
+    .search-box .material-symbols-outlined { font-size: 18px; color: var(--muted); }
+    .filter-select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--text); outline: none; cursor: pointer; }
+    .clear-btn { padding: 8px 16px; background: var(--rejected-bg); color: var(--rejected); border: 1px solid var(--rejected); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .audit-table { width: 100%; border-collapse: collapse; }
+    .audit-table th { font-size: 0.7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; padding: 0.75rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .audit-table td { padding: 0.9rem 1.25rem; font-size: 0.82rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .audit-table tr:last-child td { border-bottom: none; }
+    .audit-table tr:hover td { background: #fafafa; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 100px; font-size: 0.68rem; font-weight: 600; }
+    .badge-approved { background: var(--approved-bg); color: var(--approved); }
+    .badge-pending { background: var(--pending-bg); color: #B45309; }
+    .badge-flagged { background: var(--flagged-bg); color: #C2410C; }
+    .badge-rejected { background: var(--rejected-bg); color: #DC2626; }
+    .action-icon { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+    .action-icon .material-symbols-outlined { font-size: 14px; }
+    .table-footer { padding: 0.85rem 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--muted); }
+    .empty-state { padding: 4rem 2rem; text-align: center; }
+    .empty-state .material-symbols-outlined { font-size: 48px; color: var(--border); display: block; margin-bottom: 0.75rem; }
+    .empty-state p { color: var(--muted); font-size: 0.85rem; }
+    .empty-state small { color: var(--border); font-size: 0.75rem; }
+
+    /* synthetic log entries */
+    .synth-note { background: var(--pending-bg); border: 1px solid var(--pending); border-radius: 10px; padding: 0.75rem 1.25rem; font-size: 0.78rem; color: #92400E; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+    .synth-note .material-symbols-outlined { font-size: 16px; color: var(--pending); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" /></div>
+    <div class="brand-text">MTU Clearance<span>Admin Portal</span></div>
+  </div>
+  <div class="role-chip">
+    <div class="role-chip-label">Signed in as</div>
+    <div class="role-chip-name"><span class="material-symbols-outlined">admin_panel_settings</span><span id="adminName">Admin</span></div>
+    <div class="role-chip-sub">Registrar / Administrator</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <a href="admin-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="admin-requests.html" class="nav-item"><span class="material-symbols-outlined">list_alt</span>All Requests</a>
+    <div class="nav-label">Management</div>
+    <a href="admin-departments.html" class="nav-item"><span class="material-symbols-outlined">apartment</span>Departments</a>
+    <a href="admin-reports.html" class="nav-item"><span class="material-symbols-outlined">bar_chart</span>Reports</a>
+    <div class="nav-label">System</div>
+    <a href="admin-audit.html" class="nav-item active"><span class="material-symbols-outlined">history</span>Audit Log</a>
+    <a href="admin-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="nav-item danger" id="logoutBtn"><span class="material-symbols-outlined">logout</span>Logout</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>System Audit Log</h1>
+      <p>Complete record of all officer decisions and system events</p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="avatarInitial">A</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="synth-note">
+      <span class="material-symbols-outlined">info</span>
+      Showing officer decisions recorded in this browser session. In production, this log is stored server-side and is immutable.
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="material-symbols-outlined">search</span>
+        <input id="searchInput" type="text" placeholder="Search by student, department, or action…" />
+      </div>
+      <select class="filter-select" id="actionFilter">
+        <option value="all">All Actions</option>
+        <option value="approved">Approved</option>
+        <option value="flagged">Flagged</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <select class="filter-select" id="deptFilter">
+        <option value="all">All Departments</option>
+      </select>
+      <button class="clear-btn" id="clearDecisionsBtn">Clear All Decisions</button>
+    </div>
+
+    <div class="card">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Timestamp</th>
+            <th>Student</th>
+            <th>Department</th>
+            <th>Action</th>
+            <th>Reason / Comment</th>
+          </tr>
+        </thead>
+        <tbody id="auditBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <span class="material-symbols-outlined">history</span>
+        <p>No audit entries found.</p>
+        <small>Officer decisions will appear here once made.</small>
+      </div>
+      <div class="table-footer">
+        <span id="footerCount">Loading…</span>
+        <span id="footerTotal"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--rejected-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+      <span class="material-symbols-outlined" style="color:var(--rejected);font-size:26px;">logout</span>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Confirm Logout</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">Are you sure you want to end your session?</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('logoutModal').style.display='none'" style="padding:10px 22px;border:1px solid var(--border);background:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Cancel</button>
+      <button id="confirmLogout" style="padding:10px 22px;background:var(--rejected);color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clear confirm modal -->
+<div id="clearModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--rejected-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+      <span class="material-symbols-outlined" style="color:var(--rejected);font-size:26px;">delete_forever</span>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Clear All Decisions?</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">This will permanently remove all officer decisions from the audit log. This action cannot be undone.</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('clearModal').style.display='none'" style="padding:10px 22px;border:1px solid var(--border);background:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Cancel</button>
+      <button id="confirmClear" style="padding:10px 22px;background:var(--rejected);color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Clear All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
+  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
+  document.getElementById('adminName').textContent = sess.name || 'Admin';
+  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+
+  const DEPTS = [
+    { key:'hod', label:'HOD' }, { key:'cedgs', label:'CEDGS' }, { key:'lab', label:'Lab Instructor' },
+    { key:'college', label:'College Officer' }, { key:'health', label:'Health Unit' },
+    { key:'sport', label:'Sport' }, { key:'hall', label:'Hall of Residence' }, { key:'ict', label:'ICT Unit' },
+    { key:'alumni', label:'Alumni' }, { key:'affairs', label:'Student Affairs' },
+    { key:'library', label:'Library' }, { key:'bursary', label:'Bursary' },
+    { key:'esm', label:'ESM (Music)' }, { key:'academic', label:'Academic Affairs' }, { key:'chapel', label:'Chapel' },
+  ];
+  const NAMES = ['Adebayo K.','Chisom A.','Fatima M.','Daniel O.','Grace E.','Samuel I.','Ngozi P.','Michael T.','Amaka R.','Joshua F.','Blessing N.','Emmanuel S.','Taiwo A.','Chinwe B.','David L.','Esther O.','Tobi R.','Chukwuma E.','Halima Y.','Patrick O.','Funmilayo A.','Obinna C.','Kehinde S.','Zainab H.'];
+
+  const deptFilter = document.getElementById('deptFilter');
+  DEPTS.forEach(d => { const o = document.createElement('option'); o.value = d.key; o.textContent = d.label; deptFilter.appendChild(o); });
+
+  let activeAction = 'all', activeDept = 'all', searchVal = '';
+
+  const badgeClass = { approved:'badge-approved', flagged:'badge-flagged', rejected:'badge-rejected', pending:'badge-pending' };
+  const iconMap = { approved:'check_circle', flagged:'flag', rejected:'cancel', pending:'hourglass_top' };
+  const iconBg = { approved:'background:var(--approved-bg);color:var(--approved)', flagged:'background:var(--flagged-bg);color:var(--flagged)', rejected:'background:var(--rejected-bg);color:var(--rejected)', pending:'background:var(--pending-bg);color:var(--pending)' };
+
+  function renderAudit() {
+    const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+    const sorted = [...decisions].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    let filtered = sorted.filter(d => {
+      if (activeAction !== 'all' && d.status !== activeAction) return false;
+      if (activeDept !== 'all' && d.dept !== activeDept) return false;
+      if (searchVal) {
+        const q = searchVal.toLowerCase();
+        const deptLabel = DEPTS.find(x => x.key === d.dept)?.label || d.dept;
+        if (!String(d.studentId).includes(q) && !deptLabel.toLowerCase().includes(q) && !(d.reason||'').toLowerCase().includes(q) && !(d.comment||'').toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+
+    const tbody = document.getElementById('auditBody');
+    document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
+    document.getElementById('footerCount').textContent = `Showing ${filtered.length} entries`;
+    document.getElementById('footerTotal').textContent = `${decisions.length} total decisions`;
+
+    tbody.innerHTML = filtered.map((d, idx) => {
+      const deptLabel = DEPTS.find(x => x.key === d.dept)?.label || d.dept;
+      const studentName = NAMES[(d.studentId-1) % NAMES.length] || `Student #${d.studentId}`;
+      const ts = d.timestamp ? new Date(d.timestamp).toLocaleString('en-NG', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+      const note = [d.reason, d.comment].filter(Boolean).join(' — ') || '<span style="color:var(--muted);">—</span>';
+      return `<tr>
+        <td style="color:var(--muted);font-size:0.72rem;">${filtered.length - idx}</td>
+        <td style="font-size:0.75rem;color:var(--muted);white-space:nowrap;">${ts}</td>
+        <td><strong>${studentName}</strong><br><span style="font-size:0.7rem;color:var(--muted);">MTU/2021/${String(d.studentId).padStart(3,'0')}</span></td>
+        <td>${deptLabel}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="action-icon" style="${iconBg[d.status]||''}"><span class="material-symbols-outlined">${iconMap[d.status]||'info'}</span></span>
+            <span class="badge ${badgeClass[d.status]||''}">${d.status}</span>
+          </div>
+        </td>
+        <td style="font-size:0.78rem;max-width:220px;">${note}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('actionFilter').addEventListener('change', e => { activeAction = e.target.value; renderAudit(); });
+  document.getElementById('deptFilter').addEventListener('change', e => { activeDept = e.target.value; renderAudit(); });
+  document.getElementById('searchInput').addEventListener('input', e => { searchVal = e.target.value; renderAudit(); });
+
+  document.getElementById('clearDecisionsBtn').addEventListener('click', () => document.getElementById('clearModal').style.display = 'flex');
+  document.getElementById('confirmClear').addEventListener('click', () => {
+    localStorage.removeItem('cms_decisions');
+    document.getElementById('clearModal').style.display = 'none';
+    renderAudit();
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
+  document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
+
+  renderAudit();
+</script>
+</body>
+</html>

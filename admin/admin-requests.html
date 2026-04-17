@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Requests — MTU CMS Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #6B0080; --purple-dark: #4a0059; --purple-mid: #8b00a8;
+      --green: #76B82A;
+      --approved: #10B981; --approved-bg: #ECFDF5;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --flagged: #F97316; --flagged-bg: #FFF7ED;
+      --rejected: #EF4444; --rejected-bg: #FEF2F2;
+      --bg: #F4F6FA; --surface: #FFFFFF;
+      --text: #1A1A2E; --muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(160deg, var(--purple-dark) 0%, var(--purple) 60%, var(--purple-mid) 100%); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-brand { padding: 1.25rem 1rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 1px; }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-text { color: white; font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
+    .brand-text span { display: block; font-size: 0.65rem; font-weight: 400; opacity: 0.6; }
+    .role-chip { margin: 0.75rem; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .role-chip-label { color: rgba(255,255,255,0.45); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .role-chip-name { color: white; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .role-chip-name .material-symbols-outlined { font-size: 16px; color: var(--green); }
+    .role-chip-sub { color: rgba(255,255,255,0.45); font-size: 0.68rem; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; padding: 0.6rem 0.75rem 0.3rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: var(--green); color: white; }
+    .nav-badge { margin-left: auto; background: var(--flagged); color: white; font-size: 0.6rem; font-weight: 700; padding: 2px 6px; border-radius: 100px; }
+    .sidebar-footer { padding: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    .main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-size: 1.05rem; font-weight: 700; }
+    .topbar-left p { font-size: 0.75rem; color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+    .content { padding: 2rem; flex: 1; }
+
+    /* Filter bar */
+    .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .filter-tabs { display: flex; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
+    .tab-btn { padding: 6px 14px; border-radius: 8px; border: none; background: none; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .tab-btn.active { background: var(--purple); color: white; font-weight: 600; }
+    .search-box { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 7px 14px; flex: 1; min-width: 200px; }
+    .search-box input { border: none; background: none; font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text); outline: none; width: 100%; }
+    .search-box .material-symbols-outlined { font-size: 18px; color: var(--muted); }
+    .dept-filter { padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--text); outline: none; cursor: pointer; }
+    .export-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--purple); color: white; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .export-btn .material-symbols-outlined { font-size: 16px; }
+
+    /* Table */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .big-table { width: 100%; border-collapse: collapse; }
+    .big-table th { font-size: 0.7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; padding: 0.75rem 1.25rem; text-align: left; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .big-table td { padding: 0.9rem 1.25rem; font-size: 0.82rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .big-table tr:last-child td { border-bottom: none; }
+    .big-table tr:hover td { background: #fafafa; }
+    .student-cell { display: flex; align-items: center; gap: 10px; }
+    .student-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple); color: white; font-weight: 700; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .student-name { font-weight: 600; font-size: 0.82rem; }
+    .student-id { font-size: 0.7rem; color: var(--muted); }
+    .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 100px; font-size: 0.68rem; font-weight: 600; }
+    .badge-approved { background: var(--approved-bg); color: var(--approved); }
+    .badge-pending { background: var(--pending-bg); color: #B45309; }
+    .badge-flagged { background: var(--flagged-bg); color: #C2410C; }
+    .badge-rejected { background: var(--rejected-bg); color: #DC2626; }
+    .badge-mixed { background: #EDE9FE; color: #7C3AED; }
+    .dept-pills { display: flex; flex-wrap: wrap; gap: 4px; max-width: 280px; }
+    .dept-pill { font-size: 0.62rem; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .table-footer { padding: 0.85rem 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--muted); }
+    .empty-state { padding: 4rem 2rem; text-align: center; }
+    .empty-state .material-symbols-outlined { font-size: 48px; color: var(--border); display: block; margin-bottom: 0.75rem; }
+    .empty-state p { color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="../assets/mtu-logo.png" alt="MTU" /></div>
+    <div class="brand-text">MTU Clearance<span>Admin Portal</span></div>
+  </div>
+  <div class="role-chip">
+    <div class="role-chip-label">Signed in as</div>
+    <div class="role-chip-name"><span class="material-symbols-outlined">admin_panel_settings</span><span id="adminName">Admin</span></div>
+    <div class="role-chip-sub">Registrar / Administrator</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <a href="admin-dashboard.html" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    <a href="admin-requests.html" class="nav-item active"><span class="material-symbols-outlined">list_alt</span>All Requests</a>
+    <div class="nav-label">Management</div>
+    <a href="admin-departments.html" class="nav-item"><span class="material-symbols-outlined">apartment</span>Departments</a>
+    <a href="admin-reports.html" class="nav-item"><span class="material-symbols-outlined">bar_chart</span>Reports</a>
+    <div class="nav-label">System</div>
+    <a href="admin-audit.html" class="nav-item"><span class="material-symbols-outlined">history</span>Audit Log</a>
+    <a href="admin-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="nav-item danger" id="logoutBtn"><span class="material-symbols-outlined">logout</span>Logout</button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>All Clearance Requests</h1>
+      <p>Monitor every student's clearance status across departments</p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-avatar" id="avatarInitial">A</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="filter-bar">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="tab-btn active" data-filter="all">All</button>
+        <button class="tab-btn" data-filter="cleared">Cleared</button>
+        <button class="tab-btn" data-filter="in-progress">In Progress</button>
+        <button class="tab-btn" data-filter="flagged">Flagged</button>
+        <button class="tab-btn" data-filter="rejected">Rejected</button>
+      </div>
+      <div class="search-box">
+        <span class="material-symbols-outlined">search</span>
+        <input id="searchInput" type="text" placeholder="Search by student ID or name…" />
+      </div>
+      <select class="dept-filter" id="deptFilter">
+        <option value="all">All Departments</option>
+      </select>
+      <button class="export-btn" id="exportBtn"><span class="material-symbols-outlined">download</span>Export CSV</button>
+    </div>
+
+    <div class="card">
+      <table class="big-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Overall Status</th>
+            <th>Departments Progress</th>
+            <th>Pending</th>
+            <th>Flagged</th>
+            <th>Approved</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <span class="material-symbols-outlined">inbox</span>
+        <p>No requests match your filter.</p>
+      </div>
+      <div class="table-footer">
+        <span id="footerCount">Loading…</span>
+        <span>24 students total</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Logout modal -->
+<div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;">
+    <div style="width:52px;height:52px;border-radius:50%;background:var(--rejected-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+      <span class="material-symbols-outlined" style="color:var(--rejected);font-size:26px;">logout</span>
+    </div>
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Confirm Logout</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem;">Are you sure you want to end your session?</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="document.getElementById('logoutModal').style.display='none'" style="padding:10px 22px;border:1px solid var(--border);background:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Cancel</button>
+      <button id="confirmLogout" style="padding:10px 22px;background:var(--rejected);color:white;border:none;border-radius:10px;cursor:pointer;font-size:0.82rem;font-weight:600;">Logout</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
+  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
+  document.getElementById('adminName').textContent = sess.name || 'Admin';
+  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+
+  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
+  const DEPTS = [
+    { key:'hod', label:'HOD', seed:3 }, { key:'cedgs', label:'CEDGS', seed:7 },
+    { key:'lab', label:'Lab', seed:11 }, { key:'college', label:'College', seed:17 },
+    { key:'health', label:'Health', seed:19 }, { key:'sport', label:'Sport', seed:23 },
+    { key:'hall', label:'Hall', seed:29 }, { key:'ict', label:'ICT', seed:31 },
+    { key:'alumni', label:'Alumni', seed:37 }, { key:'affairs', label:'Affairs', seed:41 },
+    { key:'library', label:'Library', seed:43 }, { key:'bursary', label:'Bursary', seed:47 },
+    { key:'esm', label:'ESM', seed:53 }, { key:'academic', label:'Academic', seed:59 },
+    { key:'chapel', label:'Chapel', seed:0 },
+  ];
+  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
+
+  function getDeptStatus(sid, dept) {
+    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
+    if (saved) return saved.status;
+    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
+    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
+    const v = (sid * s) % 97;
+    if (v < 10) return 'rejected'; if (v < 24) return 'flagged'; if (v < 50) return 'pending';
+    return 'approved';
+  }
+
+  // Populate dept filter
+  const deptFilter = document.getElementById('deptFilter');
+  DEPTS.forEach(d => { const o = document.createElement('option'); o.value = d.key; o.textContent = d.label; deptFilter.appendChild(o); });
+
+  // Build rows
+  const NAMES = ['Adebayo K.','Chisom A.','Fatima M.','Daniel O.','Grace E.','Samuel I.','Ngozi P.','Michael T.','Amaka R.','Joshua F.','Blessing N.','Emmanuel S.','Taiwo A.','Chinwe B.','David L.','Esther O.','Tobi R.','Chukwuma E.','Halima Y.','Patrick O.','Funmilayo A.','Obinna C.','Kehinde S.','Zainab H.'];
+  const rows = STUDENTS.map((sid, idx) => {
+    const statuses = DEPTS.map(d => ({ dept: d.key, label: d.label, status: getDeptStatus(sid, d.key) }));
+    const approved = statuses.filter(s => s.status === 'approved').length;
+    const pending  = statuses.filter(s => s.status === 'pending').length;
+    const flagged  = statuses.filter(s => s.status === 'flagged').length;
+    const rejected = statuses.filter(s => s.status === 'rejected').length;
+    const allCleared = approved === 15;
+    const hasRejected = rejected > 0;
+    const hasFlagged  = flagged > 0;
+    let overall = allCleared ? 'cleared' : hasRejected ? 'rejected' : hasFlagged ? 'flagged' : 'in-progress';
+    return { sid, name: NAMES[idx], statuses, approved, pending, flagged, rejected, overall };
+  });
+
+  let activeFilter = 'all';
+  let activeDept = 'all';
+  let searchVal = '';
+
+  const badgeClass = { cleared:'badge-approved', 'in-progress':'badge-pending', flagged:'badge-flagged', rejected:'badge-rejected' };
+  const badgeLabel = { cleared:'Fully Cleared', 'in-progress':'In Progress', flagged:'Has Flags', rejected:'Has Rejections' };
+  const pillColors = { approved:'background:#ECFDF5;color:#10B981', pending:'background:#FFFBEB;color:#B45309', flagged:'background:#FFF7ED;color:#C2410C', rejected:'background:#FEF2F2;color:#DC2626' };
+
+  function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    let filtered = rows.filter(r => {
+      if (activeFilter !== 'all' && r.overall !== activeFilter) return false;
+      if (activeDept !== 'all') {
+        const ds = r.statuses.find(s => s.dept === activeDept);
+        if (!ds || ds.status === 'approved') return false;
+      }
+      if (searchVal) {
+        const q = searchVal.toLowerCase();
+        if (!r.name.toLowerCase().includes(q) && !String(r.sid).includes(q)) return false;
+      }
+      return true;
+    });
+    document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
+    document.getElementById('footerCount').textContent = `Showing ${filtered.length} of 24 students`;
+    tbody.innerHTML = filtered.map(r => {
+      const pills = r.statuses.filter(s => s.status !== 'approved').slice(0,4).map(s =>
+        `<span class="dept-pill" style="${pillColors[s.status]}">${s.label}</span>`
+      ).join('') + (r.pending + r.flagged + r.rejected > 4 ? `<span class="dept-pill" style="background:var(--bg);color:var(--muted);">+${r.pending+r.flagged+r.rejected-4}</span>` : '');
+      return `<tr>
+        <td><div class="student-cell">
+          <div class="student-avatar">${r.name[0]}</div>
+          <div><div class="student-name">${r.name}</div><div class="student-id">MTU/2021/${String(r.sid).padStart(3,'0')}</div></div>
+        </div></td>
+        <td><span class="badge ${badgeClass[r.overall]}">${badgeLabel[r.overall]}</span></td>
+        <td><div class="dept-pills">${r.overall === 'cleared' ? '<span style="font-size:0.75rem;color:var(--approved);">All 15 departments cleared</span>' : pills}</div></td>
+        <td style="font-weight:600;color:${r.pending>0?'var(--pending)':'var(--muted)'};">${r.pending}</td>
+        <td style="font-weight:600;color:${r.flagged>0?'var(--flagged)':'var(--muted)'};">${r.flagged}</td>
+        <td style="font-weight:600;color:var(--approved);">${r.approved}/15</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('filterTabs').addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderTable();
+  });
+  document.getElementById('deptFilter').addEventListener('change', e => { activeDept = e.target.value; renderTable(); });
+  document.getElementById('searchInput').addEventListener('input', e => { searchVal = e.target.value; renderTable(); });
+
+  // CSV export
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const headers = ['Student ID','Name','Matric','Overall Status','Approved','Pending','Flagged','Rejected'];
+    const csvRows = [headers.join(',')];
+    rows.forEach(r => csvRows.push([r.sid, r.name, `MTU/2021/${String(r.sid).padStart(3,'0')}`, r.overall, r.approved, r.pending, r.flagged, r.rejected].join(',')));
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'mtu_clearance_report.csv'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
+  document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
+
+  renderTable();
+</script>
+</body>
+</html>

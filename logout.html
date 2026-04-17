@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Signing out…</title>
+  <style>
+    body { font-family: Inter, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #F4F6FA; margin: 0; }
+    p { color: #6B7280; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <p>Signing out…</p>
+  <script type="module">
+    const MOCK_MODE = false;
+    localStorage.removeItem('cms_session');
+    if (!MOCK_MODE) {
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+      const supabase = createClient(
+        'https://nywyjkfgmfgutgudnbur.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
+      );
+      await supabase.auth.signOut();
+    }
+    window.location.href = 'login.html';
+  </script>
+</body>
+</html>

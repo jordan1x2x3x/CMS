@@ -1,0 +1,22 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Logs
+*.log
+
+# Env / secrets (never commit these)
+.env
+.env.local
+.env.*.local
+
+# Node (if added later)
+node_modules/
+dist/

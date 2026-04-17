@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | MTU Clearance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:       #6B0080;
+      --purple-dark:  #4A0058;
+      --purple-light: #8B20A0;
+      --green:        #76B82A;
+      --green-dark:   #5A8C20;
+      --green-light:  #8ED43A;
+      --surface:      #F4F6F9;
+      --white:        #FFFFFF;
+      --border:       #E2E8F0;
+      --text-main:    #1A0020;
+      --text-muted:   #64748B;
+      --sidebar-w:    260px;
+
+      /* Status */
+      --approved:     #10B981;
+      --approved-bg:  #D1FAE5;
+      --pending:      #F59E0B;
+      --pending-bg:   #FEF3C7;
+      --flagged:      #F97316;
+      --flagged-bg:   #FFEDD5;
+      --rejected:     #EF4444;
+      --rejected-bg:  #FEE2E2;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--purple-dark);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .brand-icon {
+      width: 38px; height: 38px;
+      background: var(--green);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; flex-shrink: 0;
+    }
+    .brand-icon .material-symbols-outlined { font-size: 22px; font-variation-settings: 'FILL' 1; }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-name {
+      font-family: 'Newsreader', serif;
+      font-size: 0.95rem; font-weight: 700;
+      color: white; line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 0.65rem; color: rgba(255,255,255,0.45);
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    /* Student profile chip */
+    .sidebar-profile {
+      margin: 1rem 1rem 0.5rem;
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .profile-avatar {
+      width: 34px; height: 34px;
+      background: var(--purple-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    .profile-info { min-width: 0; }
+    .profile-name {
+      font-size: 0.8rem; font-weight: 600; color: white;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .profile-matric { font-size: 0.65rem; color: rgba(255,255,255,0.45); }
+
+    /* Nav items */
+    .sidebar-nav { padding: 0.75rem 0.75rem; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .nav-label {
+      font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3);
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.6rem 0.75rem 0.3rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.82rem; font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer; border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item .material-symbols-outlined { font-size: 19px; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active {
+      background: var(--green);
+      color: white;
+    }
+    .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--flagged);
+      color: white;
+      font-size: 0.6rem; font-weight: 700;
+      padding: 2px 6px; border-radius: 100px;
+    }
+
+    .sidebar-footer {
+      padding: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .nav-item.danger { color: rgba(255,100,100,0.7); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-left h2 {
+      font-family: 'Newsreader', serif;
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--purple-dark);
+    }
+    .topbar-left p { font-size: 0.75rem; color: var(--text-muted); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: none; background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-muted);
+      position: relative; transition: background 0.15s;
+    }
+    .icon-btn:hover { background: var(--border); }
+    .icon-btn .material-symbols-outlined { font-size: 20px; }
+    .notif-dot {
+      position: absolute; top: 7px; right: 7px;
+      width: 8px; height: 8px;
+      background: var(--flagged); border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    /* ── PAGE CONTENT ── */
+    .content { padding: 2rem; flex: 1; }
+
+    /* Action alert */
+    .alert-banner {
+      background: var(--white);
+      border-left: 4px solid var(--flagged);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .alert-left { display: flex; align-items: center; gap: 12px; }
+    .alert-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--flagged-bg);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--flagged); flex-shrink: 0;
+    }
+    .alert-icon .material-symbols-outlined { font-size: 20px; font-variation-settings: 'FILL' 1; }
+    .alert-title { font-size: 0.88rem; font-weight: 700; color: var(--flagged); }
+    .alert-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 1px; }
+    .btn-fix {
+      background: var(--flagged);
+      color: white; border: none; border-radius: 6px;
+      padding: 8px 18px; font-family: 'Inter', sans-serif;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap; transition: opacity 0.2s;
+    }
+    .btn-fix:hover { opacity: 0.88; }
+
+    /* Page title row */
+    .page-title-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .page-title {
+      font-family: 'Newsreader', serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--purple-dark);
+    }
+    .btn-new-request {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--purple);
+      color: white; border: none; border-radius: 8px;
+      padding: 9px 18px; font-family: 'Inter', sans-serif;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-new-request:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-new-request .material-symbols-outlined { font-size: 18px; }
+
+    /* ── STATS GRID ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+    .stat-card-top {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .stat-card-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .stat-card-icon .material-symbols-outlined { font-size: 20px; font-variation-settings: 'FILL' 1; }
+    .stat-tag {
+      font-size: 0.62rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 100px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .stat-value {
+      font-family: 'Newsreader', serif;
+      font-size: 2rem; font-weight: 700; line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em;
+    }
+
+    /* ── MIDDLE ROW ── */
+    .mid-row {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Progress ring card */
+    .progress-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .progress-card-title {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.09em;
+      align-self: flex-start; margin-bottom: 1rem;
+    }
+    .ring-wrap {
+      position: relative;
+      width: 160px; height: 160px;
+      margin-bottom: 1.25rem;
+    }
+    .ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring-bg { stroke: #F0EAF5; }
+    .ring-fill { stroke: var(--purple); stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    .ring-label {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .ring-pct {
+      font-family: 'Newsreader', serif;
+      font-size: 2rem; font-weight: 700;
+      color: var(--purple-dark); line-height: 1;
+    }
+    .ring-sub {
+      font-size: 0.62rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .ring-meta {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.75rem; width: 100%;
+    }
+    .ring-meta-item {
+      background: var(--surface);
+      border-radius: 8px; padding: 10px;
+    }
+    .ring-meta-label {
+      font-size: 0.62rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 3px;
+    }
+    .ring-meta-val { font-size: 0.82rem; font-weight: 700; color: var(--purple-dark); }
+
+    /* Quick actions card */
+    .quick-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .quick-card-title {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.09em;
+      margin-bottom: 1rem;
+    }
+    .dept-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.6rem;
+    }
+    .dept-mini {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 10px 8px;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      text-align: center;
+      border: 1.5px solid transparent;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      text-decoration: none; color: inherit;
+    }
+    .dept-mini:hover { border-color: var(--purple); background: white; }
+    .dept-mini-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .dept-mini-icon .material-symbols-outlined { font-size: 16px; }
+    .dept-mini-name { font-size: 0.65rem; font-weight: 600; color: var(--text-main); line-height: 1.2; }
+    .dept-mini-status {
+      font-size: 0.58rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 1px 6px; border-radius: 100px;
+    }
+
+    /* ── RECENT ACTIVITY ── */
+    .activity-card {
+      background: var(--white);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .activity-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-header h3 {
+      font-size: 0.9rem; font-weight: 700; color: var(--text-main);
+    }
+    .activity-header a {
+      font-size: 0.78rem; color: var(--purple); font-weight: 600;
+      text-decoration: none; transition: color 0.15s;
+    }
+    .activity-header a:hover { color: var(--green); text-decoration: underline; }
+    .activity-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-row:hover { background: var(--surface); }
+    .activity-dept-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .activity-dept-icon .material-symbols-outlined { font-size: 20px; }
+    .activity-info { flex: 1; min-width: 0; }
+    .activity-dept { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+    .activity-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .activity-right { text-align: right; flex-shrink: 0; }
+    .activity-time { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Status badges */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      padding: 3px 10px; border-radius: 100px;
+    }
+    .badge-approved { background: var(--approved-bg); color: var(--approved); }
+    .badge-pending  { background: var(--pending-bg);  color: var(--pending); }
+    .badge-flagged  { background: var(--flagged-bg);  color: var(--flagged); }
+    .badge-rejected { background: var(--rejected-bg); color: var(--rejected); }
+    .badge .material-symbols-outlined { font-size: 11px; font-variation-settings: 'FILL' 1; }
+
+    /* Footer */
+    footer {
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      background: var(--white);
+    }
+
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .mid-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; }
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(74,0,88,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white);
+      border-radius: 16px;
+      width: 100%; max-width: 520px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+      overflow: hidden;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(24px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+      padding: 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h2 {
+      font-family: 'Newsreader', serif;
+      font-size: 1.2rem; font-weight: 700; color: white;
+    }
+    .modal-header p { font-size: 0.75rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+    .modal-close {
+      background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
+      width: 32px; height: 32px; cursor: pointer; color: white;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.25); }
+    .modal-close .material-symbols-outlined { font-size: 18px; }
+
+    .modal-body { padding: 1.5rem; }
+
+    /* Student info strip */
+    .modal-student-info {
+      background: var(--surface);
+      border-radius: 10px; padding: 1rem 1.25rem;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.75rem; margin-bottom: 1.25rem;
+    }
+    .info-item-label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .info-item-value { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-top: 2px; }
+
+    /* Clearance type selection */
+    .modal-section-label {
+      font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.09em;
+      margin-bottom: 0.6rem;
+    }
+    .type-cards {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.75rem; margin-bottom: 1.25rem;
+    }
+    .type-card {
+      border: 2px solid var(--border);
+      border-radius: 10px; padding: 1rem;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      text-align: center;
+    }
+    .type-card:hover { border-color: var(--purple-light); background: #F9F0FF; }
+    .type-card.selected { border-color: var(--purple); background: #F5EEFF; }
+    .type-card input[type="radio"] { display: none; }
+    .type-card .material-symbols-outlined { font-size: 28px; color: var(--purple); display: block; margin-bottom: 6px; font-variation-settings: 'FILL' 1; }
+    .type-card h4 { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
+    .type-card p  { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+
+    /* Declaration */
+    .declaration-box {
+      background: #FFF7ED;
+      border: 1px solid #FDE68A;
+      border-radius: 8px; padding: 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.78rem; color: #78350F; line-height: 1.6;
+    }
+    .declaration-check {
+      display: flex; align-items: flex-start; gap: 10px; margin-top: 0.75rem;
+      cursor: pointer;
+    }
+    .declaration-check input { margin-top: 2px; accent-color: var(--purple); width: 15px; height: 15px; flex-shrink: 0; }
+    .declaration-check span { font-size: 0.78rem; font-weight: 500; color: var(--text-main); }
+
+    .modal-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 0.75rem;
+    }
+    .btn-modal-cancel {
+      background: none; border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 10px 20px;
+      font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: border-color 0.15s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-modal-submit {
+      background: linear-gradient(135deg, var(--purple), var(--purple-light));
+      color: white; border: none; border-radius: 8px;
+      padding: 10px 24px; font-family: 'Inter', sans-serif;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .btn-modal-submit:hover { opacity: 0.9; }
+    .btn-modal-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-modal-submit .material-symbols-outlined { font-size: 17px; }
+
+    /* Success state inside modal */
+    .modal-success {
+      display: none; flex-direction: column; align-items: center;
+      text-align: center; padding: 2.5rem 2rem;
+      gap: 0.75rem;
+    }
+    .modal-success.show { display: flex; }
+    .modal-success-icon {
+      width: 64px; height: 64px; background: var(--approved-bg);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-success-icon .material-symbols-outlined { font-size: 34px; color: var(--approved); font-variation-settings: 'FILL' 1; }
+    .modal-success h3 { font-family: 'Newsreader', serif; font-size: 1.3rem; font-weight: 700; color: var(--purple-dark); }
+    .modal-success p { font-size: 0.82rem; color: var(--text-muted); max-width: 320px; line-height: 1.6; }
+    .btn-go-track {
+      background: var(--green); color: white; border: none; border-radius: 8px;
+      padding: 11px 24px; font-family: 'Inter', sans-serif;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 0.5rem; transition: opacity 0.2s;
+    }
+    .btn-go-track:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <span class="material-symbols-outlined">account_balance</span>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">MTU Clearance</span>
+      <span class="brand-sub">Student Portal</span>
+    </div>
+  </div>
+
+  <div class="sidebar-profile">
+    <div class="profile-avatar">OJ</div>
+    <div class="profile-info">
+      <div class="profile-name">Odunukwe C. Jordan</div>
+      <div class="profile-matric">MTU/CSC/2021/001</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Main</div>
+    <a href="student-dashboard.html" class="nav-item active">
+      <span class="material-symbols-outlined">dashboard</span>
+      Dashboard
+    </a>
+    <a href="clearance-tracking.html" class="nav-item">
+      <span class="material-symbols-outlined">fact_check</span>
+      Clearance Status
+      <span class="nav-badge">1</span>
+    </a>
+    <a href="document-upload.html" class="nav-item">
+      <span class="material-symbols-outlined">upload_file</span>
+      Document Uploads
+    </a>
+    <a href="final-certificate.html" class="nav-item">
+      <span class="material-symbols-outlined">workspace_premium</span>
+      Final Certificate
+    </a>
+
+    <div class="nav-label" style="margin-top:0.5rem;">Account</div>
+    <a href="student-settings.html" class="nav-item">
+      <span class="material-symbols-outlined">settings</span>
+      Settings
+    </a>
+    <a href="student-help.html" class="nav-item">
+      <span class="material-symbols-outlined">help</span>
+      Help Center
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="../login.html" class="nav-item danger">
+      <span class="material-symbols-outlined">logout</span>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h2>Good morning, CJ 👋</h2>
+      <p>Clearance year: 2023/2024 Academic Session</p>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="notif-dot"></span>
+      </button>
+      <div class="profile-avatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
+    </div>
+  </header>
+
+  <!-- Page content -->
+  <div class="content">
+
+    <!-- Action alert -->
+    <div class="alert-banner">
+      <div class="alert-left">
+        <div class="alert-icon">
+          <span class="material-symbols-outlined">warning</span>
+        </div>
+        <div>
+          <div class="alert-title">Action Required — Chapel Clearance</div>
+          <div class="alert-desc">Your chapel attendance record shows more than 10 misses. You need to resolve this before proceeding.</div>
+        </div>
+      </div>
+      <a href="clearance-tracking.html">
+        <button class="btn-fix">Fix Now</button>
+      </a>
+    </div>
+
+    <!-- Page title -->
+    <div class="page-title-row">
+      <h1 class="page-title">My Dashboard</h1>
+      <button class="btn-new-request" onclick="openModal()">
+        <span class="material-symbols-outlined">add</span>
+        Start Clearance Request
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <!-- Cleared -->
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:var(--approved-bg);">
+            <span class="material-symbols-outlined" style="color:var(--approved);">task_alt</span>
+          </div>
+          <span class="stat-tag" style="background:var(--approved-bg);color:var(--approved);">+2 this week</span>
+        </div>
+        <div class="stat-value" style="color:var(--approved);">08</div>
+        <div class="stat-label">Departments Cleared</div>
+      </div>
+
+      <!-- Pending -->
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:var(--pending-bg);">
+            <span class="material-symbols-outlined" style="color:var(--pending);">hourglass_empty</span>
+          </div>
+        </div>
+        <div class="stat-value" style="color:var(--pending);">04</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+
+      <!-- Flagged -->
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:var(--flagged-bg);">
+            <span class="material-symbols-outlined" style="color:var(--flagged);">flag</span>
+          </div>
+        </div>
+        <div class="stat-value" style="color:var(--flagged);">01</div>
+        <div class="stat-label">Flagged Issues</div>
+      </div>
+
+      <!-- Remaining -->
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-icon" style="background:#F0EAF5;">
+            <span class="material-symbols-outlined" style="color:var(--purple);">pending_actions</span>
+          </div>
+        </div>
+        <div class="stat-value" style="color:var(--purple);">03</div>
+        <div class="stat-label">Not Yet Started</div>
+      </div>
+    </div>
+
+    <!-- Mid row: Ring + Quick dept overview -->
+    <div class="mid-row">
+
+      <!-- Progress ring -->
+      <div class="progress-card">
+        <div class="progress-card-title">Overall Progress</div>
+        <div class="ring-wrap">
+          <svg viewBox="0 0 160 160">
+            <circle class="ring-bg" cx="80" cy="80" r="68" fill="none" stroke-width="12"/>
+            <!-- 53% = circumference 427, dashoffset = 427 * (1 - 0.53) = 200.7 -->
+            <circle class="ring-fill" cx="80" cy="80" r="68" fill="none" stroke-width="12"
+              stroke-dasharray="427" stroke-dashoffset="201"/>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-pct">53%</div>
+            <div class="ring-sub">Complete</div>
+          </div>
+        </div>
+        <div class="ring-meta">
+          <div class="ring-meta-item">
+            <div class="ring-meta-label">Est. Completion</div>
+            <div class="ring-meta-val">Aug 30, 2024</div>
+          </div>
+          <div class="ring-meta-item">
+            <div class="ring-meta-label">Active Stage</div>
+            <div class="ring-meta-val" style="color:var(--flagged);">Chapel</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dept mini overview -->
+      <div class="quick-card">
+        <div class="quick-card-title">Department Status Overview</div>
+        <div class="dept-mini-grid">
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=0">
+            <div class="dept-mini-icon" style="background:var(--approved-bg);">
+              <span class="material-symbols-outlined" style="color:var(--approved);">school</span>
+            </div>
+            <div class="dept-mini-name">HOD</div>
+            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=1">
+            <div class="dept-mini-icon" style="background:var(--approved-bg);">
+              <span class="material-symbols-outlined" style="color:var(--approved);">payments</span>
+            </div>
+            <div class="dept-mini-name">CEDGS</div>
+            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=2">
+            <div class="dept-mini-icon" style="background:var(--approved-bg);">
+              <span class="material-symbols-outlined" style="color:var(--approved);">science</span>
+            </div>
+            <div class="dept-mini-name">Lab</div>
+            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=3">
+            <div class="dept-mini-icon" style="background:var(--approved-bg);">
+              <span class="material-symbols-outlined" style="color:var(--approved);">corporate_fare</span>
+            </div>
+            <div class="dept-mini-name">College Officer</div>
+            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=4">
+            <div class="dept-mini-icon" style="background:var(--flagged-bg);">
+              <span class="material-symbols-outlined" style="color:var(--flagged);">church</span>
+            </div>
+            <div class="dept-mini-name">Chapel</div>
+            <span class="dept-mini-status" style="background:var(--flagged-bg);color:var(--flagged);">Flagged</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=5">
+            <div class="dept-mini-icon" style="background:var(--approved-bg);">
+              <span class="material-symbols-outlined" style="color:var(--approved);">local_hospital</span>
+            </div>
+            <div class="dept-mini-name">Health</div>
+            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=6">
+            <div class="dept-mini-icon" style="background:var(--approved-bg);">
+              <span class="material-symbols-outlined" style="color:var(--approved);">sports</span>
+            </div>
+            <div class="dept-mini-name">Sport</div>
+            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=7">
+            <div class="dept-mini-icon" style="background:var(--approved-bg);">
+              <span class="material-symbols-outlined" style="color:var(--approved);">home</span>
+            </div>
+            <div class="dept-mini-name">Hall</div>
+            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=8">
+            <div class="dept-mini-icon" style="background:var(--pending-bg);">
+              <span class="material-symbols-outlined" style="color:var(--pending);">computer</span>
+            </div>
+            <div class="dept-mini-name">ICT Unit</div>
+            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=9">
+            <div class="dept-mini-icon" style="background:var(--pending-bg);">
+              <span class="material-symbols-outlined" style="color:var(--pending);">groups</span>
+            </div>
+            <div class="dept-mini-name">Alumni</div>
+            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=10">
+            <div class="dept-mini-icon" style="background:var(--pending-bg);">
+              <span class="material-symbols-outlined" style="color:var(--pending);">diversity_3</span>
+            </div>
+            <div class="dept-mini-name">Student Affairs</div>
+            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=11">
+            <div class="dept-mini-icon" style="background:#F0EAF5;">
+              <span class="material-symbols-outlined" style="color:var(--purple);">menu_book</span>
+            </div>
+            <div class="dept-mini-name">Library</div>
+            <span class="dept-mini-status" style="background:#F0EAF5;color:var(--purple);">Locked</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=12">
+            <div class="dept-mini-icon" style="background:#F0EAF5;">
+              <span class="material-symbols-outlined" style="color:var(--purple);">account_balance_wallet</span>
+            </div>
+            <div class="dept-mini-name">Bursary</div>
+            <span class="dept-mini-status" style="background:#F0EAF5;color:var(--purple);">Locked</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=13">
+            <div class="dept-mini-icon" style="background:var(--pending-bg);">
+              <span class="material-symbols-outlined" style="color:var(--pending);">music_note</span>
+            </div>
+            <div class="dept-mini-name">ESM</div>
+            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
+          </a>
+
+          <a class="dept-mini" href="clearance-tracking.html?dept=14">
+            <div class="dept-mini-icon" style="background:#F0EAF5;">
+              <span class="material-symbols-outlined" style="color:var(--purple);">verified</span>
+            </div>
+            <div class="dept-mini-name">Academic Affairs</div>
+            <span class="dept-mini-status" style="background:#F0EAF5;color:var(--purple);">Locked</span>
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-card">
+      <div class="activity-header">
+        <h3>Recent Activity</h3>
+        <a href="clearance-tracking.html">View Full Report →</a>
+      </div>
+
+      <div class="activity-row">
+        <div class="activity-dept-icon" style="background:var(--approved-bg);">
+          <span class="material-symbols-outlined" style="color:var(--approved);">task_alt</span>
+        </div>
+        <div class="activity-info">
+          <div class="activity-dept">Head of Department (HOD)</div>
+          <div class="activity-note">4 bonded project copies, CDs, plagiarism result & signatures verified.</div>
+        </div>
+        <div class="activity-right">
+          <span class="badge badge-approved"><span class="material-symbols-outlined">check_circle</span> Approved</span>
+          <div class="activity-time">2 days ago</div>
+        </div>
+      </div>
+
+      <div class="activity-row">
+        <div class="activity-dept-icon" style="background:var(--approved-bg);">
+          <span class="material-symbols-outlined" style="color:var(--approved);">task_alt</span>
+        </div>
+        <div class="activity-info">
+          <div class="activity-dept">College Officer</div>
+          <div class="activity-note">HOD signature verified. College clearance granted.</div>
+        </div>
+        <div class="activity-right">
+          <span class="badge badge-approved"><span class="material-symbols-outlined">check_circle</span> Approved</span>
+          <div class="activity-time">3 days ago</div>
+        </div>
+      </div>
+
+      <div class="activity-row" style="border-left: 3px solid var(--flagged);">
+        <div class="activity-dept-icon" style="background:var(--flagged-bg);">
+          <span class="material-symbols-outlined" style="color:var(--flagged);">church</span>
+        </div>
+        <div class="activity-info">
+          <div class="activity-dept" style="color:var(--flagged);">University Chapel</div>
+          <div class="activity-note">Chapel attendance below threshold — more than 10 misses recorded.</div>
+        </div>
+        <div class="activity-right">
+          <span class="badge badge-flagged"><span class="material-symbols-outlined">flag</span> Flagged</span>
+          <div class="activity-time">1 day ago</div>
+        </div>
+      </div>
+
+      <div class="activity-row">
+        <div class="activity-dept-icon" style="background:var(--pending-bg);">
+          <span class="material-symbols-outlined" style="color:var(--pending);">hourglass_empty</span>
+        </div>
+        <div class="activity-info">
+          <div class="activity-dept">ICT Unit</div>
+          <div class="activity-note">Request submitted. Awaiting officer review.</div>
+        </div>
+        <div class="activity-right">
+          <span class="badge badge-pending"><span class="material-symbols-outlined">schedule</span> Pending</span>
+          <div class="activity-time">Today</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+
+  <footer>
+    &copy; 2024 Mountain Top University &mdash; Academic Portal &nbsp;|&nbsp; Support: registrar@mtu.edu.ng
+  </footer>
+</div>
+
+<!-- ── CLEARANCE REQUEST MODAL ── -->
+<div class="modal-overlay" id="requestModal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>Start Clearance Request</h2>
+        <p>Initiate your graduation or withdrawal clearance</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div id="modalForm">
+      <div class="modal-body">
+        <!-- Student info summary -->
+        <div class="modal-section-label">Your Information</div>
+        <div class="modal-student-info">
+          <div>
+            <div class="info-item-label">Full Name</div>
+            <div class="info-item-value">Odunukwe C. Jordan</div>
+          </div>
+          <div>
+            <div class="info-item-label">Matric Number</div>
+            <div class="info-item-value">MTU/CSC/2021/001</div>
+          </div>
+          <div>
+            <div class="info-item-label">Department</div>
+            <div class="info-item-value">Computer Science &amp; Mathematics</div>
+          </div>
+          <div>
+            <div class="info-item-label">Programme</div>
+            <div class="info-item-value">B.Sc. Computer Science</div>
+          </div>
+          <div>
+            <div class="info-item-label">College</div>
+            <div class="info-item-value">CBAS</div>
+          </div>
+          <div>
+            <div class="info-item-label">Session</div>
+            <div class="info-item-value">2023/2024</div>
+          </div>
+        </div>
+
+        <!-- Clearance type -->
+        <div class="modal-section-label">Clearance Type</div>
+        <div class="type-cards">
+          <label class="type-card selected" id="tc-graduation">
+            <input type="radio" name="clearanceType" value="graduation" checked />
+            <span class="material-symbols-outlined">school</span>
+            <h4>Graduation</h4>
+            <p>Final year clearance for convocation ceremony</p>
+          </label>
+          <label class="type-card" id="tc-withdrawal">
+            <input type="radio" name="clearanceType" value="withdrawal" />
+            <span class="material-symbols-outlined">directions_walk</span>
+            <h4>Withdrawal</h4>
+            <p>Voluntary or administrative withdrawal from the university</p>
+          </label>
+        </div>
+
+        <!-- Declaration -->
+        <div class="declaration-box">
+          <strong>Declaration</strong><br/>
+          By submitting this request, I confirm that all information provided is accurate and that I understand the clearance process requires physical and/or digital verification across all listed university departments.
+          <label class="declaration-check">
+            <input type="checkbox" id="declareCheck" onchange="toggleSubmit()" />
+            <span>I understand and agree to the terms of the clearance process.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-modal-submit" id="submitBtn" disabled onclick="submitRequest()">
+          <span class="material-symbols-outlined">send</span>
+          Submit Request
+        </button>
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div class="modal-success" id="modalSuccess">
+      <div class="modal-success-icon">
+        <span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <h3>Request Submitted!</h3>
+      <p>Your clearance request has been initiated. All 15 departments are now active. Head to Clearance Status to track your progress.</p>
+      <a href="clearance-tracking.html" class="btn-go-track">
+        <span class="material-symbols-outlined" style="font-size:17px;">fact_check</span>
+        Go to Clearance Status
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Modal ──
+  function openModal() {
+    document.getElementById('requestModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('requestModal').classList.remove('open');
+    document.body.style.overflow = '';
+    // Reset
+    document.getElementById('declareCheck').checked = false;
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('modalForm').style.display = '';
+    document.getElementById('modalSuccess').classList.remove('show');
+  }
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('requestModal')) closeModal();
+  }
+  function toggleSubmit() {
+    document.getElementById('submitBtn').disabled = !document.getElementById('declareCheck').checked;
+  }
+  async function submitRequest() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabase = createClient(
+      'https://nywyjkfgmfgutgudnbur.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
+    );
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+
+    const academicYear = new Date().getFullYear() + '/' + (new Date().getFullYear() + 1);
+
+    // Create clearance request
+    const { data: request, error: reqErr } = await supabase
+      .from('clearance_requests')
+      .insert({ student_id: session.user.id, academic_year: academicYear, status: 'submitted', submitted_at: new Date().toISOString() })
+      .select()
+      .single();
+
+    if (reqErr) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Request';
+      alert('Failed to submit request: ' + reqErr.message);
+      return;
+    }
+
+    // Create one clearance item per department
+    const DEPARTMENTS = ['hod','cedgs','lab','college','esm','chapel','health','sport','hall','ict','alumni','student_affairs','library','bursary','academic'];
+    const items = DEPARTMENTS.map(dept => ({
+      request_id:    request.id,
+      department_id: dept,
+      status:        'pending',
+    }));
+    await supabase.from('clearance_items').insert(items);
+
+    document.getElementById('modalForm').style.display = 'none';
+    document.getElementById('modalSuccess').classList.add('show');
+  }
+
+  // ── Clearance type card selection ──
+  document.querySelectorAll('.type-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      card.querySelector('input[type="radio"]').checked = true;
+    });
+  });
+
+  // ── Session guard ──
+  (async () => {
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabase = createClient(
+      'https://nywyjkfgmfgutgudnbur.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
+    );
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+    if (!profile || profile.role !== 'student') { window.location.href = '../login.html'; return; }
+
+    // Populate name in sidebar/topbar if elements exist
+    const nameEl = document.getElementById('studentFullName');
+    if (nameEl) nameEl.textContent = profile.first_name + ' ' + profile.last_name;
+    const matricEl = document.getElementById('studentMatric');
+    if (matricEl) matricEl.textContent = profile.matric_number || '';
+
+    // Logout links
+    document.querySelectorAll('a[href*="login.html"]').forEach(a => {
+      if (a.textContent.toLowerCase().includes('log') || a.dataset.logout !== undefined) {
+        a.addEventListener('click', async (e) => {
+          e.preventDefault();
+          await supabase.auth.signOut();
+          window.location.href = '../login.html';
+        });
+      }
+    });
+  })();
+</script>
+</body>
+</html>

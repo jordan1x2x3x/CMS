@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | MTU Clearance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:       #6B0080;
+      --purple-dark:  #4A0058;
+      --purple-light: #8B20A0;
+      --green:        #76B82A;
+      --green-dark:   #5A8C20;
+      --green-light:  #8ED43A;
+      --surface:      #F4F6F9;
+      --white:        #FFFFFF;
+      --border:       #D1D9E6;
+      --text-main:    #1A0020;
+      --text-muted:   #5A6A80;
+      --error:        #EF4444;
+      --focus:        rgba(107,0,128,0.18);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--purple-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo {
+      width: 44px;
+      height: 44px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      color: white;
+      font-size: 20px;
+    }
+    .nav-title {
+      font-family: 'Newsreader', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 0.01em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: white; }
+    .nav-links a.active { color: #B5E048; }
+
+    /* ── MAIN LAYOUT ── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ── LEFT PANEL ── */
+    .brand-panel {
+      background: linear-gradient(145deg, var(--purple-dark) 0%, var(--purple) 50%, var(--purple-light) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 3.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 300px; height: 300px;
+      background: var(--green);
+      opacity: 0.12;
+      border-radius: 50%;
+    }
+    .brand-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 220px; height: 220px;
+      background: var(--green-light);
+      opacity: 0.10;
+      border-radius: 50%;
+    }
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(118,184,42,0.25);
+      border: 1px solid rgba(181,224,72,0.3);
+      color: #B5E048;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      width: fit-content;
+      margin-bottom: 2rem;
+    }
+    .brand-heading {
+      font-family: 'Newsreader', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: white;
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+    .brand-heading span { color: #B5E048; }
+    .brand-divider {
+      width: 48px;
+      height: 3px;
+      background: var(--green-light);
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .brand-desc {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      max-width: 380px;
+      margin-bottom: 3rem;
+    }
+    .brand-stats {
+      display: flex;
+      gap: 2rem;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .brand-dept-list {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .dept-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.78rem;
+    }
+    .dept-chip .material-symbols-outlined { font-size: 14px; color: #B5E048; }
+
+    /* ── RIGHT PANEL / FORM ── */
+    .form-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2.5rem;
+      background: var(--white);
+    }
+    .form-container { width: 100%; max-width: 420px; }
+    .form-header { margin-bottom: 2rem; }
+    .form-header h2 {
+      font-family: 'Newsreader', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--purple-dark);
+      margin-bottom: 0.3rem;
+    }
+    .form-header p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* ── FORM FIELDS ── */
+    .field { margin-bottom: 1.2rem; }
+    label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-bottom: 6px;
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      font-size: 18px;
+      pointer-events: none;
+    }
+    .input-wrap input,
+    .input-wrap select {
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+    }
+    .input-wrap input::placeholder { color: #A0AABB; }
+    .input-wrap input:focus,
+    .input-wrap select:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--purple); }
+    .toggle-pw .material-symbols-outlined { font-size: 18px; }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .field-row label { margin-bottom: 0; }
+    .forgot-link {
+      font-size: 0.78rem;
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: var(--green); text-decoration: underline; }
+
+    /* ── ERROR ── */
+    .field-error {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--error);
+      margin-top: 4px;
+    }
+    .field.has-error .input-wrap input,
+    .field.has-error .input-wrap select {
+      border-color: var(--error);
+    }
+    .field.has-error .field-error { display: block; }
+
+    /* ── BUTTON ── */
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 1.5rem;
+    }
+    .btn-primary:hover { opacity: 0.93; transform: translateY(-1px); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary .material-symbols-outlined { font-size: 20px; }
+
+    /* ── INFO NOTE ── */
+    .info-note {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: #F5EEFF;
+      border-left: 3px solid var(--purple);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-top: 1.5rem;
+    }
+    .info-note .material-symbols-outlined { color: var(--purple); font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .info-note p { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
+    .info-note a { color: var(--purple); font-weight: 500; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 1.5rem 0;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider span { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; }
+
+    /* ── SIGNUP LINK ── */
+    .signup-prompt {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .signup-prompt a {
+      color: var(--purple);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .signup-prompt a:hover { color: var(--green); text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--purple-dark);
+      color: rgba(255,255,255,0.45);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      font-size: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    footer span { color: rgba(255,255,255,0.6); font-family: 'Newsreader', serif; font-size: 0.9rem; font-weight: 600; }
+    footer a { color: rgba(255,255,255,0.45); text-decoration: none; margin: 0 0.5rem; }
+    footer a:hover { color: white; text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; }
+      .brand-panel { display: none; }
+      .form-panel { padding: 2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo">
+      <img src="assets/mtu-logo.png" alt="MTU" style="width:100%;height:100%;object-fit:contain;" />
+    </div>
+    <span class="nav-title">Mountain Top University</span>
+  </a>
+  <div class="nav-links">
+    <a href="help.html">Help</a>
+    <a href="#" class="active">Sign In</a>
+  </div>
+</nav>
+
+<main>
+  <!-- Left Brand Panel -->
+  <aside class="brand-panel">
+    <div class="brand-badge">
+      <span class="material-symbols-outlined" style="font-size:14px;">verified_user</span>
+      Official Clearance Portal
+    </div>
+    <h1 class="brand-heading">MTU <br/>Clearance <br/><span>Portal</span></h1>
+    <div class="brand-divider"></div>
+    <p class="brand-desc">
+      The official digital clearance system for Mountain Top University.
+      Manage your graduation or withdrawal clearance across all departments — securely and transparently.
+    </p>
+    <div class="brand-stats">
+      <div class="stat-item">
+        <span class="stat-value">15+</span>
+        <span class="stat-label">Departments</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">2.4K</span>
+        <span class="stat-label">Active Users</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">4</span>
+        <span class="stat-label">User Roles</span>
+      </div>
+    </div>
+    <div class="brand-dept-list">
+      <div class="dept-chip">
+        <span class="material-symbols-outlined">check_circle</span>
+        Track clearance across HOD, Library, Bursary & more
+      </div>
+      <div class="dept-chip">
+        <span class="material-symbols-outlined">check_circle</span>
+        Upload documents and receive real-time feedback
+      </div>
+      <div class="dept-chip">
+        <span class="material-symbols-outlined">check_circle</span>
+        Download your final clearance certificate
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Form Panel -->
+  <section class="form-panel">
+    <div class="form-container">
+      <div class="form-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to your clearance portal account</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+
+        <!-- Identifier -->
+        <div class="field" id="field-identifier">
+          <label for="identifier">Matric Number / Staff Email</label>
+          <div class="input-wrap">
+            <span class="material-symbols-outlined input-icon">badge</span>
+            <input type="text" id="identifier" name="identifier"
+              placeholder="MTU/2024/001 or name@mtu.edu.ng" autocomplete="username" />
+          </div>
+          <span class="field-error">Please enter your matric number or email.</span>
+        </div>
+
+        <!-- Role -->
+        <div class="field" id="field-role">
+          <label for="role">Role</label>
+          <div class="input-wrap">
+            <span class="material-symbols-outlined input-icon">person</span>
+            <select id="role" name="role">
+              <option value="" disabled selected>Select your role</option>
+              <option value="student">Student</option>
+              <option value="officer">Department Officer</option>
+              <option value="admin">Admin / Registrar</option>
+              <option value="super_admin">Super Admin / ICT</option>
+            </select>
+          </div>
+          <span class="field-error">Please select your role.</span>
+        </div>
+
+        <!-- Password -->
+        <div class="field" id="field-password">
+          <div class="field-row">
+            <label for="password">Password</label>
+            <a href="forgot-password.html" class="forgot-link">Forgot Password?</a>
+          </div>
+          <div class="input-wrap">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input type="password" id="password" name="password"
+              placeholder="••••••••" autocomplete="current-password" />
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password visibility">
+              <span class="material-symbols-outlined" id="togglePwIcon">visibility</span>
+            </button>
+          </div>
+          <span class="field-error">Please enter your password.</span>
+        </div>
+
+        <div id="loginError" style="display:none;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:9px;padding:10px 14px;font-size:0.82rem;color:#991B1B;margin-bottom:0.75rem;align-items:center;gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:17px;flex-shrink:0;">error</span>
+          <span id="loginErrorMsg">Invalid credentials. Please check and try again.</span>
+        </div>
+        <button type="submit" class="btn-primary">
+          <span>Sign In</span>
+          <span class="material-symbols-outlined">login</span>
+        </button>
+      </form>
+
+      <div class="info-note">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">info</span>
+        <p>Use your official university credentials. For account issues, contact <a href="#">ICT Support</a> at the Senate Building.</p>
+      </div>
+
+      <div class="divider"><span>Don't have an account?</span></div>
+      <div class="signup-prompt">
+        <a href="signup.html">Create an Account &rarr;</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Mountain Top University</span>
+  <div>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Help Center</a>
+  </div>
+  <div>&copy; 2024 Mountain Top University. All rights reserved.</div>
+</footer>
+
+<script type="module">
+  // ── Set to false to reconnect Supabase ─────────────────────
+  const MOCK_MODE = false;
+
+  // ── Redirect if already logged in ──────────────────────────
+  if (MOCK_MODE) {
+    const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
+    if (sess.role) redirectByRole(sess.role);
+  } else {
+    const { supabase } = await import('./js/supabase.js');
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) {
+          localStorage.setItem('cms_session', JSON.stringify({
+            id: session.user.id, role: profile.role,
+            name: (profile.first_name + ' ' + profile.last_name).trim(),
+            email: profile.email, department: profile.department || null,
+          }));
+          redirectByRole(profile.role);
+        }
+      }
+    })();
+  }
+
+  // ── Toggle password visibility ─────────────────────────────
+  document.getElementById('togglePw').addEventListener('click', () => {
+    const inp  = document.getElementById('password');
+    const icon = document.getElementById('togglePwIcon');
+    const hide = inp.type === 'password';
+    inp.type        = hide ? 'text' : 'password';
+    icon.textContent = hide ? 'visibility_off' : 'visibility';
+  });
+
+  // ── Form submit ────────────────────────────────────────────
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Client-side validation
+    let valid = true;
+    [['identifier','field-identifier'],['role','field-role'],['password','field-password']]
+      .forEach(([id, fid]) => {
+        const el = document.getElementById(id);
+        const f  = document.getElementById(fid);
+        if (!el.value.trim()) { f.classList.add('has-error'); valid = false; }
+        else                   f.classList.remove('has-error');
+      });
+
+    const identifier = document.getElementById('identifier').value.trim().toLowerCase();
+    if (identifier.includes('@') && !identifier.endsWith('@mtu.edu.ng')) {
+      document.getElementById('field-identifier').classList.add('has-error');
+      document.querySelector('#field-identifier .field-error').textContent =
+        'Only MTU institutional emails are accepted (e.g. name@mtu.edu.ng).';
+      valid = false;
+    }
+    if (!valid) return;
+
+    const password = document.getElementById('password').value;
+    const role     = document.getElementById('role').value;
+    const errBox   = document.getElementById('loginError');
+    const submitBtn = e.submitter || document.querySelector('[type=submit]');
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in…';
+
+    if (MOCK_MODE) {
+      // ── Mock login: check cms_users in localStorage ──────────
+      const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
+      const user = users.find(u =>
+        (u.email === identifier || u.matric === identifier.toUpperCase()) &&
+        u.password === password && u.role === role
+      );
+      if (!user) {
+        showError('Incorrect email/matric, password, or role. Please try again.');
+        document.getElementById('field-password').classList.add('has-error');
+        resetBtn(submitBtn); return;
+      }
+      localStorage.setItem('cms_session', JSON.stringify({
+        id: user.id, role: user.role, name: user.name,
+        email: user.email, department: user.department || null,
+      }));
+      errBox.style.display = 'none';
+      redirectByRole(role);
+      return;
+    }
+
+    // ── Supabase login ──────────────────────────────────────────
+    const { supabase } = await import('./js/supabase.js');
+    let email = identifier;
+    if (!identifier.includes('@')) {
+      const { data: profile } = await supabase
+        .from('profiles').select('email').eq('matric_number', identifier.toUpperCase()).single();
+      if (!profile) { showError('No account found for that matric number.'); resetBtn(submitBtn); return; }
+      email = profile.email;
+    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      const msg = (error.message || '').toLowerCase();
+      if (msg.includes('not confirmed')) showError('Please confirm your email first — check your inbox for a verification link from Supabase.');
+      else { showError('Incorrect email/matric or password. Please try again.'); document.getElementById('field-password').classList.add('has-error'); }
+      resetBtn(submitBtn); return;
+    }
+    const { data: profile, error: profileErr } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+    if (profileErr || !profile) { showError('Account profile not found. Contact the ICT office.'); await supabase.auth.signOut(); resetBtn(submitBtn); return; }
+    if (profile.role !== role) { showError(`This account is registered as "${profile.role}", not "${role}".`); await supabase.auth.signOut(); resetBtn(submitBtn); return; }
+    if (profile.is_active === false) { showError('Your account has been deactivated. Contact the ICT office.'); await supabase.auth.signOut(); resetBtn(submitBtn); return; }
+    localStorage.setItem('cms_session', JSON.stringify({
+      id: data.user.id, role: profile.role,
+      name: (profile.first_name + ' ' + profile.last_name).trim(),
+      email: profile.email, department: profile.department || null,
+    }));
+    errBox.style.display = 'none';
+    redirectByRole(role);
+  });
+
+  // ── Helpers ────────────────────────────────────────────────
+  function showError(msg) {
+    const errBox = document.getElementById('loginError');
+    errBox.style.display = 'flex';
+    document.getElementById('loginErrorMsg').textContent = msg;
+  }
+
+  function resetBtn(btn) {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+
+  function redirectByRole(role) {
+    const map = {
+      student:     'student/student-dashboard.html',
+      officer:     'dept-officer/officer-dashboard.html',
+      admin:       'admin/admin-dashboard.html',
+      super_admin: 'super-admin/super-admin-dashboard.html',
+    };
+    window.location.href = map[role] || '#';
+  }
+
+  // ── Clear errors on input ──────────────────────────────────
+  ['identifier', 'role', 'password'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.getElementById('field-' + id).classList.remove('has-error');
+    });
+  });
+</script>
+</body>
+</html>
