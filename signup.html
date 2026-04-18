@@ -982,37 +982,6 @@
     return valid;
   }
 
-  // ── Access codes per department (officer) and role ──
-  const DEPT_ACCESS_CODES = {
-    hod:      'HOD-MTU-2025',
-    cedgs:    'CDG-MTU-2025',
-    lab:      'LAB-MTU-2025',
-    college:  'CLG-MTU-2025',
-    chapel:   'CHP-MTU-2025',
-    health:   'HLT-MTU-2025',
-    sport:    'SPT-MTU-2025',
-    hall:     'HLL-MTU-2025',
-    ict:      'ICT-MTU-2025',
-    alumni:   'ALM-MTU-2025',
-    affairs:  'AFF-MTU-2025',
-    library:  'LIB-MTU-2025',
-    bursary:  'BUR-MTU-2025',
-    esm:      'ESM-MTU-2025',
-    academic: 'ACA-MTU-2025',
-  };
-  const ROLE_ACCESS_CODES = {
-    admin:       'ADMIN-MTU-2025',
-    super_admin: 'SUPER-MTU-2025',
-  };
-
-  function getExpectedCode() {
-    if (selectedRole === 'officer') {
-      const dept = document.getElementById('officerDept').value;
-      return DEPT_ACCESS_CODES[dept] || null;
-    }
-    return ROLE_ACCESS_CODES[selectedRole] || null;
-  }
-
   // ── Validate Step 3 ──
   function validateStep3() {
     let valid = true;
@@ -1022,14 +991,10 @@
       const ac = document.getElementById('accessCode');
       const acField = document.getElementById('field-access-code');
       const entered = ac.value.trim();
-      const expected = getExpectedCode();
       const errorSpan = acField.querySelector('.field-error');
 
       if (!entered) {
         errorSpan.textContent = 'Access code is required for this role.';
-        acField.classList.add('has-error'); valid = false;
-      } else if (expected && entered !== expected) {
-        errorSpan.textContent = 'Invalid access code. Contact the Super Admin / ICT Unit.';
         acField.classList.add('has-error'); valid = false;
       } else {
         acField.classList.remove('has-error');
@@ -1049,19 +1014,6 @@
     return valid;
   }
 
-  // ── Set to false to reconnect Supabase ─────────────────────
-  const MOCK_MODE = false;
-
-  // Mock access codes (only checked in mock mode)
-  const MOCK_CODES = {
-    'ADMIN-MTU-2025': 'admin', 'SUPER-MTU-2025': 'super_admin',
-    'HOD-MTU-2025': 'officer', 'CDG-MTU-2025': 'officer', 'LAB-MTU-2025': 'officer',
-    'COL-MTU-2025': 'officer', 'HLT-MTU-2025': 'officer', 'SPT-MTU-2025': 'officer',
-    'HLL-MTU-2025': 'officer', 'ICT-MTU-2025': 'officer', 'ALM-MTU-2025': 'officer',
-    'AFF-MTU-2025': 'officer', 'LIB-MTU-2025': 'officer', 'BUR-MTU-2025': 'officer',
-    'ESM-MTU-2025': 'officer', 'ACA-MTU-2025': 'officer', 'CHP-MTU-2025': 'officer',
-  };
-
   // ── Form Submit ─────────────────────────────────────────────
   document.getElementById('signupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1079,54 +1031,8 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Creating account…';
 
-    if (MOCK_MODE) {
-      // ── Mock signup: save to localStorage ──────────────────
-      if (selectedRole !== 'student') {
-        const codeRole = MOCK_CODES[accessCode];
-        if (!codeRole) {
-          showSignupError('Invalid access code. Check the code and try again.');
-          resetSubmitBtn(submitBtn); return;
-        }
-        if (codeRole !== selectedRole) {
-          showSignupError(`This code is for "${codeRole}", not "${selectedRole}".`);
-          resetSubmitBtn(submitBtn); return;
-        }
-      }
-      const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
-      if (users.find(u => u.email === email)) {
-        showSignupError('An account with this email already exists.');
-        resetSubmitBtn(submitBtn); return;
-      }
-      const newUser = {
-        id: crypto.randomUUID(), role: selectedRole,
-        name: fullname, email, password,
-        matric: document.getElementById('matric')?.value?.trim().toUpperCase() || null,
-        department: document.getElementById('officerDept')?.value || document.getElementById('department')?.value || null,
-        college: document.getElementById('college')?.value || null,
-        programme: document.getElementById('programme')?.value || null,
-        createdAt: new Date().toISOString(),
-      };
-      users.push(newUser);
-      localStorage.setItem('cms_users', JSON.stringify(users));
-
-      // Show success panel
-      document.getElementById('signupForm').style.display = 'none';
-      document.getElementById('signinPrompt').style.display = 'none';
-      document.getElementById('successPanel').classList.add('active');
-      document.getElementById('stepBar').style.display = 'none';
-      [1,2,3].forEach(i => {
-        const s = document.getElementById(`step-indicator-${i}`);
-        if (s) { s.classList.remove('active'); s.classList.add('done'); }
-      });
-      return;
-    }
-
     // ── Supabase signup ─────────────────────────────────────────
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const supabase = createClient(
-      'https://nywyjkfgmfgutgudnbur.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
-    );
+    const { supabase } = await import('./js/supabase.js');
     if (selectedRole !== 'student') {
       const { data: codeRow, error: codeErr } = await supabase.from('access_codes').select('id, intended_role, used_by, expires_at').eq('code', accessCode).single();
       if (codeErr || !codeRow) { showSignupError('Access code lookup failed: ' + (codeErr?.message || 'code not found.')); resetSubmitBtn(submitBtn); return; }
@@ -1149,6 +1055,10 @@
     if (selectedRole !== 'student') {
       await supabase.from('access_codes').update({ used_by: userId, used_at: new Date().toISOString() }).eq('code', accessCode);
     }
+
+    // Sign out the auto-created session so the user must log in manually
+    await supabase.auth.signOut();
+    localStorage.removeItem('cms_session');
 
     // Show success panel
     document.getElementById('signupForm').style.display = 'none';

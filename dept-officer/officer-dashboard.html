@@ -154,7 +154,7 @@
     <a href="officer-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -166,7 +166,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span><span class="notif-dot"></span></button>
-      <div class="topbar-avatar">CO</div>
+      <div class="topbar-avatar" id="topbarAvatar">CO</div>
     </div>
   </header>
 
@@ -183,7 +183,7 @@
       <div class="stat-card">
         <div class="stat-top">
           <div>
-            <div class="stat-value">24</div>
+            <div class="stat-value" id="statTotal">—</div>
             <div class="stat-label">Total Requests</div>
           </div>
           <div class="stat-icon" style="background:rgba(107,0,128,0.08);">
@@ -195,7 +195,7 @@
       <div class="stat-card">
         <div class="stat-top">
           <div>
-            <div class="stat-value" style="color:var(--pending);">8</div>
+            <div class="stat-value" id="statPending" style="color:var(--pending);">—</div>
             <div class="stat-label">Pending Review</div>
           </div>
           <div class="stat-icon" style="background:var(--pending-bg);">
@@ -207,7 +207,7 @@
       <div class="stat-card">
         <div class="stat-top">
           <div>
-            <div class="stat-value" style="color:var(--approved);">13</div>
+            <div class="stat-value" id="statApproved" style="color:var(--approved);">—</div>
             <div class="stat-label">Approved</div>
           </div>
           <div class="stat-icon" style="background:var(--approved-bg);">
@@ -219,7 +219,7 @@
       <div class="stat-card">
         <div class="stat-top">
           <div>
-            <div class="stat-value" style="color:var(--flagged);">3</div>
+            <div class="stat-value" id="statFlagged" style="color:var(--flagged);">—</div>
             <div class="stat-label">Flagged</div>
           </div>
           <div class="stat-icon" style="background:var(--flagged-bg);">
@@ -325,19 +325,19 @@
             <div class="donut-legend" style="padding:0 0.5rem;">
               <div class="legend-row">
                 <div class="legend-label"><div class="legend-dot" style="background:var(--approved);"></div>Approved</div>
-                <div class="legend-val">13</div>
+                <div class="legend-val" id="legendApproved">—</div>
               </div>
               <div class="legend-row">
                 <div class="legend-label"><div class="legend-dot" style="background:var(--pending);"></div>Pending</div>
-                <div class="legend-val">5</div>
+                <div class="legend-val" id="legendPending">—</div>
               </div>
               <div class="legend-row">
                 <div class="legend-label"><div class="legend-dot" style="background:var(--flagged);"></div>Flagged</div>
-                <div class="legend-val">3</div>
+                <div class="legend-val" id="legendFlagged">—</div>
               </div>
               <div class="legend-row">
                 <div class="legend-label"><div class="legend-dot" style="background:#E5E7EB;"></div>Rejected</div>
-                <div class="legend-val">3</div>
+                <div class="legend-val" id="legendRejected">—</div>
               </div>
             </div>
           </div>
@@ -384,158 +384,101 @@
 </div>
 
 
-<script>
-const REQUESTS = [
-  { id:1,  name:'Odunukwe C. Jordan',   matric:'MTU/CSC/2021/001', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 14, 2026', initials:'OJ', color:'#6B0080' },
-  { id:2,  name:'Adeyemi Miracle',       matric:'MTU/BCH/2021/014', programme:'B.Sc Biochemistry',               college:'CBAS', type:'Graduation', submitted:'Apr 13, 2026', initials:'AM', color:'#0e7490' },
-  { id:3,  name:'Eze Oluwaseun',         matric:'MTU/NRS/2021/007', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 13, 2026', initials:'EO', color:'#065f46' },
-  { id:4,  name:'Fashola Kehinde',       matric:'MTU/MLS/2021/022', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 12, 2026', initials:'FK', color:'#92400e' },
-  { id:5,  name:'Nwosu Blessing',        matric:'MTU/ECO/2021/031', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 11, 2026', initials:'NB', color:'#1e3a5f' },
-  { id:6,  name:'Ibrahim Aisha',         matric:'MTU/PHL/2020/008', programme:'B.A Philosophy',                  college:'CHMS', type:'Withdrawal', submitted:'Apr 10, 2026', initials:'IA', color:'#5b21b6' },
-  { id:7,  name:'Okonkwo David',         matric:'MTU/CSC/2021/019', programme:'B.Sc Software Engineering',       college:'CBAS', type:'Graduation', submitted:'Apr 09, 2026', initials:'OD', color:'#be185d' },
-  { id:8,  name:'Lawal Fatimah',         matric:'MTU/ACF/2021/005', programme:'B.Sc Accounting and Finance',     college:'CHMS', type:'Graduation', submitted:'Apr 09, 2026', initials:'LF', color:'#b45309' },
-  { id:9,  name:'Chukwu Emeka',          matric:'MTU/CSC/2020/003', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 08, 2026', initials:'CE', color:'#0f766e' },
-  { id:10, name:'Adeola Tunde',          matric:'MTU/PHY/2021/011', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Apr 07, 2026', initials:'AT', color:'#7c3aed' },
-  { id:11, name:'Bello Fatima',          matric:'MTU/NUT/2020/016', programme:'B.Sc Nutrition & Dietetics',      college:'CAHS', type:'Graduation', submitted:'Apr 06, 2026', initials:'BF', color:'#dc2626' },
-  { id:12, name:'Taiwo Samuel',          matric:'MTU/MCS/2021/009', programme:'B.Sc Mass Communication',         college:'CHMS', type:'Graduation', submitted:'Apr 05, 2026', initials:'TS', color:'#059669' },
-  { id:13, name:'Obi Grace',             matric:'MTU/BIO/2021/027', programme:'B.Sc Biological Sciences',        college:'CBAS', type:'Graduation', submitted:'Apr 05, 2026', initials:'OG', color:'#0369a1' },
-  { id:14, name:'Hassan Musa',           matric:'MTU/GEO/2021/033', programme:'B.Sc Geosciences',                college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'HM', color:'#4d7c0f' },
-  { id:15, name:'Amara Chisom',          matric:'MTU/CHM/2021/018', programme:'B.Sc Chemical Sciences',          college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'AC', color:'#9333ea' },
-  { id:16, name:'Daniels Victor',        matric:'MTU/BMT/2021/041', programme:'B.Sc Biomedical Technology',      college:'CAHS', type:'Graduation', submitted:'Apr 03, 2026', initials:'DV', color:'#c2410c' },
-  { id:17, name:'Yusuf Khadijat',        matric:'MTU/FST/2021/012', programme:'B.Sc Food Science & Technology',  college:'CBAS', type:'Graduation', submitted:'Apr 03, 2026', initials:'YK', color:'#0891b2' },
-  { id:18, name:'Nnamdi Peter',          matric:'MTU/ECO/2021/025', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'NP', color:'#65a30d' },
-  { id:19, name:'Oke Christiana',        matric:'MTU/PHL/2021/006', programme:'B.A Philosophy & Religion',       college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'OC', color:'#b91c1c' },
-  { id:20, name:'Adeleye Rotimi',        matric:'MTU/MLS/2021/038', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'AR', color:'#0f172a' },
-  { id:21, name:'Nnaji Chidinma',        matric:'MTU/NRS/2021/029', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'NC', color:'#92400e' },
-  { id:22, name:'Okeke Emmanuel',        matric:'MTU/CSC/2020/044', programme:'B.Sc Cyber Security',             college:'CBAS', type:'Withdrawal', submitted:'Mar 31, 2026', initials:'OE', color:'#312e81' },
-  { id:23, name:'Adeleke Rukayat',       matric:'MTU/BAD/2021/017', programme:'B.Sc Business Administration',   college:'CHMS', type:'Graduation', submitted:'Mar 30, 2026', initials:'AR', color:'#166534' },
-  { id:24, name:'Musa Hauwa',            matric:'MTU/PHY/2020/052', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Mar 29, 2026', initials:'MH', color:'#0c4a6e' },
-];
+<script type="module">
+const DEPT_NAMES = {
+  hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
+  college:'College Officer', chapel:'University Chapel', health:'Health Centre',
+  sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
+  alumni:'Alumni Association', student_affairs:'Student Affairs', library:'University Library',
+  bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
+};
+const DEPT_ICONS = {
+  hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
+  chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
+  ict:'computer', alumni:'groups', student_affairs:'diversity_3', library:'menu_book',
+  bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
+};
+const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6','#be185d','#b45309','#0f766e','#7c3aed'];
 
-function getDeptStatus(studentId, dept) {
-  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-  const saved = decisions.find(d => d.studentId === studentId && d.dept === dept);
-  if (saved) return saved.status;
-  const chapelMap = {
-    1:'flagged', 2:'pending', 3:'pending', 4:'pending', 5:'pending',
-    6:'pending', 7:'pending', 8:'pending', 9:'flagged', 10:'flagged',
-    11:'rejected', 12:'approved', 13:'approved', 14:'approved', 15:'approved',
-    16:'approved', 17:'approved', 18:'approved', 19:'approved', 20:'approved',
-    21:'approved', 22:'approved', 23:'approved', 24:'approved'
-  };
-  if (dept === 'chapel') return chapelMap[studentId] || 'pending';
-  const seeds = {hod:3,cedgs:7,lab:11,college:17,health:19,sport:23,hall:29,ict:31,alumni:37,affairs:41,library:43,bursary:47,esm:53,academic:59};
-  const v = (studentId * (seeds[dept] || 13)) % 97;
-  if (v < 10) return 'rejected';
-  if (v < 24) return 'flagged';
-  if (v < 50) return 'pending';
-  return 'approved';
-}
+(async () => {
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
 
-(function() {
-  const DEPT_NAMES = {
-    hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
-    college:'College Officer', chapel:'University Chapel', health:'Health Centre',
-    sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
-    alumni:'Alumni Association', affairs:'Student Affairs', library:'University Library',
-    bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
-  };
-  const DEPT_ICONS = {
-    hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
-    chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
-    ict:'computer', alumni:'groups', affairs:'diversity_3', library:'menu_book',
-    bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
-  };
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'officer') { window.location.href = '../login.html'; return; }
 
-  const session = JSON.parse(localStorage.getItem('cms_session') || 'null');
-  if (!session || session.role !== 'officer') { window.location.href = '../login.html'; return; }
-
-  const dept     = session.department || 'chapel';
+  const dept     = profile.department || 'chapel';
   const deptName = DEPT_NAMES[dept] || dept;
   const deptIcon = DEPT_ICONS[dept] || 'badge';
-  const initials = ((session.firstName||'')[0]||'') + ((session.lastName||'')[0]||'');
+  const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || 'CO';
 
-  // Sidebar / topbar
-  const chip = document.getElementById('deptChipName');
-  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
-  const sub = document.getElementById('topbarSub');
-  if (sub) sub.textContent = deptName + ' — Clearance Officer';
-  document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials.toUpperCase() || 'CO');
-  document.querySelectorAll('a[href="../login.html"]').forEach(a => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (confirm('Log out of CMS? Any unsaved changes will be lost.')) {
-        localStorage.removeItem('cms_session');
-        window.location.href = '../login.html';
-      }
-    });
+  document.getElementById('deptChipName').innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+  document.getElementById('topbarSub').textContent  = deptName + ' — Clearance Officer';
+  document.getElementById('topbarAvatar').textContent = initials;
+
+  // Load all clearance items for this department
+  const { data: items } = await supabase
+    .from('clearance_items')
+    .select('id, status, updated_at, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme))')
+    .eq('department_id', dept)
+    .order('updated_at', { ascending: false });
+
+  const rows = (items || []).map((item, i) => {
+    const req = item.clearance_requests;
+    const p   = req?.profiles;
+    const fn = p?.first_name || ''; const ln = p?.last_name || '';
+    return {
+      itemId: item.id,
+      status: item.status || 'pending',
+      name: [fn, ln].filter(Boolean).join(' ') || 'Unknown Student',
+      matric: p?.matric_number || '—',
+      programme: p?.programme || '—',
+      type: req?.type || 'Graduation',
+      initials: ((fn[0]||'') + (ln[0]||'')).toUpperCase() || '??',
+      color: AVA_COLORS[i % AVA_COLORS.length],
+      submittedAt: req?.submitted_at || null,
+    };
   });
 
-  // Compute counts
-  const counts = {approved:0, pending:0, flagged:0, rejected:0};
-  REQUESTS.forEach(r => { counts[getDeptStatus(r.id, dept)]++; });
-  const total = REQUESTS.length;
-  const approvalPct = Math.round(counts.approved / total * 100);
+  const counts = { approved:0, pending:0, flagged:0, rejected:0 };
+  rows.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+  const total = rows.length;
+  const approvalPct = total ? Math.round(counts.approved / total * 100) : 0;
 
-  // Stat cards
-  const statVals = document.querySelectorAll('.stat-value');
-  if (statVals[0]) statVals[0].textContent = total;
-  if (statVals[1]) statVals[1].textContent = counts.pending;
-  if (statVals[2]) statVals[2].textContent = counts.approved;
-  if (statVals[3]) statVals[3].textContent = counts.flagged;
-  const trendEls = document.querySelectorAll('.stat-trend');
-  if (trendEls[2]) trendEls[2].innerHTML = `<span class="material-symbols-outlined" style="font-size:14px;">trending_up</span>${approvalPct}% approval rate`;
-
-  // Alert banner
-  const alertText = document.getElementById('alertBannerText');
-  if (alertText) alertText.innerHTML = `<strong>${counts.pending} request${counts.pending === 1 ? '' : 's'}</strong> are pending your review. Students are waiting for ${deptName} clearance.`;
-
-  // Nav badge
-  const navBadge = document.getElementById('pendingNavBadge');
-  if (navBadge) navBadge.textContent = counts.pending;
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statPending').textContent = counts.pending;
+  document.getElementById('statApproved').textContent= counts.approved;
+  document.getElementById('statFlagged').textContent = counts.flagged;
+  document.getElementById('legendApproved').textContent = counts.approved;
+  document.getElementById('legendPending').textContent  = counts.pending;
+  document.getElementById('legendFlagged').textContent  = counts.flagged;
+  document.getElementById('legendRejected').textContent = counts.rejected;
+  document.getElementById('pendingNavBadge').textContent = counts.pending;
+  document.getElementById('alertBannerText').innerHTML =
+    `<strong>${counts.pending} request${counts.pending === 1 ? '' : 's'}</strong> are pending your review. Students are waiting for ${deptName} clearance.`;
 
   // Donut chart
-  const ap = counts.approved / total * 100;
-  const pp = ap + counts.pending / total * 100;
-  const fp = pp + counts.flagged / total * 100;
+  const ap = total ? counts.approved / total * 100 : 0;
+  const pp = ap + (total ? counts.pending / total * 100 : 0);
+  const fp = pp + (total ? counts.flagged / total * 100 : 0);
   const donut = document.getElementById('donutChart');
   if (donut) donut.style.background = `conic-gradient(var(--approved) 0% ${ap}%, var(--pending) ${ap}% ${pp}%, var(--flagged) ${pp}% ${fp}%, #E5E7EB ${fp}% 100%)`;
   const donutLabel = document.getElementById('donutLabel');
   if (donutLabel) donutLabel.innerHTML = `${approvalPct}%<small>approved</small>`;
 
-  // Donut legend values
-  const legendVals = document.querySelectorAll('.legend-val');
-  if (legendVals[0]) legendVals[0].textContent = counts.approved;
-  if (legendVals[1]) legendVals[1].textContent = counts.pending;
-  if (legendVals[2]) legendVals[2].textContent = counts.flagged;
-  if (legendVals[3]) legendVals[3].textContent = counts.rejected;
-
-  // Pending requests list — show up to 6 actionable (pending/flagged)
-  const timeLabels = {
-    'Apr 14':'2 days ago', 'Apr 13':'3 days ago', 'Apr 12':'4 days ago',
-    'Apr 11':'5 days ago', 'Apr 10':'6 days ago', 'Apr 09':'7 days ago',
-    'Apr 08':'8 days ago', 'Apr 07':'9 days ago', 'Apr 06':'10 days ago',
-    'Apr 05':'11 days ago','Apr 04':'12 days ago','Apr 03':'13 days ago',
-    'Apr 02':'14 days ago','Apr 01':'15 days ago','Mar 31':'16 days ago',
-    'Mar 30':'17 days ago','Mar 29':'18 days ago',
-  };
-  const actionable = REQUESTS.filter(r => {
-    const s = getDeptStatus(r.id, dept);
-    return s === 'pending' || s === 'flagged';
-  }).slice(0, 6);
-
+  // Pending requests list — top 6 actionable
+  const actionable = rows.filter(r => r.status === 'pending' || r.status === 'flagged').slice(0, 6);
   const pendingList = document.getElementById('pendingList');
   if (pendingList) {
     if (actionable.length === 0) {
       pendingList.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:0.82rem;">No pending requests — all cleared!</div>';
     } else {
       pendingList.innerHTML = actionable.map(r => {
-        const status = getDeptStatus(r.id, dept);
-        const badgeClass = status === 'flagged' ? 'badge-flagged' : 'badge-pending';
-        const badgeText  = status === 'flagged' ? 'Flagged' : 'Pending';
-        const dateKey = Object.keys(timeLabels).find(k => r.submitted.startsWith(k));
-        const timeAgo = dateKey ? timeLabels[dateKey] : r.submitted;
-        return `<a href="officer-review.html?student=${r.id}" class="req-row">
+        const badgeClass = r.status === 'flagged' ? 'badge-flagged' : 'badge-pending';
+        const badgeText  = r.status === 'flagged' ? 'Flagged' : 'Pending';
+        const timeAgo = r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
+        return `<a href="officer-review.html?item=${r.itemId}" class="req-row">
           <div class="req-avatar" style="background:${r.color};">${r.initials}</div>
           <div class="req-info">
             <div class="req-name">${r.name}</div>
@@ -550,27 +493,26 @@ function getDeptStatus(studentId, dept) {
     }
   }
 
-  // Recent activity — dept-aware last 4 actions
-  const recentStudents = REQUESTS.slice(0, 8);
-  const activityData = recentStudents
-    .map(r => ({ r, status: getDeptStatus(r.id, dept) }))
-    .filter(({status}) => status !== 'pending')
-    .slice(0, 4);
+  // Recent activity — last 4 non-pending items
+  const activityData = rows.filter(r => r.status !== 'pending').slice(0, 4);
   const activityList = document.querySelector('.activity-list');
-  if (activityList && activityData.length > 0) {
-    const actIcons   = {approved:'check', flagged:'flag', rejected:'close'};
-    const actBgs     = {approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', rejected:'var(--rejected-bg)'};
-    const actColors  = {approved:'var(--approved)',    flagged:'var(--flagged)',    rejected:'var(--rejected)'};
-    const actLabels  = {approved:'clearance approved', flagged:`flagged for ${deptName.toLowerCase()} review`, rejected:'clearance rejected'};
-    const actTimes   = ['Today, 9:14 AM','Yesterday, 3:42 PM','Yesterday, 11:20 AM','2 days ago'];
-    activityList.innerHTML = activityData.map(({r, status}, i) => `
-      <div class="activity-item">
-        <div class="activity-icon" style="background:${actBgs[status]};"><span class="material-symbols-outlined" style="color:${actColors[status]};">${actIcons[status]}</span></div>
-        <div class="activity-text">
-          <strong>${r.name}</strong> — ${actLabels[status]}
-          <div class="activity-time">${actTimes[i] || r.submitted}</div>
-        </div>
-      </div>`).join('');
+  if (activityList) {
+    const actIcons  = {approved:'check', flagged:'flag', rejected:'close'};
+    const actBgs    = {approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', rejected:'var(--rejected-bg)'};
+    const actColors = {approved:'var(--approved)', flagged:'var(--flagged)', rejected:'var(--rejected)'};
+    const actLabels = {approved:'clearance approved', flagged:'request flagged', rejected:'clearance rejected'};
+    if (activityData.length === 0) {
+      activityList.innerHTML = '<div style="padding:1rem;font-size:0.82rem;color:var(--muted);">No recent activity yet.</div>';
+    } else {
+      activityList.innerHTML = activityData.map(r => `
+        <div class="activity-item">
+          <div class="activity-icon" style="background:${actBgs[r.status]||actBgs.approved};"><span class="material-symbols-outlined" style="color:${actColors[r.status]||actColors.approved};">${actIcons[r.status]||'check'}</span></div>
+          <div class="activity-text">
+            <strong>${r.name}</strong> — ${actLabels[r.status]||r.status}
+            <div class="activity-time">${r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : '—'}</div>
+          </div>
+        </div>`).join('');
+    }
   }
 })();
 </script>

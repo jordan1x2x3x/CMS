@@ -169,8 +169,8 @@
     <div><div class="brand-name">MTU Clearance</div><div class="brand-sub">Student Portal</div></div>
   </div>
   <div class="sidebar-profile">
-    <div class="profile-avatar">OJ</div>
-    <div><div class="profile-name">Odunukwe C. Jordan</div><div class="profile-matric">MTU/CSC/2021/001</div></div>
+    <div class="profile-avatar" id="sidebarAvatar">--</div>
+    <div><div class="profile-name" id="sidebarName">Loading…</div><div class="profile-matric" id="sidebarMatric"></div></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-label">Main</div>
@@ -183,7 +183,7 @@
     <a href="student-help.html" class="nav-item"><span class="material-symbols-outlined">help</span>Help Center</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -196,7 +196,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span><span class="notif-dot"></span></button>
-      <div class="profile-avatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
+      <div class="profile-avatar" id="topbarAvatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">--</div>
     </div>
   </header>
 
@@ -207,7 +207,7 @@
         <p>Click any department in the stepper to view its requirements and status details.</p>
       </div>
       <div class="completion-chip">
-        <div><div class="completion-label">Total Completion</div><div class="completion-pct">53%</div></div>
+        <div><div class="completion-label">Total Completion</div><div class="completion-pct" id="completionPct">0%</div></div>
         <span class="material-symbols-outlined" style="font-size:32px;color:var(--purple);font-variation-settings:'FILL' 1;">verified</span>
       </div>
     </div>
@@ -234,197 +234,79 @@
 
 <script>
 const DEPTS = [
-  {
-    id:'hod', name:'Head of Department (HOD)', status:'approved', icon:'school',
-    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
-    requirements:[
-      {done:true,  text:'4 bonded project copies submitted'},
-      {done:true,  text:'4 CDs with digital thesis'},
-      {done:true,  text:'Plagiarism result verified (<15%)'},
-      {done:true,  text:'HOD & Supervisor signatures obtained'},
-    ],
-    note:'Cleared on July 14, 2024. No further action required.',
-    actions:[],
-  },
-  {
-    id:'cedgs', name:'CEDGS', status:'approved', icon:'payments',
-    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
-    requirements:[
-      {done:true, text:'CEDGS fee payment confirmed'},
-      {done:true, text:'HOD signature verified'},
-      {done:true, text:'Poise/Entrepreneurship fee proof submitted'},
-    ],
-    note:'Cleared on July 10, 2024.',
-    actions:[],
-  },
-  {
-    id:'lab', name:'Lab Instructor', status:'approved', icon:'science',
-    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
-    requirements:[
-      {done:true, text:'No damaged or missing lab equipment confirmed'},
-      {done:true, text:'Lab access card returned'},
-    ],
-    note:'No equipment damage recorded. Cleared on July 8, 2024.',
-    actions:[],
-  },
-  {
-    id:'college', name:'College Officer', status:'approved', icon:'corporate_fare',
-    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
-    requirements:[
-      {done:true, text:'HOD signature verified (prerequisite met)'},
-      {done:true, text:'College officer review completed'},
-    ],
-    note:'Cleared on July 11, 2024.',
-    actions:[],
-  },
-  {
-    id:'chapel', name:'University Chapel', status:'flagged', icon:'church',
-    tag:'Flagged — Action Required', tagClass:'b-flagged', borderClass:'border-flagged', tagColor:'var(--flagged)',
-    issue:{
-      label:'Chapel Attendance',
-      rows:[
-        {k:'Issue',       v:'Chapel attendance shows 14 misses — exceeds the 10-miss limit.'},
-        {k:'Requirement', v:'Maximum of 10 chapel session misses allowed for clearance.'},
-        {k:'Next Step',   v:'Visit the Chaplaincy Unit with your ID card or contact the Chapel officer.'},
-      ],
-      bg:'var(--flagged-bg)', color:'#92400E',
-    },
-    requirements:[
-      {done:false, text:'Chapel attendance within allowed limit (≤10 misses)'},
-      {done:false, text:'Signed clearance letter from Chaplain (if exemption applies)'},
-    ],
-    actions:[
-      {label:'Resolve Issue', icon:'open_in_new', style:'orange'},
-      {label:'Contact Chaplaincy', icon:'mail', style:'secondary'},
-    ],
-  },
-  {
-    id:'health', name:'Health Centre', status:'approved', icon:'local_hospital',
-    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
-    requirements:[
-      {done:true, text:'No outstanding medical bills or damages'},
-      {done:true, text:'Health centre records reviewed'},
-    ],
-    note:'Cleared on July 9, 2024.',
-    actions:[],
-  },
-  {
-    id:'sport', name:'Sport Unit', status:'approved', icon:'sports',
-    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
-    requirements:[
-      {done:true, text:'No sport equipment damage or loss'},
-      {done:true, text:'Sport unit clearance signed off'},
-    ],
-    note:'Cleared on July 9, 2024.',
-    actions:[],
-  },
-  {
-    id:'hall', name:'Hall of Residence', status:'approved', icon:'home',
-    tag:'Approved', tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)',
-    requirements:[
-      {done:true, text:'No property damage recorded'},
-      {done:true, text:'Room key returned'},
-      {done:true, text:'Hostel dues fully paid'},
-    ],
-    note:'Cleared on July 7, 2024. Required by Student Affairs before they can clear you.',
-    actions:[],
-  },
-  {
-    id:'ict', name:'ICT Unit', status:'pending', icon:'computer',
-    tag:'Pending Review', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
-    requirements:[
-      {done:true,  text:'HOD signature verified (prerequisite met)'},
-      {done:false, text:'ICT officer review completed'},
-    ],
-    note:'Request submitted July 15, 2024. Estimated review: 1–2 working days.',
-    actions:[
-      {label:'View Submission', icon:'visibility', style:'secondary'},
-    ],
-  },
-  {
-    id:'alumni', name:'Alumni Association', status:'pending', icon:'groups',
-    tag:'Pending Review', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
-    requirements:[
-      {done:false, text:'Alumni fee payment proof uploaded'},
-      {done:false, text:'Alumni association review completed'},
-    ],
-    note:'Upload your alumni fee payment receipt to proceed.',
-    actions:[
-      {label:'Upload Payment Proof', icon:'upload', style:'primary'},
-    ],
-  },
-  {
-    id:'affairs', name:'Student Affairs', status:'pending', icon:'diversity_3',
-    tag:'Pending Review', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
-    requirements:[
-      {done:true,  text:'Hall of Residence clearance obtained (prerequisite met)'},
-      {done:false, text:'Student Affairs officer review completed'},
-    ],
-    note:'Awaiting Student Affairs officer review. Prerequisite (Hostel clearance) is met.',
-    actions:[],
-  },
-  {
-    id:'library', name:'University Library', status:'locked', icon:'menu_book',
-    tag:'Locked', tagClass:'b-locked', borderClass:'border-locked', tagColor:'var(--purple-light)',
-    requirements:[
-      {lock:true, text:'All borrowed books returned'},
-      {lock:true, text:'Library fines fully paid'},
-    ],
-    note:'🔒 Requires CEDGS, HOD & College Officer clearances (all met) + Chapel (flagged). Resolve Chapel first to unlock Library.',
-    actions:[],
-  },
-  {
-    id:'bursary', name:'Bursary Unit', status:'locked', icon:'account_balance_wallet',
-    tag:'Locked', tagClass:'b-locked', borderClass:'border-locked', tagColor:'var(--purple-light)',
-    requirements:[
-      {lock:true, text:'School fees receipt (final session) uploaded'},
-      {lock:true, text:'No outstanding debt confirmed'},
-    ],
-    note:'🔒 Final debt check. Available after Library clearance is obtained.',
-    actions:[],
-  },
-  {
-    id:'esm', name:'ESM Unit (Ensemble for Spiritual Music)', status:'pending', icon:'music_note',
-    tag:'Pending', tagClass:'b-pending', borderClass:'border-pending', tagColor:'var(--pending)',
-    requirements:[
-      {done:false, text:'Attend all mandatory ESM sessions for the semester'},
-      {done:false, text:'Obtain ESM clearance form from the ESM Office'},
-      {done:false, text:'ESM Coordinator signature on clearance form'},
-      {done:false, text:'Submit signed form to the Student Affairs portal'},
-    ],
-    note:'ESM (Ensemble for Spiritual Music) is a mandatory general course for all students regardless of department or programme. Every student must obtain ESM clearance before graduation or withdrawal.',
-    actions:['Visit ESM Office', 'Upload Clearance Form'],
-  },
-  {
-    id:'academic', name:'Academic Affairs (Registrar)', status:'locked', icon:'verified',
-    tag:'Locked — Final Step', tagClass:'b-locked', borderClass:'border-locked', tagColor:'var(--purple-light)',
-    requirements:[
-      {lock:true, text:'All 14 departments fully cleared'},
-      {lock:true, text:'Final verification by Registrar'},
-      {lock:true, text:'Clearance certificate generated'},
-    ],
-    note:'🔒 This is the final step. All other departments must be approved before Academic Affairs can clear you.',
-    actions:[],
-  },
+  { id:'hod',           name:'Head of Department (HOD)',            icon:'school',
+    requirements:[{done:false,text:'4 bonded project copies submitted'},{done:false,text:'4 CDs with digital thesis'},{done:false,text:'Plagiarism result verified (<15%)'},{done:false,text:'HOD & Supervisor signatures obtained'}],
+    note:'Submit all required documents to your HOD\'s office.', actions:[] },
+  { id:'cedgs',         name:'CEDGS',                               icon:'payments',
+    requirements:[{done:false,text:'CEDGS fee payment confirmed'},{done:false,text:'HOD signature verified'},{done:false,text:'Poise/Entrepreneurship fee proof submitted'}],
+    note:'Submit your CEDGS fee payment proof to the office.', actions:[] },
+  { id:'lab',           name:'Lab Instructor',                      icon:'science',
+    requirements:[{done:false,text:'No damaged or missing lab equipment confirmed'},{done:false,text:'Lab access card returned'}],
+    note:'Return your lab access card and ensure no equipment damage or loss.', actions:[] },
+  { id:'college',       name:'College Officer',                     icon:'corporate_fare',
+    requirements:[{done:false,text:'HOD signature verified (prerequisite)'},{done:false,text:'College officer review completed'}],
+    note:'Obtain your HOD clearance first, then visit the College Officer.', actions:[] },
+  { id:'chapel',        name:'University Chapel',                   icon:'church',
+    requirements:[{done:false,text:'Chapel attendance within allowed limit (≤10 misses)'},{done:false,text:'Signed clearance letter from Chaplain (if exemption applies)'}],
+    note:'Visit the Chaplaincy Unit with your ID card to obtain chapel clearance.', actions:[] },
+  { id:'health',        name:'Health Centre',                       icon:'local_hospital',
+    requirements:[{done:false,text:'No outstanding medical bills or damages'},{done:false,text:'Health centre records reviewed'}],
+    note:'Ensure all medical bills are settled before visiting the Health Centre.', actions:[] },
+  { id:'sport',         name:'Sport Unit',                          icon:'sports',
+    requirements:[{done:false,text:'No sport equipment damage or loss'},{done:false,text:'Sport unit clearance signed off'}],
+    note:'Return any sport equipment and obtain clearance from the Sport Unit.', actions:[] },
+  { id:'hall',          name:'Hall of Residence',                   icon:'home',
+    requirements:[{done:false,text:'No property damage recorded'},{done:false,text:'Room key returned'},{done:false,text:'Hostel dues fully paid'}],
+    note:'Return your room key and settle all hostel dues before clearance.', actions:[] },
+  { id:'ict',           name:'ICT Unit',                            icon:'computer',
+    requirements:[{done:false,text:'HOD signature verified (prerequisite)'},{done:false,text:'ICT officer review completed'}],
+    note:'Ensure your HOD has cleared you before proceeding to the ICT Unit.', actions:[] },
+  { id:'alumni',        name:'Alumni Association',                  icon:'groups',
+    requirements:[{done:false,text:'Alumni fee payment proof uploaded'},{done:false,text:'Alumni association review completed'}],
+    note:'Upload your alumni fee payment receipt to proceed.', actions:[] },
+  { id:'student_affairs', name:'Student Affairs',                   icon:'diversity_3',
+    requirements:[{done:false,text:'Hall of Residence clearance obtained (prerequisite)'},{done:false,text:'Student Affairs officer review completed'}],
+    note:'Obtain your Hall of Residence clearance before visiting Student Affairs.', actions:[] },
+  { id:'library',       name:'University Library',                  icon:'menu_book',
+    requirements:[{done:false,text:'All borrowed books returned'},{done:false,text:'Library fines fully paid'}],
+    note:'Return all borrowed books and pay any outstanding fines.', actions:[] },
+  { id:'bursary',       name:'Bursary Unit',                        icon:'account_balance_wallet',
+    requirements:[{done:false,text:'School fees receipt (final session) uploaded'},{done:false,text:'No outstanding debt confirmed'}],
+    note:'Upload your final session school fees receipt and ensure no outstanding debts.', actions:[] },
+  { id:'esm',           name:'ESM Unit (Ensemble for Spiritual Music)', icon:'music_note',
+    requirements:[{done:false,text:'Attend all mandatory ESM sessions for the semester'},{done:false,text:'Obtain ESM clearance form from the ESM Office'},{done:false,text:'ESM Coordinator signature on clearance form'},{done:false,text:'Submit signed form to the Student Affairs portal'}],
+    note:'ESM clearance is mandatory for all students. Visit the ESM Office to obtain your clearance form.', actions:[] },
+  { id:'academic',      name:'Academic Affairs (Registrar)',         icon:'verified',
+    requirements:[{lock:true,text:'All 14 departments fully cleared'},{lock:true,text:'Final verification by Registrar'},{lock:true,text:'Clearance certificate generated'}],
+    note:'This is the final step. All other departments must be approved before Academic Affairs can clear you.', actions:[] },
 ];
 
+// Apply default pending style to every dept
+const STATUS_PROPS = {
+  pending:  {status:'pending',  tag:'Pending Review',            tagClass:'b-pending',  borderClass:'border-pending',  tagColor:'var(--pending)'},
+  approved: {status:'approved', tag:'Approved',                  tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)'},
+  flagged:  {status:'flagged',  tag:'Flagged — Action Required', tagClass:'b-flagged',  borderClass:'border-flagged',  tagColor:'var(--flagged)'},
+  rejected: {status:'flagged',  tag:'Rejected',                  tagClass:'b-flagged',  borderClass:'border-flagged',  tagColor:'var(--flagged)'},
+  locked:   {status:'locked',   tag:'Locked',                    tagClass:'b-locked',   borderClass:'border-locked',   tagColor:'var(--purple-light)'},
+};
+DEPTS.forEach(d => Object.assign(d, STATUS_PROPS.pending));
+
 const STATUS_DOT = {
-  approved: {cls:'s-approved', icon:'check'},
-  flagged:  {cls:'s-flagged',  icon:'priority_high'},
-  pending:  {cls:'s-pending',  icon:'schedule'},
-  locked:   {cls:'s-locked',   icon:'lock'},
-  na:       {cls:'s-na',       icon:'remove'},
+  approved:{cls:'s-approved',icon:'check'},
+  flagged: {cls:'s-flagged', icon:'priority_high'},
+  pending: {cls:'s-pending', icon:'schedule'},
+  locked:  {cls:'s-locked',  icon:'lock'},
+  na:      {cls:'s-na',      icon:'remove'},
 };
 
-let selected = 4; // default: Chapel (flagged)
+let selected = 0;
 
 function renderStepper() {
   const list = document.getElementById('stepperList');
   list.innerHTML = DEPTS.map((d, i) => {
-    const dot = STATUS_DOT[d.status];
-    const isSelected = i === selected;
+    const dot = STATUS_DOT[d.status] || STATUS_DOT.pending;
     return `
-      <div class="stepper-item ${dot.cls} ${isSelected ? 'selected' : ''}" onclick="selectDept(${i})">
+      <div class="stepper-item ${dot.cls} ${i===selected?'selected':''}" onclick="selectDept(${i})">
         <div class="stepper-dot"><span class="material-symbols-outlined">${dot.icon}</span></div>
         <div class="stepper-info">
           <div class="stepper-name">${i+1}. ${d.name}</div>
@@ -437,29 +319,17 @@ function renderStepper() {
 function renderDetail(i) {
   const d = DEPTS[i];
   const panel = document.getElementById('detailPanel');
-
-  let issueHTML = '';
-  if (d.issue) {
-    const rows = d.issue.rows.map(r =>
-      `<div class="issue-row"><strong style="color:${d.issue.color||'inherit'}">${r.k}:</strong><span>${r.v}</span></div>`
-    ).join('');
-    issueHTML = `<div class="issue-box" style="background:${d.issue.bg}">${rows}</div>`;
-  }
-
   const reqHTML = d.requirements.map(r => {
     const iconCls = r.lock ? 'req-lock' : r.done ? 'req-check' : 'req-pending';
     const icon    = r.lock ? 'lock' : r.done ? 'check_circle' : 'radio_button_unchecked';
     return `<div class="req-item"><span class="material-symbols-outlined ${iconCls}">${icon}</span>${r.text}</div>`;
   }).join('');
-
-  const actHTML = d.actions.map(a => {
-    if (a.style === 'secondary') {
-      return `<button class="btn-secondary-action"><span class="material-symbols-outlined" style="font-size:16px;">${a.icon}</span>${a.label}</button>`;
-    }
+  const actHTML = (d.actions||[]).map(a => {
+    if (typeof a === 'string') return `<button class="btn-primary-action">${a}</button>`;
+    if (a.style === 'secondary') return `<button class="btn-secondary-action"><span class="material-symbols-outlined" style="font-size:16px;">${a.icon}</span>${a.label}</button>`;
     const cls = a.style === 'orange' ? 'orange' : a.style === 'green' ? 'green' : '';
     return `<button class="btn-primary-action ${cls}"><span class="material-symbols-outlined" style="font-size:16px;">${a.icon}</span>${a.label}</button>`;
   }).join('');
-
   panel.innerHTML = `
     <div class="detail-card ${d.borderClass}">
       <div class="detail-top">
@@ -467,11 +337,8 @@ function renderDetail(i) {
           <div class="detail-tag" style="color:${d.tagColor}">${d.tag}</div>
           <div class="detail-title">${d.name}</div>
         </div>
-        <div class="detail-icon" style="color:${d.tagColor}">
-          <span class="material-symbols-outlined">${d.icon}</span>
-        </div>
+        <div class="detail-icon" style="color:${d.tagColor}"><span class="material-symbols-outlined">${d.icon}</span></div>
       </div>
-      ${issueHTML}
       ${d.requirements.length ? `<div class="req-list">${reqHTML}</div>` : ''}
       ${d.note ? `<div class="info-note">${d.note}</div>` : ''}
       ${actHTML ? `<div class="action-row" style="margin-top:1rem;">${actHTML}</div>` : ''}
@@ -486,17 +353,73 @@ function selectDept(i) {
   selected = i;
   renderStepper();
   renderDetail(i);
-  document.getElementById('detailPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  document.getElementById('detailPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// Init — honour ?dept=N from dashboard links
-const _deptParam = new URLSearchParams(location.search).get('dept');
-if (_deptParam !== null) {
-  const _idx = parseInt(_deptParam, 10);
-  if (!isNaN(_idx) && _idx >= 0 && _idx < DEPTS.length) selected = _idx;
-}
+// Initial render while Supabase loads
 renderStepper();
 renderDetail(selected);
+
+// Load real data from Supabase
+(async () => {
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
+
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+  if (!profile || profile.role !== 'student') { window.location.href = '../login.html'; return; }
+
+  const fullName = (profile.first_name + ' ' + profile.last_name).trim();
+  const initials = ((profile.first_name||'')[0]||'') + ((profile.last_name||'')[0]||'');
+  document.getElementById('sidebarAvatar').textContent = initials.toUpperCase();
+  document.getElementById('sidebarName').textContent   = fullName;
+  document.getElementById('sidebarMatric').textContent = profile.matric_number || '';
+  document.getElementById('topbarAvatar').textContent  = initials.toUpperCase();
+
+  const { data: request } = await supabase
+    .from('clearance_requests')
+    .select('id')
+    .eq('student_id', session.user.id)
+    .order('submitted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (request) {
+    const { data: items } = await supabase
+      .from('clearance_items')
+      .select('department_id, status, officer_note')
+      .eq('request_id', request.id);
+
+    (items || []).forEach(item => {
+      const dept = DEPTS.find(d => d.id === item.department_id);
+      if (!dept) return;
+      const props = STATUS_PROPS[item.status] || STATUS_PROPS.pending;
+      dept.status      = props.status;
+      dept.tag         = props.tag;
+      dept.tagClass    = props.tagClass;
+      dept.borderClass = props.borderClass;
+      dept.tagColor    = props.tagColor;
+      dept.requirements = dept.requirements.map(r => ({...r, done: item.status === 'approved'}));
+      dept.note = item.officer_note
+        || (item.status === 'approved'  ? 'Cleared. No further action required.'
+          : item.status === 'rejected'  ? 'Clearance rejected. Contact the department officer for details.'
+          : item.status === 'flagged'   ? 'Flagged for action. Visit the department office to resolve this issue.'
+          : dept.note);
+    });
+  }
+
+  const approved = DEPTS.filter(d => d.status === 'approved').length;
+  document.getElementById('completionPct').textContent = Math.round((approved / DEPTS.length) * 100) + '%';
+
+  // Honour ?dept=N from dashboard links
+  const param = new URLSearchParams(location.search).get('dept');
+  if (param !== null) {
+    const idx = parseInt(param, 10);
+    if (!isNaN(idx) && idx >= 0 && idx < DEPTS.length) selected = idx;
+  }
+  renderStepper();
+  renderDetail(selected);
+})();
 </script>
 </body>
 </html>

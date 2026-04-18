@@ -157,7 +157,7 @@
     <a href="officer-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -173,7 +173,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-      <div class="topbar-avatar">CO</div>
+      <div class="topbar-avatar" id="topbarAvatar">CO</div>
     </div>
   </header>
 
@@ -551,11 +551,7 @@ function takeAction(status, reason) {
 
   // Persist decision to Supabase
   (async () => {
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const supabase = createClient(
-      'https://nywyjkfgmfgutgudnbur.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
-    );
+    const { supabase } = await import('../js/supabase.js');
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
@@ -600,53 +596,61 @@ function showToast(msg, type = 'approved') {
 
 // ── Session guard, student loader & department population ──
 (async function() {
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  const supabase = createClient(
-    'https://nywyjkfgmfgutgudnbur.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
-  );
+  const { supabase } = await import('../js/supabase.js');
 
   const { data: { session: authSession } } = await supabase.auth.getSession();
   if (!authSession) { window.location.href = '../login.html'; return; }
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authSession.user.id).single();
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authSession.user.id).maybeSingle();
   if (!profile || profile.role !== 'officer') { window.location.href = '../login.html'; return; }
 
   const dept     = profile.department || 'chapel';
   const deptName = DEPT_NAMES[dept] || dept;
   const deptIcon = DEPT_ICONS[dept] || 'badge';
-  const initials = (profile.first_name[0] || '') + (profile.last_name[0] || '');
+  const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || 'CO';
 
   const chip = document.getElementById('deptChipName');
   if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
-  document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials.toUpperCase() || 'CO');
-  document.querySelectorAll('a[href="../login.html"]').forEach(a => {
-    a.addEventListener('click', async (e) => {
-      e.preventDefault();
-      if (confirm('Log out of CMS? Any unsaved changes will be lost.')) {
-        await supabase.auth.signOut();
-        window.location.href = '../login.html';
-      }
-    });
-  });
+  document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials);
 
-  // Load student from ?student=ID param
-  const studentId = parseInt(new URLSearchParams(window.location.search).get('student')) || 1;
-  const student   = REQUESTS.find(r => r.id === studentId) || REQUESTS[0];
-  const status    = getDeptStatus(student.id, dept);
+  // Load clearance item from ?item=ID param (Supabase row ID)
+  const itemId = new URLSearchParams(window.location.search).get('item');
+  let student = null; let status = 'pending'; let submittedDate = '—';
+
+  if (itemId) {
+    const { data: item } = await supabase
+      .from('clearance_items')
+      .select('id, status, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme, college))')
+      .eq('id', itemId).maybeSingle();
+
+    if (item) {
+      const req = item.clearance_requests;
+      const p   = req?.profiles;
+      const fn  = p?.first_name || ''; const ln = p?.last_name || '';
+      const ini = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '??';
+      student = { name: [fn, ln].filter(Boolean).join(' '), matric: p?.matric_number || '—',
+        programme: p?.programme || '—', college: p?.college || '—',
+        type: req?.type || 'Graduation', initials: ini };
+      status = item.status || 'pending';
+      submittedDate = req?.submitted_at ? new Date(req.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    }
+  }
+
+  if (!student) {
+    student = { name:'Unknown Student', matric:'—', programme:'—', college:'—', type:'Graduation', initials:'??' };
+  }
 
   // Student info
-  document.getElementById('studentName').textContent  = student.name;
-  document.getElementById('studentMatric').textContent = student.matric;
-  document.getElementById('studentAvatar').textContent = student.initials;
-  document.getElementById('studentAvatar').style.background = student.color;
-  document.getElementById('infoProg').textContent      = student.programme;
-  document.getElementById('infoCollege').textContent   = student.college;
-  document.getElementById('infoClearance').textContent = (student.type === 'Graduation' ? '🎓 ' : '📤 ') + student.type;
-  document.getElementById('infoSubmitted').textContent = student.submitted;
+  document.getElementById('studentName').textContent   = student.name;
+  document.getElementById('studentMatric').textContent  = student.matric;
+  document.getElementById('studentAvatar').textContent  = student.initials;
+  document.getElementById('infoProg').textContent       = student.programme;
+  document.getElementById('infoCollege').textContent    = student.college;
+  document.getElementById('infoClearance').textContent  = (student.type === 'Graduation' ? '🎓 ' : '📤 ') + student.type;
+  document.getElementById('infoSubmitted').textContent  = submittedDate;
   document.getElementById('infoClearanceDept').textContent = deptName;
-  document.getElementById('topbarName').textContent    = student.name;
-  document.getElementById('topbarMeta').textContent    = student.matric + ' · ' + deptName + ' Review';
+  document.getElementById('topbarName').textContent     = student.name;
+  document.getElementById('topbarMeta').textContent     = student.matric + ' · ' + deptName + ' Review';
 
   // Status badges
   const statusClasses = {approved:'badge-approved', flagged:'badge-flagged', pending:'badge-pending', rejected:'badge-rejected'};
@@ -712,7 +716,7 @@ function showToast(msg, type = 'approved') {
       <div class="tl-content">
         <div class="tl-title">${tlTitles[status]}</div>
         <div class="tl-body">${tlBodies[status]}</div>
-        <div class="tl-time">${student.submitted} · You</div>
+        <div class="tl-time">${submittedDate} · You</div>
       </div>
     </div>
     <div class="tl-item">
@@ -720,7 +724,7 @@ function showToast(msg, type = 'approved') {
       <div class="tl-content">
         <div class="tl-title">Documents submitted by student</div>
         <div class="tl-body">${docs.map(d => d.name).join(', ')}</div>
-        <div class="tl-time">${student.submitted} · 10:05 AM · Student</div>
+        <div class="tl-time">${submittedDate} · Student</div>
       </div>
     </div>
     <div class="tl-item">
@@ -728,39 +732,22 @@ function showToast(msg, type = 'approved') {
       <div class="tl-content">
         <div class="tl-title">Clearance request submitted</div>
         <div class="tl-body">${student.type} clearance request sent to all 15 departments.</div>
-        <div class="tl-time">${student.submitted} · 9:20 AM · Student</div>
+        <div class="tl-time">${submittedDate} · Student</div>
       </div>
     </div>`;
 
-  // Nav badge — show dept-specific pending count
-  const pendingCount = REQUESTS.filter(r => getDeptStatus(r.id, dept) === 'pending').length;
+  // Nav badge — load real pending count for this dept
+  const { count: pendingCount } = await supabase
+    .from('clearance_items').select('id', { count:'exact', head:true })
+    .eq('department_id', dept).eq('status', 'pending');
   const navBadge = document.querySelector('.nav-badge');
-  if (navBadge) navBadge.textContent = pendingCount;
+  if (navBadge) navBadge.textContent = pendingCount ?? '';
 
-  // Prev/Next navigation — wire up correct student IDs
-  const currentIdx = REQUESTS.findIndex(r => r.id === student.id);
+  // Prev/Next navigation — disable (no sequential REQUESTS array in real mode)
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
-  if (prevBtn) {
-    const prev = REQUESTS[currentIdx - 1];
-    if (prev) {
-      prevBtn.href = `officer-review.html?student=${prev.id}`;
-    } else {
-      prevBtn.style.opacity = '0.4';
-      prevBtn.style.pointerEvents = 'none';
-      prevBtn.title = 'No previous student';
-    }
-  }
-  if (nextBtn) {
-    const next = REQUESTS[currentIdx + 1];
-    if (next) {
-      nextBtn.href = `officer-review.html?student=${next.id}`;
-    } else {
-      nextBtn.style.opacity = '0.4';
-      nextBtn.style.pointerEvents = 'none';
-      nextBtn.title = 'No next student';
-    }
-  }
+  if (prevBtn) { prevBtn.style.opacity='0.4'; prevBtn.style.pointerEvents='none'; prevBtn.title='Use Requests list to navigate'; }
+  if (nextBtn) { nextBtn.style.opacity='0.4'; nextBtn.style.pointerEvents='none'; nextBtn.title='Use Requests list to navigate'; }
 })();
 </script>
 </body>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Codes | MTU Super Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple: #6B0080; --purple-dark: #4A0058; --purple-light: #8B20A0;
+      --green: #76B82A; --green-dark: #5A8C20;
+      --surface: #F4F6F9; --white: #FFFFFF;
+      --border: #D1D9E6; --text-main: #1A0020; --text-muted: #5A6A80;
+      --sidebar-w: 240px;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--purple-dark); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); text-decoration: none; }
+    .sidebar-brand img { width: 36px; height: 36px; border-radius: 6px; background: white; padding: 2px; object-fit: contain; }
+    .sidebar-brand-text { font-family: 'Newsreader', serif; font-size: 0.9rem; font-weight: 700; color: white; line-height: 1.2; }
+    .sidebar-brand-text span { display: block; font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 500; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0.75rem 1.25rem 0.25rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.65rem 1.25rem; text-decoration: none; color: rgba(255,255,255,0.65); font-size: 0.83rem; font-weight: 500; border-left: 3px solid transparent; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: white; border-left-color: #B5E048; }
+    .nav-item .material-symbols-outlined { font-size: 18px; }
+    .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-user { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+    .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-light); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .sidebar-user-name { font-size: 0.78rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-role { font-size: 0.65rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.07em; }
+    .btn-logout { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.15s; }
+    .btn-logout:hover { background: rgba(239,68,68,0.15); color: #FCA5A5; border-color: rgba(239,68,68,0.3); }
+    .btn-logout .material-symbols-outlined { font-size: 16px; }
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: white; border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+    .topbar-title { font-size: 1rem; font-weight: 600; }
+    .topbar-badge { display: inline-flex; align-items: center; gap: 6px; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; border-radius: 20px; padding: 4px 12px; font-size: 0.72rem; font-weight: 600; }
+    .topbar-badge .material-symbols-outlined { font-size: 14px; }
+    .content { padding: 2rem; flex: 1; }
+    .grid-2 { display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem; }
+    .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-header h2 { font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .card-header h2 .material-symbols-outlined { font-size: 18px; color: var(--purple); }
+    .card-body { padding: 1.5rem; }
+
+    /* Generate form */
+    .field { display: flex; flex-direction: column; margin-bottom: 1rem; }
+    .field label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-muted); margin-bottom: 5px; }
+    .field select, .field input { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-main); outline: none; background: white; transition: border-color 0.2s; }
+    .field select:focus, .field input:focus { border-color: var(--purple); }
+    .field .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+
+    .btn-generate {
+      width: 100%; padding: 11px; border: none; border-radius: 8px;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
+      color: white; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-generate:hover { opacity: 0.9; }
+    .btn-generate .material-symbols-outlined { font-size: 18px; }
+
+    /* Generated code display */
+    .code-display { display: none; margin-top: 1rem; background: #F0FDF4; border: 1.5px solid #86EFAC; border-radius: 10px; padding: 1rem 1.25rem; }
+    .code-display.show { display: block; }
+    .code-display p { font-size: 0.72rem; color: #166534; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; }
+    .code-value { font-family: monospace; font-size: 1.1rem; font-weight: 700; color: #15803D; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; }
+    .copy-btn { background: none; border: none; cursor: pointer; color: #16A34A; display: flex; align-items: center; }
+    .copy-btn .material-symbols-outlined { font-size: 18px; }
+    .copy-btn:hover { color: #166534; }
+
+    /* Table */
+    .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 160px; }
+    .search-wrap .material-symbols-outlined { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 17px; pointer-events: none; }
+    .search-wrap input { width: 100%; padding: 8px 8px 8px 34px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.83rem; color: var(--text-main); outline: none; }
+    .search-wrap input:focus { border-color: var(--purple); }
+    select.filter-sel { padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.82rem; outline: none; background: white; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { text-align: left; padding: 0.5rem 0.75rem; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: #FAFBFD; }
+    td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFBFD; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 600; }
+    .badge-green  { background: #D1FAE5; color: #065F46; }
+    .badge-purple { background: #F5EEFF; color: var(--purple); }
+    .badge-blue   { background: #DBEAFE; color: #1E40AF; }
+    .badge-amber  { background: #FEF3C7; color: #92400E; }
+    .badge-red    { background: #FEE2E2; color: #991B1B; }
+    .badge-gray   { background: #F3F4F6; color: #374151; }
+    .code-mono { font-family: monospace; font-size: 0.82rem; font-weight: 600; color: var(--purple); background: #F5EEFF; padding: 2px 8px; border-radius: 4px; }
+
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="../index.html">
+    <img src="../assets/mtu-logo.png" alt="MTU" />
+    <div class="sidebar-brand-text">MTU Clearance <span>Super Admin</span></div>
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item" href="super-admin-dashboard.html"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+    <div class="nav-section-label">Management</div>
+    <a class="nav-item" href="super-admin-users.html"><span class="material-symbols-outlined">group</span> Users</a>
+    <a class="nav-item active" href="super-admin-access-codes.html"><span class="material-symbols-outlined">key</span> Access Codes</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item" href="super-admin-audit.html"><span class="material-symbols-outlined">receipt_long</span> Audit Log</a>
+    <a class="nav-item" href="super-admin-settings.html"><span class="material-symbols-outlined">settings</span> Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">SA</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebarName">Super Admin</div>
+        <div class="sidebar-user-role">ICT Unit</div>
+      </div>
+    </div>
+    <a class="btn-logout" href="../logout.html"><span class="material-symbols-outlined">logout</span> Sign Out</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Access Code Management</div>
+    <span class="topbar-badge"><span class="material-symbols-outlined">shield_person</span> Super Admin</span>
+  </div>
+  <div class="content">
+    <div class="grid-2">
+
+      <!-- Generate Panel -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <h2><span class="material-symbols-outlined">add_circle</span> Generate New Code</h2>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label>Role</label>
+              <select id="genRole">
+                <option value="officer">Department Officer</option>
+                <option value="admin">Admin / Registrar</option>
+                <option value="super_admin">Super Admin</option>
+              </select>
+            </div>
+            <div class="field" id="deptField">
+              <label>Department</label>
+              <select id="genDept">
+                <option value="hod">Head of Department (HOD)</option>
+                <option value="cedgs">CEDGS</option>
+                <option value="lab">Lab Instructor</option>
+                <option value="college">College Officer</option>
+                <option value="chapel">University Chapel</option>
+                <option value="health">Health Centre</option>
+                <option value="sport">Sport Unit</option>
+                <option value="hall">Hall of Residence</option>
+                <option value="ict">ICT Unit</option>
+                <option value="alumni">Alumni Association</option>
+                <option value="affairs">Student Affairs</option>
+                <option value="library">University Library</option>
+                <option value="bursary">Bursary Unit</option>
+                <option value="esm">ESM Unit</option>
+                <option value="academic">Academic Affairs</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Issued To <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+              <input type="text" id="genIssuedTo" placeholder="e.g. Dr. Adeyemi (for reference)" />
+              <div class="hint">This is just a label — the code works for anyone who has it.</div>
+            </div>
+            <div class="field">
+              <label>Expires In</label>
+              <select id="genExpiry">
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+                <option value="90">90 days</option>
+              </select>
+            </div>
+            <button class="btn-generate" id="generateBtn">
+              <span class="material-symbols-outlined">add</span> Generate Code
+            </button>
+
+            <div class="code-display" id="codeDisplay">
+              <p>Generated Code — share this with the recipient</p>
+              <div class="code-value">
+                <span id="generatedCode"></span>
+                <button class="copy-btn" id="copyBtn" title="Copy to clipboard">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+              </div>
+              <div style="font-size:0.72rem;color:#166534;margin-top:6px;" id="codeExpiry"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Codes Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2><span class="material-symbols-outlined">key</span> All Access Codes</h2>
+        </div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="toolbar">
+            <div class="search-wrap">
+              <span class="material-symbols-outlined">search</span>
+              <input type="text" id="codeSearch" placeholder="Search codes…" />
+            </div>
+            <select class="filter-sel" id="codeFilter">
+              <option value="all">All</option>
+              <option value="unused">Unused</option>
+              <option value="used">Used</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Role</th>
+                <th>Issued To</th>
+                <th>Expires</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="codesBody">
+              <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'super_admin') { window.location.href = '../login.html'; }
+
+  const _initials = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'SA';
+  const _fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Super Admin';
+  document.getElementById('sidebarName').textContent = _fullName;
+  document.getElementById('sidebarAvatar').textContent = _initials;
+
+  // Show/hide dept field based on role
+  document.getElementById('genRole').addEventListener('change', function() {
+    document.getElementById('deptField').style.display = this.value === 'officer' ? 'flex' : 'none';
+  });
+
+  // ── Dept prefix map ──
+  const DEPT_PREFIX = {
+    hod:'HOD', cedgs:'CEDGS', lab:'LAB', college:'COL', chapel:'CHP',
+    health:'HEALTH', sport:'SPORT', hall:'HALL', ict:'ICT',
+    alumni:'ALUMNI', affairs:'AFFAIRS', library:'LIB',
+    bursary:'BURSARY', esm:'ESM', academic:'ACADEMIC',
+  };
+
+  let allCodes = [];
+
+  async function loadCodes() {
+    const { data } = await supabase.from('access_codes').select('*').order('created_at', { ascending: false });
+    allCodes = data || [];
+    renderCodes();
+  }
+  loadCodes();
+
+  function renderCodes() {
+    const search = document.getElementById('codeSearch').value.toLowerCase();
+    const filter = document.getElementById('codeFilter').value;
+    const now = new Date();
+    let filtered = allCodes;
+    if (filter === 'unused')  filtered = filtered.filter(c => !c.used_by && new Date(c.expires_at) > now);
+    if (filter === 'used')    filtered = filtered.filter(c => !!c.used_by);
+    if (filter === 'expired') filtered = filtered.filter(c => !c.used_by && new Date(c.expires_at) <= now);
+    if (search) filtered = filtered.filter(c =>
+      c.code.toLowerCase().includes(search) ||
+      (c.issued_to||'').toLowerCase().includes(search) ||
+      c.intended_role.toLowerCase().includes(search)
+    );
+
+    const roleColors = { officer:'badge-blue', admin:'badge-purple', super_admin:'badge-amber' };
+    const tbody = document.getElementById('codesBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);">No codes found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(c => {
+      const expired = new Date(c.expires_at) <= now;
+      const status = c.used_by ? 'Used' : expired ? 'Expired' : 'Active';
+      const statusClass = c.used_by ? 'badge-gray' : expired ? 'badge-red' : 'badge-green';
+      return `
+        <tr>
+          <td><span class="code-mono">${c.code}</span></td>
+          <td><span class="badge ${roleColors[c.intended_role]||'badge-gray'}">${c.intended_role}</span></td>
+          <td style="font-size:0.78rem;color:var(--text-muted);">${c.issued_to || '—'}</td>
+          <td style="font-size:0.78rem;color:var(--text-muted);">${new Date(c.expires_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+          <td><span class="badge ${statusClass}">${status}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('codeSearch').addEventListener('input', renderCodes);
+  document.getElementById('codeFilter').addEventListener('change', renderCodes);
+
+  // ── Generate Code ──────────────────────────────────────────
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const role = document.getElementById('genRole').value;
+    const dept = document.getElementById('genDept').value;
+    const issuedTo = document.getElementById('genIssuedTo').value.trim() || null;
+    const days = parseInt(document.getElementById('genExpiry').value);
+
+    const year = new Date().getFullYear();
+    let prefix = role === 'admin' ? 'ADMIN' : role === 'super_admin' ? 'SUPER' : (DEPT_PREFIX[dept] || dept.toUpperCase());
+    const rand = Math.random().toString(36).substring(2,6).toUpperCase();
+    const code = `${prefix}-MTU-${year}-${rand}`;
+
+    const expiresAt = new Date(Date.now() + days * 86400000).toISOString();
+
+    const { error } = await supabase.from('access_codes').insert({
+      code,
+      intended_role: role,
+      issued_to: issuedTo,
+      expires_at: expiresAt,
+      created_by: profile.id || null,
+    });
+
+    if (error) {
+      alert('Failed to generate code: ' + error.message);
+      return;
+    }
+
+    document.getElementById('generatedCode').textContent = code;
+    document.getElementById('codeExpiry').textContent = `Expires: ${new Date(expiresAt).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
+    document.getElementById('codeDisplay').classList.add('show');
+    await loadCodes();
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const code = document.getElementById('generatedCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      const icon = document.querySelector('#copyBtn .material-symbols-outlined');
+      icon.textContent = 'check';
+      setTimeout(() => { icon.textContent = 'content_copy'; }, 1500);
+    });
+  });
+</script>
+</body>
+</html>

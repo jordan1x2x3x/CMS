@@ -260,10 +260,10 @@
   </div>
 
   <div class="sidebar-profile">
-    <div class="profile-avatar">OJ</div>
+    <div class="profile-avatar" id="sidebarAvatar">OJ</div>
     <div>
-      <div class="profile-name">Odunukwe C. Jordan</div>
-      <div class="profile-matric">MTU/CSC/2021/001</div>
+      <div class="profile-name" id="sidebarName">Odunukwe C. Jordan</div>
+      <div class="profile-matric" id="sidebarMatric">MTU/CSC/2021/001</div>
     </div>
   </div>
 
@@ -298,7 +298,7 @@
   </nav>
 
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger">
+    <a href="../logout.html" class="nav-item danger">
       <span class="material-symbols-outlined">logout</span>
       Logout
     </a>
@@ -323,7 +323,7 @@
       <button class="icon-btn">
         <span class="material-symbols-outlined">help</span>
       </button>
-      <div class="profile-avatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
+      <div class="profile-avatar" id="topbarAvatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
     </div>
   </header>
 
@@ -622,6 +622,21 @@
   <span id="toastMsg">Document uploaded successfully!</span>
 </div>
 
+<script type="module">
+  (async () => {
+    const { supabase } = await import('../js/supabase.js');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if (!profile) { window.location.href = '../login.html'; return; }
+    const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
+    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('sidebarName').textContent = fullName;
+    document.getElementById('sidebarMatric').textContent = profile.matric_number || '—';
+    document.getElementById('topbarAvatar').textContent = initials;
+  })();
+</script>
 <script>
   // ── File input handler ──
   const fileInput = document.getElementById('fileInput');

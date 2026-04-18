@@ -111,7 +111,7 @@
     <a href="officer-settings.html" class="nav-item"><span class="material-symbols-outlined">settings</span>Settings</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -123,7 +123,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-      <div class="topbar-avatar">CO</div>
+      <div class="topbar-avatar" id="topbarAvatar">CO</div>
     </div>
   </header>
 
@@ -176,96 +176,59 @@
   </div>
 </div>
 
-<script>
-const REQUESTS = [
-  { id:1,  name:'Odunukwe C. Jordan',   matric:'MTU/CSC/2021/001', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 14, 2026', initials:'OJ', color:'#6B0080' },
-  { id:2,  name:'Adeyemi Miracle',       matric:'MTU/BCH/2021/014', programme:'B.Sc Biochemistry',               college:'CBAS', type:'Graduation', submitted:'Apr 13, 2026', initials:'AM', color:'#0e7490' },
-  { id:3,  name:'Eze Oluwaseun',         matric:'MTU/NRS/2021/007', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 13, 2026', initials:'EO', color:'#065f46' },
-  { id:4,  name:'Fashola Kehinde',       matric:'MTU/MLS/2021/022', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 12, 2026', initials:'FK', color:'#92400e' },
-  { id:5,  name:'Nwosu Blessing',        matric:'MTU/ECO/2021/031', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 11, 2026', initials:'NB', color:'#1e3a5f' },
-  { id:6,  name:'Ibrahim Aisha',         matric:'MTU/PHL/2020/008', programme:'B.A Philosophy',                  college:'CHMS', type:'Withdrawal', submitted:'Apr 10, 2026', initials:'IA', color:'#5b21b6' },
-  { id:7,  name:'Okonkwo David',         matric:'MTU/CSC/2021/019', programme:'B.Sc Software Engineering',       college:'CBAS', type:'Graduation', submitted:'Apr 09, 2026', initials:'OD', color:'#be185d' },
-  { id:8,  name:'Lawal Fatimah',         matric:'MTU/ACF/2021/005', programme:'B.Sc Accounting and Finance',     college:'CHMS', type:'Graduation', submitted:'Apr 09, 2026', initials:'LF', color:'#b45309' },
-  { id:9,  name:'Chukwu Emeka',          matric:'MTU/CSC/2020/003', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 08, 2026', initials:'CE', color:'#0f766e' },
-  { id:10, name:'Adeola Tunde',          matric:'MTU/PHY/2021/011', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Apr 07, 2026', initials:'AT', color:'#7c3aed' },
-  { id:11, name:'Bello Fatima',          matric:'MTU/NUT/2020/016', programme:'B.Sc Nutrition & Dietetics',      college:'CAHS', type:'Graduation', submitted:'Apr 06, 2026', initials:'BF', color:'#dc2626' },
-  { id:12, name:'Taiwo Samuel',          matric:'MTU/MCS/2021/009', programme:'B.Sc Mass Communication',         college:'CHMS', type:'Graduation', submitted:'Apr 05, 2026', initials:'TS', color:'#059669' },
-  { id:13, name:'Obi Grace',             matric:'MTU/BIO/2021/027', programme:'B.Sc Biological Sciences',        college:'CBAS', type:'Graduation', submitted:'Apr 05, 2026', initials:'OG', color:'#0369a1' },
-  { id:14, name:'Hassan Musa',           matric:'MTU/GEO/2021/033', programme:'B.Sc Geosciences',                college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'HM', color:'#4d7c0f' },
-  { id:15, name:'Amara Chisom',          matric:'MTU/CHM/2021/018', programme:'B.Sc Chemical Sciences',          college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'AC', color:'#9333ea' },
-  { id:16, name:'Daniels Victor',        matric:'MTU/BMT/2021/041', programme:'B.Sc Biomedical Technology',      college:'CAHS', type:'Graduation', submitted:'Apr 03, 2026', initials:'DV', color:'#c2410c' },
-  { id:17, name:'Yusuf Khadijat',        matric:'MTU/FST/2021/012', programme:'B.Sc Food Science & Technology',  college:'CBAS', type:'Graduation', submitted:'Apr 03, 2026', initials:'YK', color:'#0891b2' },
-  { id:18, name:'Nnamdi Peter',          matric:'MTU/ECO/2021/025', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'NP', color:'#65a30d' },
-  { id:19, name:'Oke Christiana',        matric:'MTU/PHL/2021/006', programme:'B.A Philosophy & Religion',       college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'OC', color:'#b91c1c' },
-  { id:20, name:'Adeleye Rotimi',        matric:'MTU/MLS/2021/038', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'AR', color:'#0f172a' },
-  { id:21, name:'Nnaji Chidinma',        matric:'MTU/NRS/2021/029', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'NC', color:'#92400e' },
-  { id:22, name:'Okeke Emmanuel',        matric:'MTU/CSC/2020/044', programme:'B.Sc Cyber Security',             college:'CBAS', type:'Withdrawal', submitted:'Mar 31, 2026', initials:'OE', color:'#312e81' },
-  { id:23, name:'Adeleke Rukayat',       matric:'MTU/BAD/2021/017', programme:'B.Sc Business Administration',   college:'CHMS', type:'Graduation', submitted:'Mar 30, 2026', initials:'AR', color:'#166534' },
-  { id:24, name:'Musa Hauwa',            matric:'MTU/PHY/2020/052', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Mar 29, 2026', initials:'MH', color:'#0c4a6e' },
-];
+<script type="module">
+const DEPT_NAMES = {
+  hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
+  college:'College Officer', chapel:'University Chapel', health:'Health Centre',
+  sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
+  alumni:'Alumni Association', student_affairs:'Student Affairs', library:'University Library',
+  bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
+};
+const DEPT_ICONS = {
+  hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
+  chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
+  ict:'computer', alumni:'groups', student_affairs:'diversity_3', library:'menu_book',
+  bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
+};
+const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6','#be185d','#b45309','#0f766e','#7c3aed'];
 
-let currentDept = 'chapel';
+let ALL_ROWS = [];
 let activeFilter = 'all';
 let activeType = '';
 let searchQuery = '';
 
-function getDeptStatus(studentId, dept) {
-  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-  const saved = decisions.find(d => d.studentId === studentId && d.dept === dept);
-  if (saved) return saved.status;
-  const chapelMap = {
-    1:'flagged', 2:'pending', 3:'pending', 4:'pending', 5:'pending',
-    6:'pending', 7:'pending', 8:'pending', 9:'flagged', 10:'flagged',
-    11:'rejected', 12:'approved', 13:'approved', 14:'approved', 15:'approved',
-    16:'approved', 17:'approved', 18:'approved', 19:'approved', 20:'approved',
-    21:'approved', 22:'approved', 23:'approved', 24:'approved'
-  };
-  if (dept === 'chapel') return chapelMap[studentId] || 'pending';
-  const seeds = {hod:3,cedgs:7,lab:11,college:17,health:19,sport:23,hall:29,ict:31,alumni:37,affairs:41,library:43,bursary:47,esm:53,academic:59};
-  const v = (studentId * (seeds[dept] || 13)) % 97;
-  if (v < 10) return 'rejected';
-  if (v < 24) return 'flagged';
-  if (v < 50) return 'pending';
-  return 'approved';
-}
-
 function badgeHTML(status) {
   const map = { pending:'badge-pending', approved:'badge-approved', flagged:'badge-flagged', rejected:'badge-rejected' };
   const label = status.charAt(0).toUpperCase() + status.slice(1);
-  return `<span class="badge ${map[status]}">${label}</span>`;
+  return `<span class="badge ${map[status] || 'badge-pending'}">${label}</span>`;
 }
 
 function updateFilterTabs() {
-  const counts = {all:REQUESTS.length, pending:0, flagged:0, approved:0, rejected:0};
-  REQUESTS.forEach(r => { counts[getDeptStatus(r.id, currentDept)]++; });
+  const counts = { all:ALL_ROWS.length, pending:0, flagged:0, approved:0, rejected:0 };
+  ALL_ROWS.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
   const tabs = document.querySelectorAll('.filter-tab');
   const order = ['all','pending','flagged','approved','rejected'];
-  const names = {all:'All', pending:'Pending', flagged:'Flagged', approved:'Approved', rejected:'Rejected'};
-  tabs.forEach((tab, i) => {
-    const key = order[i];
-    if (key) tab.textContent = `${names[key]} (${counts[key]})`;
-  });
+  const names = { all:'All', pending:'Pending', flagged:'Flagged', approved:'Approved', rejected:'Rejected' };
+  tabs.forEach((tab, i) => { const key = order[i]; if (key) tab.textContent = `${names[key]} (${counts[key]})`; });
   const badge = document.querySelector('.nav-badge');
   if (badge) badge.textContent = counts.pending;
 }
 
 function renderTable() {
   const body = document.getElementById('reqBody');
-  const filtered = REQUESTS.filter(r => {
-    const status = getDeptStatus(r.id, currentDept);
-    const matchFilter = activeFilter === 'all' || status === activeFilter;
+  const filtered = ALL_ROWS.filter(r => {
+    const matchFilter = activeFilter === 'all' || r.status === activeFilter;
     const matchType   = !activeType || r.type === activeType;
     const matchSearch = !searchQuery || r.name.toLowerCase().includes(searchQuery) || r.matric.toLowerCase().includes(searchQuery);
     return matchFilter && matchType && matchSearch;
   });
-  document.getElementById('tableInfo').textContent = `Showing ${filtered.length} of ${REQUESTS.length} requests`;
+  document.getElementById('tableInfo').textContent = `Showing ${filtered.length} of ${ALL_ROWS.length} requests`;
   if (filtered.length === 0) {
     body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem 1.25rem;color:var(--muted);font-size:0.83rem;">No requests match your search or filter.</td></tr>`;
     return;
   }
-  body.innerHTML = filtered.map(r => {
-    const status = getDeptStatus(r.id, currentDept);
-    return `<tr onclick="location.href='officer-review.html?student=${r.id}'">
+  body.innerHTML = filtered.map(r => `
+    <tr onclick="location.href='officer-review.html?item=${r.itemId}'">
       <td>
         <div class="student-cell">
           <div class="s-avatar" style="background:${r.color};">${r.initials}</div>
@@ -278,62 +241,61 @@ function renderTable() {
       <td style="color:var(--muted);font-size:0.78rem;">${r.programme}</td>
       <td><span class="clearance-type">${r.type === 'Graduation' ? '🎓' : '📤'} ${r.type}</span></td>
       <td style="color:var(--muted);font-size:0.78rem;">${r.submitted}</td>
-      <td>${badgeHTML(status)}</td>
-      <td><button class="action-btn" onclick="event.stopPropagation();location.href='officer-review.html?student=${r.id}'">Review</button></td>
-    </tr>`;
-  }).join('');
+      <td>${badgeHTML(r.status)}</td>
+      <td><button class="action-btn" onclick="event.stopPropagation();location.href='officer-review.html?item=${r.itemId}'">Review</button></td>
+    </tr>`).join('');
 }
 
-function setFilter(f, btn) {
+window.setFilter = (f, btn) => {
   activeFilter = f;
   document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderTable();
-}
+};
+window.setTypeFilter = (v) => { activeType = v; renderTable(); };
+window.filterTable   = (v) => { searchQuery = v.toLowerCase(); renderTable(); };
 
-function setTypeFilter(v) { activeType = v; renderTable(); }
-function filterTable(v) { searchQuery = v.toLowerCase(); renderTable(); }
+(async () => {
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; return; }
 
-// ── Session guard & department population ──
-(function() {
-  const DEPT_NAMES = {
-    hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
-    college:'College Officer', chapel:'University Chapel', health:'Health Centre',
-    sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
-    alumni:'Alumni Association', affairs:'Student Affairs', library:'University Library',
-    bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
-  };
-  const DEPT_ICONS = {
-    hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
-    chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
-    ict:'computer', alumni:'groups', affairs:'diversity_3', library:'menu_book',
-    bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
-  };
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'officer') { window.location.href = '../login.html'; return; }
 
-  const session = JSON.parse(localStorage.getItem('cms_session') || 'null');
-  if (!session || session.role !== 'officer') { window.location.href = '../login.html'; return; }
+  const dept     = profile.department || 'chapel';
+  const deptName = DEPT_NAMES[dept] || dept;
+  const deptIcon = DEPT_ICONS[dept] || 'badge';
+  const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || 'CO';
 
-  currentDept = session.department || 'chapel';
-  const deptName = DEPT_NAMES[currentDept] || currentDept;
-  const deptIcon = DEPT_ICONS[currentDept] || 'badge';
-  const initials = ((session.firstName||'')[0]||'') + ((session.lastName||'')[0]||'');
+  document.getElementById('deptChipName').innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+  document.getElementById('topbarAvatar').textContent = initials;
 
-  const chip = document.getElementById('deptChipName');
-  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+  const { data: items } = await supabase
+    .from('clearance_items')
+    .select('id, status, updated_at, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme))')
+    .eq('department_id', dept)
+    .order('updated_at', { ascending: false });
+
+  ALL_ROWS = (items || []).map((item, i) => {
+    const req = item.clearance_requests;
+    const p   = req?.profiles;
+    const fn = p?.first_name || ''; const ln = p?.last_name || '';
+    return {
+      itemId: item.id,
+      status: item.status || 'pending',
+      name: [fn, ln].filter(Boolean).join(' ') || 'Unknown',
+      matric: p?.matric_number || '—',
+      programme: p?.programme || '—',
+      type: req?.type || 'Graduation',
+      initials: ((fn[0]||'') + (ln[0]||'')).toUpperCase() || '??',
+      color: AVA_COLORS[i % AVA_COLORS.length],
+      submitted: req?.submitted_at ? new Date(req.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—',
+    };
+  });
 
   const sub = document.getElementById('topbarSub');
-  if (sub) sub.textContent = deptName + ' · ' + REQUESTS.length + ' total requests';
-
-  document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials.toUpperCase() || 'CO');
-  document.querySelectorAll('a[href="../login.html"]').forEach(a => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (confirm('Log out of CMS? Any unsaved changes will be lost.')) {
-        localStorage.removeItem('cms_session');
-        window.location.href = '../login.html';
-      }
-    });
-  });
+  if (sub) sub.textContent = deptName + ' · ' + ALL_ROWS.length + ' total requests';
 
   updateFilterTabs();
   renderTable();

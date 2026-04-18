@@ -161,10 +161,10 @@
     <div class="brand-text">CMS Portal<span>Mountain Top University</span></div>
   </div>
   <div class="profile-chip">
-    <div class="profile-avatar">OJ</div>
+    <div class="profile-avatar" id="sidebarAvatar">OJ</div>
     <div class="profile-info">
-      <div class="profile-name">Odunukwe C. Jordan</div>
-      <div class="profile-role">Student · MTU/CSC/2021/001</div>
+      <div class="profile-name" id="sidebarName">Odunukwe C. Jordan</div>
+      <div class="profile-role" id="sidebarRole">Student · MTU/CSC/2021/001</div>
     </div>
   </div>
   <nav class="sidebar-nav">
@@ -178,7 +178,7 @@
     <a href="student-help.html" class="nav-item"><span class="material-symbols-outlined">help</span>Help Center</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -191,7 +191,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-      <div class="topbar-avatar">OJ</div>
+      <div class="topbar-avatar" id="topbarAvatar">OJ</div>
     </div>
   </header>
 
@@ -217,7 +217,7 @@
         </div>
         <div class="card-body">
           <div class="avatar-row">
-            <div class="avatar-preview" id="avatarPreview">OJ</div>
+            <div class="avatar-preview" id="avatarPreview" style="width:72px;height:72px;border-radius:50%;background:var(--purple);color:white;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;">OJ</div>
             <div class="avatar-actions">
               <button class="btn-sm primary" onclick="document.getElementById('avatarInput').click()">Upload Photo</button>
               <button class="btn-sm outline" onclick="removeAvatar()">Remove</button>
@@ -240,15 +240,15 @@
           <div class="form-grid" style="margin-bottom:1rem;">
             <div class="form-group">
               <label>First Name</label>
-              <input type="text" value="Odunukwe" />
+              <input type="text" id="fieldFirstName" value="Odunukwe" />
             </div>
             <div class="form-group">
               <label>Last Name</label>
-              <input type="text" value="Jordan" />
+              <input type="text" id="fieldLastName" value="Jordan" />
             </div>
             <div class="form-group">
               <label>Middle Name</label>
-              <input type="text" value="Chidire" />
+              <input type="text" id="fieldMiddleName" value="Chidire" />
             </div>
             <div class="form-group">
               <label>Phone Number</label>
@@ -256,7 +256,7 @@
             </div>
             <div class="form-group form-grid single" style="grid-column:1/-1;">
               <label>Institution Email</label>
-              <input type="email" value="odunukwe.jordan@mtu.edu.ng" disabled />
+              <input type="email" id="fieldEmail" value="odunukwe.jordan@mtu.edu.ng" disabled />
               <div class="field-lock"><span class="material-symbols-outlined">lock</span> Institution email cannot be changed. Contact ICT for issues.</div>
             </div>
             <div class="form-group form-grid single" style="grid-column:1/-1;">
@@ -533,6 +533,27 @@
   <span id="toastMsg"></span>
 </div>
 
+<script type="module">
+  (async () => {
+    const { supabase } = await import('../js/supabase.js');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if (!profile) { window.location.href = '../login.html'; return; }
+    const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
+    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('sidebarName').textContent = fullName;
+    document.getElementById('sidebarRole').textContent = 'Student · ' + (profile.matric_number || '—');
+    document.getElementById('topbarAvatar').textContent = initials;
+    document.getElementById('avatarPreview').textContent = initials;
+    if (profile.first_name) document.getElementById('fieldFirstName').value = profile.first_name;
+    if (profile.last_name)  document.getElementById('fieldLastName').value  = profile.last_name;
+    if (profile.email)      document.getElementById('fieldEmail').value     = profile.email;
+    // Store email for password change function
+    window._userEmail = profile.email || session.user.email;
+  })();
+</script>
 <script>
   function switchTab(name, btn) {
     document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
@@ -585,14 +606,19 @@
     lbl.textContent = labels[score - 1] || 'Too short';
   }
 
-  function changePassword() {
+  async function changePassword() {
     const cur = document.getElementById('currentPw').value;
     const nw = document.getElementById('newPw').value;
     const cf = document.getElementById('confirmPw').value;
     if (!cur || !nw || !cf) { showToast('Please fill all password fields', true); return; }
     if (nw.length < 8) { showToast('Password must be at least 8 characters', true); return; }
     if (nw !== cf) { showToast('Passwords do not match', true); return; }
-    // TODO: call Supabase auth.updateUser({ password: nw })
+    const { supabase } = await import('../js/supabase.js');
+    const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: sess.email, password: cur });
+    if (authErr) { showToast('Current password is incorrect', true); return; }
+    const { error } = await supabase.auth.updateUser({ password: nw });
+    if (error) { showToast('Failed to update password: ' + error.message, true); return; }
     showToast('Password updated successfully');
     document.getElementById('currentPw').value = '';
     document.getElementById('newPw').value = '';
@@ -600,9 +626,17 @@
     checkPwStrength('');
   }
 
-  function confirmDanger(msg) {
+  async function confirmDanger(msg) {
     if (confirm(msg + '\n\nThis action cannot be undone.')) {
-      // TODO: call Supabase to cancel clearance record
+      const { supabase } = await import('../js/supabase.js');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { showToast('Session expired. Please log in again.', true); return; }
+      const { error } = await supabase
+        .from('clearance_requests')
+        .update({ status: 'withdrawn' })
+        .eq('student_id', session.user.id)
+        .in('status', ['submitted', 'in_progress']);
+      if (error) { showToast('Failed to withdraw application: ' + error.message, true); return; }
       showToast('Application withdrawn. Redirecting…');
       setTimeout(() => { window.location.href = 'student-dashboard.html'; }, 2000);
     }

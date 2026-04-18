@@ -20,3 +20,6 @@ desktop.ini
 # Node (if added later)
 node_modules/
 dist/
+
+# Prototype / design drafts (not part of the production app)
+stitch_mountain_top_clearance_portal/

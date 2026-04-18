@@ -11,16 +11,9 @@
 <body>
   <p>Signing out…</p>
   <script type="module">
-    const MOCK_MODE = false;
     localStorage.removeItem('cms_session');
-    if (!MOCK_MODE) {
-      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-      const supabase = createClient(
-        'https://nywyjkfgmfgutgudnbur.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
-      );
-      await supabase.auth.signOut();
-    }
+    const { supabase } = await import('./js/supabase.js');
+    await supabase.auth.signOut();
     window.location.href = 'login.html';
   </script>
 </body>

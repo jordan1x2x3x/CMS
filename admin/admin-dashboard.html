@@ -315,176 +315,136 @@
   </div>
 </div>
 
-<script>
-  // ── Session guard ──
-  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-  if (!sess.role || sess.role !== 'admin') {
-    window.location.href = '../login.html';
-  }
-  document.getElementById('adminName').textContent = sess.name || 'Admin';
-  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'admin') { window.location.href = '../login.html'; }
+
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Admin';
+  document.getElementById('adminName').textContent = fullName;
+  document.getElementById('avatarInitial').textContent = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'A';
   document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-NG', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-  // ── Data ──
-  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
-  const DEPTS = [
-    { key:'hod',      label:'HOD',             seed:3  },
-    { key:'cedgs',    label:'CEDGS',            seed:7  },
-    { key:'lab',      label:'Lab Instructor',   seed:11 },
-    { key:'college',  label:'College Officer',  seed:17 },
-    { key:'health',   label:'Health Unit',      seed:19 },
-    { key:'sport',    label:'Sport',            seed:23 },
-    { key:'hall',     label:'Hall of Residence',seed:29 },
-    { key:'ict',      label:'ICT Unit',         seed:31 },
-    { key:'alumni',   label:'Alumni',           seed:37 },
-    { key:'affairs',  label:'Student Affairs',  seed:41 },
-    { key:'library',  label:'Library',          seed:43 },
-    { key:'bursary',  label:'Bursary',          seed:47 },
-    { key:'esm',      label:'ESM (Music)',       seed:53 },
-    { key:'academic', label:'Academic Affairs',  seed:59 },
-    { key:'chapel',   label:'Chapel',           seed:0  },
+  const DEPT_META = [
+    { key:'hod', label:'HOD' }, { key:'cedgs', label:'CEDGS' }, { key:'lab', label:'Lab Instructor' },
+    { key:'college', label:'College Officer' }, { key:'health', label:'Health Unit' },
+    { key:'sport', label:'Sport' }, { key:'hall', label:'Hall of Residence' },
+    { key:'ict', label:'ICT Unit' }, { key:'alumni', label:'Alumni' },
+    { key:'affairs', label:'Student Affairs' }, { key:'library', label:'Library' },
+    { key:'bursary', label:'Bursary' }, { key:'esm', label:'ESM (Music)' },
+    { key:'academic', label:'Academic Affairs' }, { key:'chapel', label:'Chapel' },
   ];
-  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
 
-  function getDeptStatus(sid, dept) {
-    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
-    if (saved) return saved.status;
-    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
-    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
-    const v = (sid * s) % 97;
-    if (v < 10) return 'rejected';
-    if (v < 24) return 'flagged';
-    if (v < 50) return 'pending';
-    return 'approved';
-  }
+  const [{ data: students }, { data: allItems }] = await Promise.all([
+    supabase.from('profiles').select('id').eq('role', 'student'),
+    supabase.from('clearance_items')
+      .select('id, status, department_id, updated_at, clearance_requests(student_id, profiles(first_name, last_name))')
+      .order('updated_at', { ascending: false }),
+  ]);
 
-  // ── Compute stats ──
-  let totalCleared = 0, totalPending = 0, totalFlagged = 0;
-  const deptStats = DEPTS.map(dept => {
-    let approved=0, pending=0, flagged=0, rejected=0;
-    STUDENTS.forEach(sid => {
-      const st = getDeptStatus(sid, dept.key);
-      if (st==='approved') approved++;
-      else if (st==='pending') pending++;
-      else if (st==='flagged') flagged++;
-      else rejected++;
-    });
-    const pct = Math.round((approved/STUDENTS.length)*100);
+  const items = allItems || [];
+  document.getElementById('statTotal').textContent = (students || []).length;
+
+  // Per-dept stats
+  const deptStats = DEPT_META.map(dept => {
+    const dItems = items.filter(it => it.department_id === dept.key);
+    const approved = dItems.filter(it => it.status === 'approved').length;
+    const pending  = dItems.filter(it => it.status === 'pending').length;
+    const flagged  = dItems.filter(it => it.status === 'flagged').length;
+    const rejected = dItems.filter(it => it.status === 'rejected').length;
+    const pct = dItems.length ? Math.round((approved / dItems.length) * 100) : 0;
     return { ...dept, approved, pending, flagged, rejected, pct };
   });
 
-  // How many students cleared ALL 15 depts
-  STUDENTS.forEach(sid => {
-    const allApproved = DEPTS.every(d => getDeptStatus(sid, d.key) === 'approved');
-    if (allApproved) totalCleared++;
-    const anyPending = DEPTS.some(d => getDeptStatus(sid, d.key) === 'pending');
-    if (anyPending) totalPending++;
-    const anyFlagged = DEPTS.some(d => ['flagged','rejected'].includes(getDeptStatus(sid, d.key)));
-    if (anyFlagged) totalFlagged++;
+  // Per-student cleared / in-progress / flagged
+  const studentIds = [...new Set(items.map(it => it.clearance_requests?.student_id).filter(Boolean))];
+  let totalCleared = 0, totalInProgress = 0, totalFlagged = 0;
+  studentIds.forEach(sid => {
+    const statuses = items.filter(it => it.clearance_requests?.student_id === sid).map(it => it.status);
+    if (statuses.every(s => s === 'approved')) totalCleared++;
+    if (statuses.some(s => s === 'pending')) totalInProgress++;
+    if (statuses.some(s => s === 'flagged' || s === 'rejected')) totalFlagged++;
   });
 
   document.getElementById('statCleared').textContent = totalCleared;
-  document.getElementById('statPending').textContent = totalPending;
+  document.getElementById('statPending').textContent = totalInProgress;
   document.getElementById('statFlagged').textContent = totalFlagged;
+  document.getElementById('pendingNavBadge').textContent = deptStats.reduce((s,d) => s + d.pending, 0);
 
-  const pendingTotal = deptStats.reduce((s,d) => s + d.pending, 0);
-  document.getElementById('pendingNavBadge').textContent = pendingTotal;
-
-  // ── Dept table ──
+  // Dept table
   const tbody = document.getElementById('deptTableBody');
-  deptStats.slice(0,10).forEach(d => {
+  const badgeMap = { approved:'badge-approved', pending:'badge-pending', flagged:'badge-flagged', rejected:'badge-rejected' };
+  const badgeLbl = { approved:'Active', pending:'Ongoing', flagged:'Has Flags', rejected:'Has Rejections' };
+  deptStats.slice(0, 10).forEach(d => {
     const worst = d.rejected > 0 ? 'rejected' : d.flagged > 0 ? 'flagged' : d.pending > 0 ? 'pending' : 'approved';
-    const badgeMap = { approved:'badge-approved', pending:'badge-pending', flagged:'badge-flagged', rejected:'badge-rejected' };
-    const badgeLabel = { approved:'Active', pending:'Ongoing', flagged:'Has Flags', rejected:'Has Rejections' };
     tbody.innerHTML += `
       <tr>
         <td><div class="dept-name">${d.label}</div></td>
-        <td>
-          <div class="progress-wrap">
-            <div class="progress-bar"><div class="progress-fill" style="width:${d.pct}%"></div></div>
-            <div class="progress-pct">${d.pct}%</div>
-          </div>
-        </td>
+        <td><div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${d.pct}%"></div></div><div class="progress-pct">${d.pct}%</div></div></td>
         <td style="font-weight:600;color:var(--pending);">${d.pending}</td>
-        <td><span class="badge ${badgeMap[worst]}">${badgeLabel[worst]}</span></td>
+        <td><span class="badge ${badgeMap[worst]}">${badgeLbl[worst]}</span></td>
       </tr>`;
   });
 
-  // ── Donut ──
-  const totalApproved = deptStats.reduce((s,d) => s+d.approved, 0);
-  const totalPendingAll = deptStats.reduce((s,d) => s+d.pending, 0);
-  const totalFlaggedAll = deptStats.reduce((s,d) => s+d.flagged, 0);
-  const totalRejected = deptStats.reduce((s,d) => s+d.rejected, 0);
-  const grandTotal = totalApproved + totalPendingAll + totalFlaggedAll + totalRejected;
-  const approvedPct = Math.round((totalApproved/grandTotal)*100);
-  document.getElementById('donutPct').textContent = approvedPct + '%';
-  document.getElementById('donutPct').style.color = approvedPct >= 60 ? 'var(--approved)' : 'var(--pending)';
+  // Donut
+  const tA = deptStats.reduce((s,d)=>s+d.approved,0);
+  const tP = deptStats.reduce((s,d)=>s+d.pending,0);
+  const tF = deptStats.reduce((s,d)=>s+d.flagged,0);
+  const tR = deptStats.reduce((s,d)=>s+d.rejected,0);
+  const grand = tA + tP + tF + tR || 1;
+  const aPct = Math.round((tA/grand)*100);
+  document.getElementById('donutPct').textContent = aPct + '%';
+  document.getElementById('donutPct').style.color = aPct >= 60 ? 'var(--approved)' : 'var(--pending)';
 
   const canvas = document.getElementById('donutCanvas');
   const ctx = canvas.getContext('2d');
   const cx=70, cy=70, r=58, thick=18;
-  const slices = [
-    { val:totalApproved, color:'#10B981' },
-    { val:totalPendingAll, color:'#F59E0B' },
-    { val:totalFlaggedAll, color:'#F97316' },
-    { val:totalRejected, color:'#EF4444' },
-  ];
-  let startAngle = -Math.PI/2;
-  slices.forEach(s => {
-    const angle = (s.val/grandTotal) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, startAngle, startAngle+angle);
-    ctx.arc(cx, cy, r-thick, startAngle+angle, startAngle, true);
-    ctx.closePath();
-    ctx.fillStyle = s.color;
-    ctx.fill();
-    startAngle += angle;
+  let ang = -Math.PI/2;
+  [{ val:tA, color:'#10B981' },{ val:tP, color:'#F59E0B' },{ val:tF, color:'#F97316' },{ val:tR, color:'#EF4444' }].forEach(s => {
+    if (!s.val) return;
+    const slice = (s.val/grand)*Math.PI*2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,ang,ang+slice); ctx.arc(cx,cy,r-thick,ang+slice,ang,true);
+    ctx.closePath(); ctx.fillStyle = s.color; ctx.fill();
+    ang += slice;
   });
+  document.getElementById('donutLegend').innerHTML = [
+    { label:'Approved', val:tA, color:'#10B981' }, { label:'Pending', val:tP, color:'#F59E0B' },
+    { label:'Flagged',  val:tF, color:'#F97316' }, { label:'Rejected', val:tR, color:'#EF4444' },
+  ].map(l=>`<div class="legend-row"><div class="legend-dot" style="background:${l.color}"></div><div class="legend-label">${l.label}</div><div class="legend-val">${l.val}</div></div>`).join('');
 
-  const legendItems = [
-    { label:'Approved', val:totalApproved, color:'#10B981' },
-    { label:'Pending',  val:totalPendingAll, color:'#F59E0B' },
-    { label:'Flagged',  val:totalFlaggedAll, color:'#F97316' },
-    { label:'Rejected', val:totalRejected,  color:'#EF4444' },
-  ];
-  document.getElementById('donutLegend').innerHTML = legendItems.map(l =>
-    `<div class="legend-row"><div class="legend-dot" style="background:${l.color}"></div><div class="legend-label">${l.label}</div><div class="legend-val">${l.val}</div></div>`
-  ).join('');
-
-  // ── Activity feed (from decisions) ──
-  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-  const todayDec = decisions.filter(d => d.timestamp && new Date(d.timestamp).toDateString() === new Date().toDateString());
-  document.getElementById('todayDecisions').textContent = todayDec.length;
+  // Activity feed
+  const today = new Date().toDateString();
+  const todayItems = items.filter(it => it.status !== 'pending' && it.updated_at && new Date(it.updated_at).toDateString() === today);
+  document.getElementById('todayDecisions').textContent = todayItems.length;
 
   const activity = document.getElementById('activityList');
-  const recent = [...decisions].sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp)).slice(0,6);
-  if (recent.length === 0) {
+  const recent = items.filter(it => it.status !== 'pending').slice(0, 6);
+  if (!recent.length) {
     activity.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:0.82rem;">No officer decisions recorded yet.</div>';
   } else {
-    const dotMap = { approved:'dot-approve', flagged:'dot-flag', rejected:'dot-reject', pending:'dot-pending' };
-    const iconMap = { approved:'check_circle', flagged:'flag', rejected:'cancel', pending:'hourglass_top' };
-    recent.forEach(d => {
-      const dept = DEPTS.find(x => x.key === d.dept)?.label || d.dept;
-      const timeAgo = d.timestamp ? new Date(d.timestamp).toLocaleString('en-NG', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '';
+    const dotMap = { approved:'dot-approve', flagged:'dot-flag', rejected:'dot-reject' };
+    const iconMap = { approved:'check_circle', flagged:'flag', rejected:'cancel' };
+    recent.forEach(it => {
+      const dept = DEPT_META.find(x=>x.key===it.department_id)?.label || it.department_id;
+      const sName = it.clearance_requests?.profiles
+        ? [it.clearance_requests.profiles.first_name, it.clearance_requests.profiles.last_name].filter(Boolean).join(' ')
+        : 'A student';
+      const ts = it.updated_at ? new Date(it.updated_at).toLocaleString('en-NG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
       activity.innerHTML += `
         <div class="activity-item">
-          <div class="activity-dot ${dotMap[d.status] || 'dot-pending'}"><span class="material-symbols-outlined">${iconMap[d.status] || 'info'}</span></div>
+          <div class="activity-dot ${dotMap[it.status]||'dot-pending'}"><span class="material-symbols-outlined">${iconMap[it.status]||'info'}</span></div>
           <div class="activity-text">
-            <p><strong>Student #${d.studentId}</strong> ${d.status} by <strong>${dept}</strong>${d.reason ? ' — ' + d.reason : ''}</p>
-            <div class="activity-time">${timeAgo}</div>
+            <p><strong>${sName}</strong> ${it.status} by <strong>${dept}</strong></p>
+            <div class="activity-time">${ts}</div>
           </div>
         </div>`;
     });
   }
 
-  // ── Logout ──
-  document.getElementById('logoutBtn').addEventListener('click', () => {
-    document.getElementById('logoutModal').style.display = 'flex';
-  });
-  document.getElementById('confirmLogout').addEventListener('click', () => {
-    window.location.href = '../logout.html';
-  });
+  document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
+  document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
 </script>
 </body>
 </html>

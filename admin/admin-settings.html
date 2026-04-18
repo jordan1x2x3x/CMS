@@ -172,12 +172,23 @@
   </div>
 </div>
 
-<script>
-  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
-  document.getElementById('adminName').textContent = sess.name || 'Admin';
-  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
-  document.getElementById('nameInput').value = sess.name || '';
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'admin') { window.location.href = '../login.html'; }
+
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Admin';
+  const initials = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'A';
+  document.getElementById('adminName').textContent = fullName;
+  document.getElementById('avatarInitial').textContent = initials;
+  document.getElementById('nameInput').value = fullName;
+
+  // find the email input (second input) and populate it
+  const emailInput = document.querySelector('input[type="email"]');
+  if (emailInput) emailInput.value = profile.email || session.user.email || '';
+
   document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
   document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
 </script>

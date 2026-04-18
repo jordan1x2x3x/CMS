@@ -129,7 +129,7 @@
     <a href="officer-settings.html" class="nav-item active"><span class="material-symbols-outlined">settings</span>Settings</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -141,7 +141,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-      <div class="topbar-avatar">CO</div>
+      <div class="topbar-avatar" id="topbarAvatar">CO</div>
     </div>
   </header>
 
@@ -293,54 +293,45 @@
   }
 
   // ── Session guard & department population ──
-  (function() {
-    const DEPT_NAMES = {
-      hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
-      college:'College Officer', chapel:'University Chapel', health:'Health Centre',
-      sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
-      alumni:'Alumni Association', affairs:'Student Affairs', library:'University Library',
-      bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
-    };
-    const DEPT_ICONS = {
-      hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
-      chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
-      ict:'computer', alumni:'groups', affairs:'diversity_3', library:'menu_book',
-      bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
-    };
+  const DEPT_NAMES_S = {
+    hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
+    college:'College Officer', chapel:'University Chapel', health:'Health Centre',
+    sport:'Sport Unit', hall:'Hall of Residence', ict:'ICT Unit',
+    alumni:'Alumni Association', student_affairs:'Student Affairs', library:'University Library',
+    bursary:'Bursary Unit', esm:'ESM Unit', academic:'Academic Affairs (Registrar)',
+  };
+  const DEPT_ICONS_S = {
+    hod:'school', cedgs:'payments', lab:'science', college:'corporate_fare',
+    chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
+    ict:'computer', alumni:'groups', student_affairs:'diversity_3', library:'menu_book',
+    bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
+  };
 
-    const session = JSON.parse(localStorage.getItem('cms_session') || 'null');
-    if (!session || session.role !== 'officer') { window.location.href = '../login.html'; return; }
+  import('../js/supabase.js').then(async ({ supabase }) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
 
-    const dept     = session.department;
-    const deptName = DEPT_NAMES[dept] || dept;
-    const deptIcon = DEPT_ICONS[dept] || 'badge';
-    const initials = ((session.firstName||'')[0]||'') + ((session.lastName||'')[0]||'');
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if (!profile || profile.role !== 'officer') { window.location.href = '../login.html'; return; }
+
+    const dept     = profile.department || 'chapel';
+    const deptName = DEPT_NAMES_S[dept] || dept;
+    const deptIcon = DEPT_ICONS_S[dept] || 'badge';
+    const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || 'CO';
 
     const chip = document.getElementById('deptChipName');
     if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+    document.getElementById('topbarAvatar').textContent = initials;
+    document.getElementById('deptInfoIcon').textContent = deptIcon;
+    document.getElementById('deptInfoName').textContent = deptName;
 
-    // Dept info card
-    const infoIcon = document.getElementById('deptInfoIcon');
-    const infoName = document.getElementById('deptInfoName');
-    if (infoIcon) infoIcon.textContent = deptIcon;
-    if (infoName) infoName.textContent = deptName;
-
-    // Profile fields
     const fn = document.querySelector('input[placeholder="First name"]');
     const ln = document.querySelector('input[placeholder="Last name"]');
-    if (fn) fn.value = session.firstName || '';
-    if (ln) ln.value = session.lastName  || '';
+    if (fn) fn.value = profile.first_name || '';
+    if (ln) ln.value = profile.last_name  || '';
     const emailEl = document.getElementById('settingsEmail');
-    if (emailEl) emailEl.value = session.email || '';
-    const deptEl = document.getElementById('settingsDept');
-    if (deptEl) deptEl.value = deptName;
-
-    document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials.toUpperCase() || 'CO');
-
-    document.querySelectorAll('a[href="../login.html"]').forEach(a => {
-      a.addEventListener('click', () => localStorage.removeItem('cms_session'));
-    });
-  })();
+    if (emailEl) emailEl.value = profile.email || session.user.email || '';
+  });
 </script>
 </body>
 </html>

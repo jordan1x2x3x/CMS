@@ -186,58 +186,60 @@
   </div>
 </div>
 
-<script>
-  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
-  document.getElementById('adminName').textContent = sess.name || 'Admin';
-  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'admin') { window.location.href = '../login.html'; }
 
-  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
-  const DEPTS = [
-    { key:'hod', label:'HOD', seed:3 }, { key:'cedgs', label:'CEDGS', seed:7 },
-    { key:'lab', label:'Lab', seed:11 }, { key:'college', label:'College', seed:17 },
-    { key:'health', label:'Health', seed:19 }, { key:'sport', label:'Sport', seed:23 },
-    { key:'hall', label:'Hall', seed:29 }, { key:'ict', label:'ICT', seed:31 },
-    { key:'alumni', label:'Alumni', seed:37 }, { key:'affairs', label:'Affairs', seed:41 },
-    { key:'library', label:'Library', seed:43 }, { key:'bursary', label:'Bursary', seed:47 },
-    { key:'esm', label:'ESM', seed:53 }, { key:'academic', label:'Academic', seed:59 },
-    { key:'chapel', label:'Chapel', seed:0 },
+  document.getElementById('adminName').textContent = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Admin';
+  document.getElementById('avatarInitial').textContent = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'A';
+
+  const DEPT_META = [
+    { key:'hod', label:'HOD' }, { key:'cedgs', label:'CEDGS' }, { key:'lab', label:'Lab' },
+    { key:'college', label:'College' }, { key:'health', label:'Health' }, { key:'sport', label:'Sport' },
+    { key:'hall', label:'Hall' }, { key:'ict', label:'ICT' }, { key:'alumni', label:'Alumni' },
+    { key:'affairs', label:'Affairs' }, { key:'library', label:'Library' }, { key:'bursary', label:'Bursary' },
+    { key:'esm', label:'ESM' }, { key:'academic', label:'Academic' }, { key:'chapel', label:'Chapel' },
   ];
-  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
-
-  function getDeptStatus(sid, dept) {
-    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
-    if (saved) return saved.status;
-    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
-    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
-    const v = (sid * s) % 97;
-    if (v < 10) return 'rejected'; if (v < 24) return 'flagged'; if (v < 50) return 'pending';
-    return 'approved';
-  }
 
   // Populate dept filter
-  const deptFilter = document.getElementById('deptFilter');
-  DEPTS.forEach(d => { const o = document.createElement('option'); o.value = d.key; o.textContent = d.label; deptFilter.appendChild(o); });
+  const deptFilterEl = document.getElementById('deptFilter');
+  DEPT_META.forEach(d => { const o = document.createElement('option'); o.value = d.key; o.textContent = d.label; deptFilterEl.appendChild(o); });
 
-  // Build rows
-  const NAMES = ['Adebayo K.','Chisom A.','Fatima M.','Daniel O.','Grace E.','Samuel I.','Ngozi P.','Michael T.','Amaka R.','Joshua F.','Blessing N.','Emmanuel S.','Taiwo A.','Chinwe B.','David L.','Esther O.','Tobi R.','Chukwuma E.','Halima Y.','Patrick O.','Funmilayo A.','Obinna C.','Kehinde S.','Zainab H.'];
-  const rows = STUDENTS.map((sid, idx) => {
-    const statuses = DEPTS.map(d => ({ dept: d.key, label: d.label, status: getDeptStatus(sid, d.key) }));
-    const approved = statuses.filter(s => s.status === 'approved').length;
-    const pending  = statuses.filter(s => s.status === 'pending').length;
-    const flagged  = statuses.filter(s => s.status === 'flagged').length;
-    const rejected = statuses.filter(s => s.status === 'rejected').length;
-    const allCleared = approved === 15;
-    const hasRejected = rejected > 0;
-    const hasFlagged  = flagged > 0;
-    let overall = allCleared ? 'cleared' : hasRejected ? 'rejected' : hasFlagged ? 'flagged' : 'in-progress';
-    return { sid, name: NAMES[idx], statuses, approved, pending, flagged, rejected, overall };
+  // Load all students + their clearance items
+  const { data: studentProfiles } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, matric_number, programme')
+    .eq('role', 'student')
+    .order('created_at', { ascending: true });
+
+  const { data: allItems } = await supabase
+    .from('clearance_items')
+    .select('status, department_id, clearance_requests(student_id)');
+
+  const students = studentProfiles || [];
+  const items = allItems || [];
+
+  // Build per-student rows
+  const rows = students.map(s => {
+    const sItems = items.filter(it => it.clearance_requests?.student_id === s.id);
+    const statuses = DEPT_META.map(d => {
+      const it = sItems.find(x => x.department_id === d.key);
+      return { dept: d.key, label: d.label, status: it?.status || 'pending' };
+    });
+    const approved = statuses.filter(x => x.status === 'approved').length;
+    const pending  = statuses.filter(x => x.status === 'pending').length;
+    const flagged  = statuses.filter(x => x.status === 'flagged').length;
+    const rejected = statuses.filter(x => x.status === 'rejected').length;
+    const overall  = approved === 15 ? 'cleared' : rejected > 0 ? 'rejected' : flagged > 0 ? 'flagged' : 'in-progress';
+    const name = [s.first_name, s.last_name].filter(Boolean).join(' ') || '—';
+    const initials = ((s.first_name?.[0]||'') + (s.last_name?.[0]||'')).toUpperCase() || '?';
+    return { id: s.id, name, initials, matric: s.matric_number || '—', statuses, approved, pending, flagged, rejected, overall };
   });
 
-  let activeFilter = 'all';
-  let activeDept = 'all';
-  let searchVal = '';
+  let activeFilter = 'all', activeDept = 'all', searchVal = '';
 
   const badgeClass = { cleared:'badge-approved', 'in-progress':'badge-pending', flagged:'badge-flagged', rejected:'badge-rejected' };
   const badgeLabel = { cleared:'Fully Cleared', 'in-progress':'In Progress', flagged:'Has Flags', rejected:'Has Rejections' };
@@ -253,20 +255,21 @@
       }
       if (searchVal) {
         const q = searchVal.toLowerCase();
-        if (!r.name.toLowerCase().includes(q) && !String(r.sid).includes(q)) return false;
+        if (!r.name.toLowerCase().includes(q) && !r.matric.toLowerCase().includes(q)) return false;
       }
       return true;
     });
     document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
-    document.getElementById('footerCount').textContent = `Showing ${filtered.length} of 24 students`;
+    document.getElementById('footerCount').textContent = `Showing ${filtered.length} of ${rows.length} students`;
     tbody.innerHTML = filtered.map(r => {
-      const pills = r.statuses.filter(s => s.status !== 'approved').slice(0,4).map(s =>
+      const nonApproved = r.statuses.filter(s => s.status !== 'approved');
+      const pills = nonApproved.slice(0,4).map(s =>
         `<span class="dept-pill" style="${pillColors[s.status]}">${s.label}</span>`
-      ).join('') + (r.pending + r.flagged + r.rejected > 4 ? `<span class="dept-pill" style="background:var(--bg);color:var(--muted);">+${r.pending+r.flagged+r.rejected-4}</span>` : '');
+      ).join('') + (nonApproved.length > 4 ? `<span class="dept-pill" style="background:var(--bg);color:var(--muted);">+${nonApproved.length-4}</span>` : '');
       return `<tr>
         <td><div class="student-cell">
-          <div class="student-avatar">${r.name[0]}</div>
-          <div><div class="student-name">${r.name}</div><div class="student-id">MTU/2021/${String(r.sid).padStart(3,'0')}</div></div>
+          <div class="student-avatar">${r.initials}</div>
+          <div><div class="student-name">${r.name}</div><div class="student-id">${r.matric}</div></div>
         </div></td>
         <td><span class="badge ${badgeClass[r.overall]}">${badgeLabel[r.overall]}</span></td>
         <td><div class="dept-pills">${r.overall === 'cleared' ? '<span style="font-size:0.75rem;color:var(--approved);">All 15 departments cleared</span>' : pills}</div></td>
@@ -288,15 +291,14 @@
   document.getElementById('deptFilter').addEventListener('change', e => { activeDept = e.target.value; renderTable(); });
   document.getElementById('searchInput').addEventListener('input', e => { searchVal = e.target.value; renderTable(); });
 
-  // CSV export
   document.getElementById('exportBtn').addEventListener('click', () => {
-    const headers = ['Student ID','Name','Matric','Overall Status','Approved','Pending','Flagged','Rejected'];
-    const csvRows = [headers.join(',')];
-    rows.forEach(r => csvRows.push([r.sid, r.name, `MTU/2021/${String(r.sid).padStart(3,'0')}`, r.overall, r.approved, r.pending, r.flagged, r.rejected].join(',')));
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'mtu_clearance_report.csv'; a.click();
-    URL.revokeObjectURL(url);
+    const headers = ['Name','Matric','Overall Status','Approved','Pending','Flagged','Rejected'];
+    const csvRows = [headers.join(','), ...rows.map(r =>
+      [r.name, r.matric, r.overall, r.approved, r.pending, r.flagged, r.rejected].join(',')
+    )];
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csvRows.join('\n')], { type:'text/csv' }));
+    a.download = 'mtu_clearance_report.csv'; a.click();
   });
 
   document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');

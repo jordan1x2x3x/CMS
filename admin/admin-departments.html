@@ -145,53 +145,55 @@
   </div>
 </div>
 
-<script>
-  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
-  document.getElementById('adminName').textContent = sess.name || 'Admin';
-  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'admin') { window.location.href = '../login.html'; }
 
-  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
-  const DEPTS = [
-    { key:'hod',      label:'HOD / Project',      seed:3,  icon:'school',          officer:'Dr. Okonkwo J.' },
-    { key:'cedgs',    label:'CEDGS',               seed:7,  icon:'account_balance',  officer:'Mrs. Adeyemi F.' },
-    { key:'lab',      label:'Lab Instructor',      seed:11, icon:'science',          officer:'Mr. Babatunde A.' },
-    { key:'college',  label:'College Officer',     seed:17, icon:'domain',           officer:'Prof. Eze C.' },
-    { key:'health',   label:'Health Unit',         seed:19, icon:'local_hospital',   officer:'Dr. Sule M.' },
-    { key:'sport',    label:'Sport',               seed:23, icon:'sports_soccer',    officer:'Mr. Okeke T.' },
-    { key:'hall',     label:'Hall of Residence',   seed:29, icon:'home',             officer:'Mrs. Bello K.' },
-    { key:'ict',      label:'ICT Unit',            seed:31, icon:'computer',         officer:'Mr. Afolabi D.' },
-    { key:'alumni',   label:'Alumni',              seed:37, icon:'people',           officer:'Mr. Nwosu G.' },
-    { key:'affairs',  label:'Student Affairs',     seed:41, icon:'supervised_user_circle', officer:'Mrs. Adeola R.' },
-    { key:'library',  label:'Library',             seed:43, icon:'menu_book',        officer:'Mr. Ibrahim S.' },
-    { key:'bursary',  label:'Bursary',             seed:47, icon:'payments',         officer:'Mrs. Okafor P.' },
-    { key:'esm',      label:'ESM (Music)',          seed:53, icon:'music_note',       officer:'Mr. Chukwu E.' },
-    { key:'academic', label:'Academic Affairs',    seed:59, icon:'assignment',       officer:'Prof. Adeleke B.' },
-    { key:'chapel',   label:'Chapel',              seed:0,  icon:'church',           officer:'Rev. Olawale K.' },
+  document.getElementById('adminName').textContent = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Admin';
+  document.getElementById('avatarInitial').textContent = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'A';
+
+  const DEPT_META = [
+    { key:'hod',      label:'HOD / Project',    icon:'school' },
+    { key:'cedgs',    label:'CEDGS',             icon:'account_balance' },
+    { key:'lab',      label:'Lab Instructor',    icon:'science' },
+    { key:'college',  label:'College Officer',   icon:'domain' },
+    { key:'health',   label:'Health Unit',       icon:'local_hospital' },
+    { key:'sport',    label:'Sport',             icon:'sports_soccer' },
+    { key:'hall',     label:'Hall of Residence', icon:'home' },
+    { key:'ict',      label:'ICT Unit',          icon:'computer' },
+    { key:'alumni',   label:'Alumni',            icon:'people' },
+    { key:'affairs',  label:'Student Affairs',   icon:'supervised_user_circle' },
+    { key:'library',  label:'Library',           icon:'menu_book' },
+    { key:'bursary',  label:'Bursary',           icon:'payments' },
+    { key:'esm',      label:'ESM (Music)',        icon:'music_note' },
+    { key:'academic', label:'Academic Affairs',  icon:'assignment' },
+    { key:'chapel',   label:'Chapel',            icon:'church' },
   ];
-  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
 
-  function getDeptStatus(sid, dept) {
-    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
-    if (saved) return saved.status;
-    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
-    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
-    const v = (sid * s) % 97;
-    if (v < 10) return 'rejected'; if (v < 24) return 'flagged'; if (v < 50) return 'pending';
-    return 'approved';
-  }
+  // Load clearance items + officer profiles per dept
+  const [{ data: allItems }, { data: officers }] = await Promise.all([
+    supabase.from('clearance_items').select('status, department_id'),
+    supabase.from('profiles').select('first_name, last_name, department').eq('role', 'officer'),
+  ]);
+
+  const items = allItems || [];
+  const officerList = officers || [];
 
   const grid = document.getElementById('deptGrid');
-  DEPTS.forEach(dept => {
-    let approved=0, pending=0, flagged=0, rejected=0;
-    STUDENTS.forEach(sid => {
-      const st = getDeptStatus(sid, dept.key);
-      if (st==='approved') approved++; else if (st==='pending') pending++;
-      else if (st==='flagged') flagged++; else rejected++;
-    });
-    const pct = Math.round((approved/24)*100);
+  DEPT_META.forEach(dept => {
+    const dItems = items.filter(it => it.department_id === dept.key);
+    const approved = dItems.filter(it => it.status === 'approved').length;
+    const pending  = dItems.filter(it => it.status === 'pending').length;
+    const flagged  = dItems.filter(it => it.status === 'flagged').length;
+    const rejected = dItems.filter(it => it.status === 'rejected').length;
+    const total = dItems.length || 1;
+    const pct = Math.round((approved / total) * 100);
     const fillColor = pct >= 70 ? '#10B981' : pct >= 40 ? '#F59E0B' : '#EF4444';
+    const off = officerList.find(o => o.department === dept.key);
+    const officerName = off ? [off.first_name, off.last_name].filter(Boolean).join(' ') : '—';
     grid.innerHTML += `
       <div class="dept-card">
         <div class="dept-card-header">
@@ -199,8 +201,8 @@
           <div><div class="dept-card-title">${dept.label}</div><div class="dept-card-key">${dept.key}</div></div>
         </div>
         <div class="dept-card-body">
-          <div class="dept-row"><span class="dept-row-label">Officer</span><span class="dept-row-val">${dept.officer}</span></div>
-          <div class="dept-row"><span class="dept-row-label">Approved</span><span class="dept-row-val" style="color:var(--approved);">${approved}/24</span></div>
+          <div class="dept-row"><span class="dept-row-label">Officer</span><span class="dept-row-val">${officerName}</span></div>
+          <div class="dept-row"><span class="dept-row-label">Approved</span><span class="dept-row-val" style="color:var(--approved);">${approved}/${total}</span></div>
           <div class="dept-row"><span class="dept-row-label">Pending</span><span class="dept-row-val" style="color:var(--pending);">${pending}</span></div>
           <div class="dept-row"><span class="dept-row-label">Flagged / Rejected</span><span class="dept-row-val" style="color:var(--flagged);">${flagged + rejected}</span></div>
           <div class="progress-wrap">
@@ -211,9 +213,6 @@
         <div class="dept-card-footer">
           <button class="action-btn btn-view" onclick="window.location.href='admin-requests.html'">
             <span class="material-symbols-outlined">visibility</span>View
-          </button>
-          <button class="action-btn btn-edit">
-            <span class="material-symbols-outlined">edit</span>Edit
           </button>
         </div>
       </div>`;

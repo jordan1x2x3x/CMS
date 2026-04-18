@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings | MTU Super Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --purple: #6B0080; --purple-dark: #4A0058; --purple-light: #8B20A0; --green: #76B82A; --surface: #F4F6F9; --white: #FFFFFF; --border: #D1D9E6; --text-main: #1A0020; --text-muted: #5A6A80; --sidebar-w: 240px; }
+    body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--purple-dark); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); text-decoration: none; }
+    .sidebar-brand img { width: 36px; height: 36px; border-radius: 6px; background: white; padding: 2px; object-fit: contain; }
+    .sidebar-brand-text { font-family: 'Newsreader', serif; font-size: 0.9rem; font-weight: 700; color: white; line-height: 1.2; }
+    .sidebar-brand-text span { display: block; font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 500; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0.75rem 1.25rem 0.25rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.65rem 1.25rem; text-decoration: none; color: rgba(255,255,255,0.65); font-size: 0.83rem; font-weight: 500; border-left: 3px solid transparent; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: white; border-left-color: #B5E048; }
+    .nav-item .material-symbols-outlined { font-size: 18px; }
+    .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-user { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+    .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-light); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .sidebar-user-name { font-size: 0.78rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-role { font-size: 0.65rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.07em; }
+    .btn-logout { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.15s; }
+    .btn-logout:hover { background: rgba(239,68,68,0.15); color: #FCA5A5; border-color: rgba(239,68,68,0.3); }
+    .btn-logout .material-symbols-outlined { font-size: 16px; }
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: white; border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+    .topbar-title { font-size: 1rem; font-weight: 600; }
+    .topbar-badge { display: inline-flex; align-items: center; gap: 6px; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; border-radius: 20px; padding: 4px 12px; font-size: 0.72rem; font-weight: 600; }
+    .topbar-badge .material-symbols-outlined { font-size: 14px; }
+    .content { padding: 2rem; flex: 1; max-width: 720px; }
+    .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 1.5rem; }
+    .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .card-header h2 { font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .card-header h2 .material-symbols-outlined { font-size: 18px; color: var(--purple); }
+    .card-header p { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+    .card-body { padding: 1.5rem; }
+    .field { display: flex; flex-direction: column; margin-bottom: 1.1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-muted); margin-bottom: 5px; }
+    .field input { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.875rem; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+    .field input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(107,0,128,0.1); }
+    .field input[readonly] { background: var(--surface); color: var(--text-muted); cursor: not-allowed; }
+    .btn-save { display: inline-flex; align-items: center; gap: 7px; padding: 10px 24px; background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%); color: white; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; margin-top: 0.25rem; }
+    .btn-save:hover { opacity: 0.9; }
+    .btn-save .material-symbols-outlined { font-size: 17px; }
+
+    /* Toggle row */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0; border-bottom: 1px solid #F3F4F6; }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info h4 { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+    .toggle-info p { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #D1D5DB; border-radius: 24px; cursor: pointer; transition: background 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle input:checked + .toggle-slider { background: var(--green); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* Danger zone */
+    .danger-zone { border-color: #FCA5A5; }
+    .danger-zone .card-header { background: #FFF5F5; border-bottom-color: #FCA5A5; }
+    .danger-zone .card-header h2 { color: #DC2626; }
+    .danger-zone .card-header h2 .material-symbols-outlined { color: #DC2626; }
+    .btn-danger { display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px; background: #DC2626; color: white; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-danger:hover { background: #B91C1C; }
+    .btn-danger .material-symbols-outlined { font-size: 17px; }
+
+    .toast { display: none; position: fixed; bottom: 2rem; right: 2rem; background: #1A0020; color: white; padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.85rem; z-index: 999; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    .toast.show { display: flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="../index.html">
+    <img src="../assets/mtu-logo.png" alt="MTU" />
+    <div class="sidebar-brand-text">MTU Clearance <span>Super Admin</span></div>
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item" href="super-admin-dashboard.html"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+    <div class="nav-section-label">Management</div>
+    <a class="nav-item" href="super-admin-users.html"><span class="material-symbols-outlined">group</span> Users</a>
+    <a class="nav-item" href="super-admin-access-codes.html"><span class="material-symbols-outlined">key</span> Access Codes</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item" href="super-admin-audit.html"><span class="material-symbols-outlined">receipt_long</span> Audit Log</a>
+    <a class="nav-item active" href="super-admin-settings.html"><span class="material-symbols-outlined">settings</span> Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">SA</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebarName">Super Admin</div>
+        <div class="sidebar-user-role">ICT Unit</div>
+      </div>
+    </div>
+    <a class="btn-logout" href="../logout.html"><span class="material-symbols-outlined">logout</span> Sign Out</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Settings</div>
+    <span class="topbar-badge"><span class="material-symbols-outlined">shield_person</span> Super Admin</span>
+  </div>
+  <div class="content">
+
+    <!-- Profile -->
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="material-symbols-outlined">person</span> My Profile</h2>
+        <p>Your Super Admin account details</p>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="profileName" placeholder="Full name" />
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="profileEmail" readonly />
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <input type="text" value="Super Admin / ICT Unit" readonly />
+        </div>
+        <button class="btn-save" id="saveProfileBtn">
+          <span class="material-symbols-outlined">save</span> Save Changes
+        </button>
+      </div>
+    </div>
+
+    <!-- System Toggles -->
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="material-symbols-outlined">tune</span> System Preferences</h2>
+        <p>Control portal-wide behaviour</p>
+      </div>
+      <div class="card-body">
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Allow New Student Registrations</h4>
+            <p>When off, students cannot create new accounts.</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="tog-registrations" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Allow Officer Registrations</h4>
+            <p>When off, officer signup is locked even with a valid code.</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="tog-officer-reg" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Maintenance Mode</h4>
+            <p>Shows a maintenance notice to all non-admin users.</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="tog-maintenance" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <h4>Email Notifications</h4>
+            <p>System sends email alerts when accounts are created or deactivated.</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="tog-emails" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div style="margin-top:1.25rem;">
+          <button class="btn-save" id="savePrefsBtn">
+            <span class="material-symbols-outlined">save</span> Save Preferences
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+      <div class="card-header">
+        <h2><span class="material-symbols-outlined">lock</span> Change Password</h2>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Current Password</label>
+          <input type="password" id="currentPw" placeholder="Enter current password" />
+        </div>
+        <div class="field">
+          <label>New Password</label>
+          <input type="password" id="newPw" placeholder="Minimum 8 characters" />
+        </div>
+        <div class="field">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmPw" placeholder="Re-enter new password" />
+        </div>
+        <button class="btn-save" id="changePwBtn">
+          <span class="material-symbols-outlined">lock_reset</span> Update Password
+        </button>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card danger-zone">
+      <div class="card-header">
+        <h2><span class="material-symbols-outlined">warning</span> Danger Zone</h2>
+        <p>Irreversible actions — proceed with caution.</p>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+          <div>
+            <div style="font-size:0.85rem;font-weight:600;">Clear All Officer Decisions</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Wipes the local audit log. Cannot be undone.</div>
+          </div>
+          <button class="btn-danger" id="clearDecisionsBtn">
+            <span class="material-symbols-outlined">delete_sweep</span> Clear Decisions
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
+  <span id="toastMsg">Saved!</span>
+</div>
+
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'super_admin') { window.location.href = '../login.html'; }
+
+  const _initials = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'SA';
+  const _fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Super Admin';
+  document.getElementById('sidebarName').textContent = _fullName;
+  document.getElementById('sidebarAvatar').textContent = _initials;
+  document.getElementById('profileName').value = _fullName;
+  document.getElementById('profileEmail').value = profile.email || session.user.email || '';
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    const name = document.getElementById('profileName').value.trim();
+    if (!name) { alert('Name cannot be empty.'); return; }
+    const parts = name.split(' ');
+    const firstName = parts[0] || '';
+    const lastName = parts.slice(1).join(' ') || '';
+    await supabase.from('profiles').update({ first_name: firstName, last_name: lastName }).eq('id', session.user.id);
+    document.getElementById('sidebarName').textContent = name;
+    const newInitials = ((firstName[0]||'') + (lastName[0]||'')).toUpperCase() || 'SA';
+    document.getElementById('sidebarAvatar').textContent = newInitials;
+    toast('Profile updated.');
+  });
+
+  document.getElementById('savePrefsBtn').addEventListener('click', () => {
+    const prefs = {
+      registrations: document.getElementById('tog-registrations').checked,
+      officerReg: document.getElementById('tog-officer-reg').checked,
+      maintenance: document.getElementById('tog-maintenance').checked,
+      emails: document.getElementById('tog-emails').checked,
+    };
+    localStorage.setItem('cms_system_prefs', JSON.stringify(prefs));
+    toast('Preferences saved.');
+  });
+
+  // Load saved prefs
+  const savedPrefs = JSON.parse(localStorage.getItem('cms_system_prefs') || '{}');
+  if (Object.keys(savedPrefs).length > 0) {
+    document.getElementById('tog-registrations').checked = savedPrefs.registrations ?? true;
+    document.getElementById('tog-officer-reg').checked   = savedPrefs.officerReg ?? true;
+    document.getElementById('tog-maintenance').checked   = savedPrefs.maintenance ?? false;
+    document.getElementById('tog-emails').checked        = savedPrefs.emails ?? true;
+  }
+
+  document.getElementById('changePwBtn').addEventListener('click', async () => {
+    const newPw = document.getElementById('newPw').value;
+    const confirmPw = document.getElementById('confirmPw').value;
+    if (newPw.length < 8) { alert('Password must be at least 8 characters.'); return; }
+    if (newPw !== confirmPw) { alert('Passwords do not match.'); return; }
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    if (error) { alert('Failed to update password: ' + error.message); return; }
+    document.getElementById('currentPw').value = '';
+    document.getElementById('newPw').value = '';
+    document.getElementById('confirmPw').value = '';
+    toast('Password updated successfully.');
+  });
+
+  document.getElementById('clearDecisionsBtn').addEventListener('click', () => {
+    if (!confirm('This will permanently delete all officer decision records from local storage. Are you sure?')) return;
+    localStorage.removeItem('cms_decisions');
+    toast('All decisions cleared.');
+  });
+</script>
+</body>
+</html>

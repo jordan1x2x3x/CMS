@@ -181,68 +181,67 @@
   </div>
 </div>
 
-<script>
-  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
-  document.getElementById('adminName').textContent = sess.name || 'Admin';
-  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'admin') { window.location.href = '../login.html'; }
+
+  document.getElementById('adminName').textContent = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Admin';
+  document.getElementById('avatarInitial').textContent = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'A';
   document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-NG', { day:'numeric', month:'long', year:'numeric' });
 
-  const STUDENTS = Array.from({length:24}, (_,i) => i+1);
-  const DEPTS = [
-    { key:'hod', label:'HOD', seed:3 }, { key:'cedgs', label:'CEDGS', seed:7 },
-    { key:'lab', label:'Lab Instructor', seed:11 }, { key:'college', label:'College Officer', seed:17 },
-    { key:'health', label:'Health Unit', seed:19 }, { key:'sport', label:'Sport', seed:23 },
-    { key:'hall', label:'Hall of Residence', seed:29 }, { key:'ict', label:'ICT Unit', seed:31 },
-    { key:'alumni', label:'Alumni', seed:37 }, { key:'affairs', label:'Student Affairs', seed:41 },
-    { key:'library', label:'Library', seed:43 }, { key:'bursary', label:'Bursary', seed:47 },
-    { key:'esm', label:'ESM (Music)', seed:53 }, { key:'academic', label:'Academic Affairs', seed:59 },
-    { key:'chapel', label:'Chapel', seed:0 },
+  const DEPT_META = [
+    { key:'hod', label:'HOD' }, { key:'cedgs', label:'CEDGS' }, { key:'lab', label:'Lab Instructor' },
+    { key:'college', label:'College Officer' }, { key:'health', label:'Health Unit' },
+    { key:'sport', label:'Sport' }, { key:'hall', label:'Hall of Residence' },
+    { key:'ict', label:'ICT Unit' }, { key:'alumni', label:'Alumni' },
+    { key:'affairs', label:'Student Affairs' }, { key:'library', label:'Library' },
+    { key:'bursary', label:'Bursary' }, { key:'esm', label:'ESM (Music)' },
+    { key:'academic', label:'Academic Affairs' }, { key:'chapel', label:'Chapel' },
   ];
-  const CHAPEL_MAP = {1:'flagged',2:'pending',3:'approved',4:'approved',5:'pending',6:'approved',7:'flagged',8:'approved',9:'pending',10:'approved',11:'approved',12:'flagged',13:'approved',14:'pending',15:'approved',16:'approved',17:'flagged',18:'approved',19:'pending',20:'approved',21:'approved',22:'pending',23:'approved',24:'approved'};
-  const NAMES = ['Adebayo K.','Chisom A.','Fatima M.','Daniel O.','Grace E.','Samuel I.','Ngozi P.','Michael T.','Amaka R.','Joshua F.','Blessing N.','Emmanuel S.','Taiwo A.','Chinwe B.','David L.','Esther O.','Tobi R.','Chukwuma E.','Halima Y.','Patrick O.','Funmilayo A.','Obinna C.','Kehinde S.','Zainab H.'];
 
-  function getDeptStatus(sid, dept) {
-    const decs = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-    const saved = decs.find(d => d.studentId === sid && d.dept === dept);
-    if (saved) return saved.status;
-    if (dept === 'chapel') return CHAPEL_MAP[sid] || 'pending';
-    const s = DEPTS.find(d => d.key === dept)?.seed || 13;
-    const v = (sid * s) % 97;
-    if (v < 10) return 'rejected'; if (v < 24) return 'flagged'; if (v < 50) return 'pending';
-    return 'approved';
-  }
+  const [{ data: students }, { data: allItems }] = await Promise.all([
+    supabase.from('profiles').select('id, first_name, last_name, matric_number').eq('role', 'student'),
+    supabase.from('clearance_items').select('status, department_id, clearance_requests(student_id)'),
+  ]);
 
-  const deptStats = DEPTS.map(dept => {
-    let approved=0, pending=0, flagged=0, rejected=0;
-    STUDENTS.forEach(sid => {
-      const st = getDeptStatus(sid, dept.key);
-      if (st==='approved') approved++; else if (st==='pending') pending++;
-      else if (st==='flagged') flagged++; else rejected++;
-    });
+  const studentList = students || [];
+  const items = allItems || [];
+
+  const deptStats = DEPT_META.map(dept => {
+    const dItems = items.filter(it => it.department_id === dept.key);
+    const approved = dItems.filter(it => it.status === 'approved').length;
+    const pending  = dItems.filter(it => it.status === 'pending').length;
+    const flagged  = dItems.filter(it => it.status === 'flagged').length;
+    const rejected = dItems.filter(it => it.status === 'rejected').length;
     return { ...dept, approved, pending, flagged, rejected };
   });
 
-  let totalApproved=0, totalCleared=0;
-  STUDENTS.forEach(sid => {
-    DEPTS.forEach(d => { if (getDeptStatus(sid, d.key) === 'approved') totalApproved++; });
-    if (DEPTS.every(d => getDeptStatus(sid, d.key) === 'approved')) totalCleared++;
+  let totalApproved = 0, totalCleared = 0;
+  studentList.forEach(s => {
+    const sItems = items.filter(it => it.clearance_requests?.student_id === s.id);
+    const approvedCount = sItems.filter(it => it.status === 'approved').length;
+    totalApproved += approvedCount;
+    if (approvedCount === 15) totalCleared++;
   });
-  const grandTotal = STUDENTS.length * DEPTS.length;
-  const overallPct = Math.round((totalApproved/grandTotal)*100);
-  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+  const grandTotal = studentList.length * 15 || 1;
+  const overallPct = Math.round((totalApproved / grandTotal) * 100);
+  const decisionsCount = items.filter(it => it.status !== 'pending').length;
 
   document.getElementById('summaryGrid').innerHTML = `
-    <div class="summary-item"><div class="summary-val" style="color:var(--purple);">24</div><div class="summary-lbl">Total Students</div></div>
+    <div class="summary-item"><div class="summary-val" style="color:var(--purple);">${studentList.length}</div><div class="summary-lbl">Total Students</div></div>
     <div class="summary-item"><div class="summary-val" style="color:var(--approved);">${totalCleared}</div><div class="summary-lbl">Fully Cleared</div></div>
     <div class="summary-item"><div class="summary-val" style="color:var(--pending);">${overallPct}%</div><div class="summary-lbl">Overall Approval Rate</div></div>
-    <div class="summary-item"><div class="summary-val" style="color:var(--text);">${decisions.length}</div><div class="summary-lbl">Officer Decisions</div></div>`;
+    <div class="summary-item"><div class="summary-val" style="color:var(--text);">${decisionsCount}</div><div class="summary-lbl">Officer Decisions</div></div>`;
 
   // Bar chart
   const barChart = document.getElementById('barChart');
   const sorted = [...deptStats].sort((a,b) => b.approved - a.approved);
   sorted.forEach(d => {
-    const pct = Math.round((d.approved/24)*100);
+    const dTotal = items.filter(it => it.department_id === d.key).length || 1;
+    const pct = Math.round((d.approved / dTotal) * 100);
     const color = pct >= 70 ? '#10B981' : pct >= 40 ? '#F59E0B' : '#EF4444';
     barChart.innerHTML += `
       <div class="bar-row">
@@ -260,22 +259,22 @@
   }
 
   function exportFullCSV() {
-    const headers = ['Student ID','Name','Matric', ...DEPTS.map(d => d.label),'Total Approved','Status'];
+    const headers = ['Name','Matric', ...DEPT_META.map(d => d.label),'Total Approved','Status'];
     const rows = [headers.join(',')];
-    STUDENTS.forEach((sid, idx) => {
-      const statuses = DEPTS.map(d => getDeptStatus(sid, d.key));
-      const approved = statuses.filter(s => s === 'approved').length;
-      rows.push([sid, NAMES[idx], `MTU/2021/${String(sid).padStart(3,'0')}`, ...statuses, approved, approved===15?'Cleared':'In Progress'].join(','));
+    studentList.forEach(s => {
+      const sItems = items.filter(it => it.clearance_requests?.student_id === s.id);
+      const statuses = DEPT_META.map(d => sItems.find(it => it.department_id === d.key)?.status || 'pending');
+      const approved = statuses.filter(x => x === 'approved').length;
+      const name = [s.first_name, s.last_name].filter(Boolean).join(' ');
+      rows.push([name, s.matric_number||'', ...statuses, approved, approved===15?'Cleared':'In Progress'].join(','));
     });
     downloadCSV(rows.join('\n'), 'mtu_full_clearance.csv');
   }
 
   function exportDecisionsCSV() {
-    const headers = ['Timestamp','Student ID','Department','Action','Reason','Comment'];
-    const rows = [headers.join(',')];
-    decisions.sort((a,b) => new Date(b.timestamp)-new Date(a.timestamp)).forEach(d => {
-      rows.push([d.timestamp||'', d.studentId, d.dept, d.status, (d.reason||'').replace(/,/g,' '), (d.comment||'').replace(/,/g,' ')].join(','));
-    });
+    const decidedItems = items.filter(it => it.status !== 'pending');
+    const headers = ['Department','Status'];
+    const rows = [headers.join(','), ...decidedItems.map(it => [it.department_id, it.status].join(','))];
     downloadCSV(rows.join('\n'), 'mtu_officer_decisions.csv');
   }
 
@@ -283,7 +282,8 @@
     const headers = ['Department','Approved','Pending','Flagged','Rejected','Approval Rate'];
     const rows = [headers.join(',')];
     deptStats.forEach(d => {
-      rows.push([d.label, d.approved, d.pending, d.flagged, d.rejected, Math.round((d.approved/24)*100)+'%'].join(','));
+      const dTotal = items.filter(it => it.department_id === d.key).length || 1;
+      rows.push([d.label, d.approved, d.pending, d.flagged, d.rejected, Math.round((d.approved/dTotal)*100)+'%'].join(','));
     });
     downloadCSV(rows.join('\n'), 'mtu_dept_summary.csv');
   }

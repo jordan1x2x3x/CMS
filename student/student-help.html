@@ -115,10 +115,10 @@
     <div class="brand-text">CMS Portal<span>Mountain Top University</span></div>
   </div>
   <div class="profile-chip">
-    <div class="profile-avatar">OJ</div>
+    <div class="profile-avatar" id="sidebarAvatar">OJ</div>
     <div class="profile-info">
-      <div class="profile-name">Odunukwe C. Jordan</div>
-      <div class="profile-role">Student · MTU/CSC/2021/001</div>
+      <div class="profile-name" id="sidebarName">Odunukwe C. Jordan</div>
+      <div class="profile-role" id="sidebarRole">Student · MTU/CSC/2021/001</div>
     </div>
   </div>
   <nav class="sidebar-nav">
@@ -132,7 +132,7 @@
     <a href="student-help.html" class="nav-item active"><span class="material-symbols-outlined">help</span>Help Center</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -145,7 +145,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span></button>
-      <div class="topbar-avatar">OJ</div>
+      <div class="topbar-avatar" id="topbarAvatar">OJ</div>
     </div>
   </header>
 
@@ -314,6 +314,21 @@
   </div>
 </div>
 
+<script type="module">
+  (async () => {
+    const { supabase } = await import('../js/supabase.js');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if (!profile) { window.location.href = '../login.html'; return; }
+    const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
+    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('sidebarName').textContent = fullName;
+    document.getElementById('sidebarRole').textContent = 'Student · ' + (profile.matric_number || '—');
+    document.getElementById('topbarAvatar').textContent = initials;
+  })();
+</script>
 <script>
   function toggleFAQ(btn) {
     const item = btn.closest('.faq-item');

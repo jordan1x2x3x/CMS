@@ -199,11 +199,16 @@
   </div>
 </div>
 
-<script>
-  const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-  if (!sess.role || sess.role !== 'admin') window.location.href = '../login.html';
-  document.getElementById('adminName').textContent = sess.name || 'Admin';
-  document.getElementById('avatarInitial').textContent = (sess.name || 'A')[0].toUpperCase();
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'admin') { window.location.href = '../login.html'; }
+
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Admin';
+  document.getElementById('adminName').textContent = fullName;
+  document.getElementById('avatarInitial').textContent = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'A';
 
   const DEPTS = [
     { key:'hod', label:'HOD' }, { key:'cedgs', label:'CEDGS' }, { key:'lab', label:'Lab Instructor' },
@@ -213,7 +218,26 @@
     { key:'library', label:'Library' }, { key:'bursary', label:'Bursary' },
     { key:'esm', label:'ESM (Music)' }, { key:'academic', label:'Academic Affairs' }, { key:'chapel', label:'Chapel' },
   ];
-  const NAMES = ['Adebayo K.','Chisom A.','Fatima M.','Daniel O.','Grace E.','Samuel I.','Ngozi P.','Michael T.','Amaka R.','Joshua F.','Blessing N.','Emmanuel S.','Taiwo A.','Chinwe B.','David L.','Esther O.','Tobi R.','Chukwuma E.','Halima Y.','Patrick O.','Funmilayo A.','Obinna C.','Kehinde S.','Zainab H.'];
+
+  // Load real decisions from Supabase
+  const { data: itemsRaw } = await supabase
+    .from('clearance_items')
+    .select('id, status, department_id, updated_at, clearance_requests(profiles(first_name, last_name, matric_number))')
+    .in('status', ['approved','flagged','rejected'])
+    .order('updated_at', { ascending: false });
+
+  const ALL_DECISIONS = (itemsRaw || []).map(it => ({
+    timestamp: it.updated_at,
+    studentId: null,
+    studentName: it.clearance_requests?.profiles
+      ? [it.clearance_requests.profiles.first_name, it.clearance_requests.profiles.last_name].filter(Boolean).join(' ')
+      : '—',
+    matric: it.clearance_requests?.profiles?.matric_number || '',
+    dept: it.department_id,
+    status: it.status,
+    reason: '',
+    comment: '',
+  }));
 
   const deptFilter = document.getElementById('deptFilter');
   DEPTS.forEach(d => { const o = document.createElement('option'); o.value = d.key; o.textContent = d.label; deptFilter.appendChild(o); });
@@ -225,15 +249,13 @@
   const iconBg = { approved:'background:var(--approved-bg);color:var(--approved)', flagged:'background:var(--flagged-bg);color:var(--flagged)', rejected:'background:var(--rejected-bg);color:var(--rejected)', pending:'background:var(--pending-bg);color:var(--pending)' };
 
   function renderAudit() {
-    const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-    const sorted = [...decisions].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-    let filtered = sorted.filter(d => {
+    let filtered = ALL_DECISIONS.filter(d => {
       if (activeAction !== 'all' && d.status !== activeAction) return false;
       if (activeDept !== 'all' && d.dept !== activeDept) return false;
       if (searchVal) {
         const q = searchVal.toLowerCase();
         const deptLabel = DEPTS.find(x => x.key === d.dept)?.label || d.dept;
-        if (!String(d.studentId).includes(q) && !deptLabel.toLowerCase().includes(q) && !(d.reason||'').toLowerCase().includes(q) && !(d.comment||'').toLowerCase().includes(q)) return false;
+        if (!(d.studentName||'').toLowerCase().includes(q) && !deptLabel.toLowerCase().includes(q) && !(d.matric||'').toLowerCase().includes(q)) return false;
       }
       return true;
     });
@@ -241,17 +263,15 @@
     const tbody = document.getElementById('auditBody');
     document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'block';
     document.getElementById('footerCount').textContent = `Showing ${filtered.length} entries`;
-    document.getElementById('footerTotal').textContent = `${decisions.length} total decisions`;
+    document.getElementById('footerTotal').textContent = `${ALL_DECISIONS.length} total decisions`;
 
     tbody.innerHTML = filtered.map((d, idx) => {
       const deptLabel = DEPTS.find(x => x.key === d.dept)?.label || d.dept;
-      const studentName = NAMES[(d.studentId-1) % NAMES.length] || `Student #${d.studentId}`;
       const ts = d.timestamp ? new Date(d.timestamp).toLocaleString('en-NG', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
-      const note = [d.reason, d.comment].filter(Boolean).join(' — ') || '<span style="color:var(--muted);">—</span>';
       return `<tr>
         <td style="color:var(--muted);font-size:0.72rem;">${filtered.length - idx}</td>
         <td style="font-size:0.75rem;color:var(--muted);white-space:nowrap;">${ts}</td>
-        <td><strong>${studentName}</strong><br><span style="font-size:0.7rem;color:var(--muted);">MTU/2021/${String(d.studentId).padStart(3,'0')}</span></td>
+        <td><strong>${d.studentName}</strong>${d.matric ? `<br><span style="font-size:0.7rem;color:var(--muted);">${d.matric}</span>` : ''}</td>
         <td>${deptLabel}</td>
         <td>
           <div style="display:flex;align-items:center;gap:6px;">
@@ -259,7 +279,7 @@
             <span class="badge ${badgeClass[d.status]||''}">${d.status}</span>
           </div>
         </td>
-        <td style="font-size:0.78rem;max-width:220px;">${note}</td>
+        <td style="font-size:0.78rem;max-width:220px;color:var(--muted);">—</td>
       </tr>`;
     }).join('');
   }
@@ -268,12 +288,7 @@
   document.getElementById('deptFilter').addEventListener('change', e => { activeDept = e.target.value; renderAudit(); });
   document.getElementById('searchInput').addEventListener('input', e => { searchVal = e.target.value; renderAudit(); });
 
-  document.getElementById('clearDecisionsBtn').addEventListener('click', () => document.getElementById('clearModal').style.display = 'flex');
-  document.getElementById('confirmClear').addEventListener('click', () => {
-    localStorage.removeItem('cms_decisions');
-    document.getElementById('clearModal').style.display = 'none';
-    renderAudit();
-  });
+  document.getElementById('clearDecisionsBtn').style.display = 'none'; // decisions are in Supabase, not clearable here
 
   document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
   document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });

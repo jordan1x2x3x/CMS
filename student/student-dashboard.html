@@ -606,10 +606,10 @@
   </div>
 
   <div class="sidebar-profile">
-    <div class="profile-avatar">OJ</div>
+    <div class="profile-avatar" id="studentAvatar">--</div>
     <div class="profile-info">
-      <div class="profile-name">Odunukwe C. Jordan</div>
-      <div class="profile-matric">MTU/CSC/2021/001</div>
+      <div class="profile-name" id="studentFullName">Loading…</div>
+      <div class="profile-matric" id="studentMatric"></div>
     </div>
   </div>
 
@@ -645,7 +645,7 @@
   </nav>
 
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger">
+    <a href="../logout.html" class="nav-item danger">
       <span class="material-symbols-outlined">logout</span>
       Logout
     </a>
@@ -658,7 +658,7 @@
   <!-- Top bar -->
   <header class="topbar">
     <div class="topbar-left">
-      <h2>Good morning, CJ 👋</h2>
+      <h2 id="studentGreeting">Good morning 👋</h2>
       <p>Clearance year: 2023/2024 Academic Session</p>
     </div>
     <div class="topbar-right">
@@ -666,27 +666,23 @@
         <span class="material-symbols-outlined">notifications</span>
         <span class="notif-dot"></span>
       </button>
-      <div class="profile-avatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
+      <div class="profile-avatar" id="studentAvatarTopbar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">--</div>
     </div>
   </header>
 
   <!-- Page content -->
   <div class="content">
 
-    <!-- Action alert -->
-    <div class="alert-banner">
+    <!-- Action alert (hidden until a flagged item is found) -->
+    <div class="alert-banner" id="alertBanner" style="display:none">
       <div class="alert-left">
-        <div class="alert-icon">
-          <span class="material-symbols-outlined">warning</span>
-        </div>
+        <div class="alert-icon"><span class="material-symbols-outlined">warning</span></div>
         <div>
-          <div class="alert-title">Action Required — Chapel Clearance</div>
-          <div class="alert-desc">Your chapel attendance record shows more than 10 misses. You need to resolve this before proceeding.</div>
+          <div class="alert-title" id="alertTitle">Action Required</div>
+          <div class="alert-desc" id="alertDesc"></div>
         </div>
       </div>
-      <a href="clearance-tracking.html">
-        <button class="btn-fix">Fix Now</button>
-      </a>
+      <a href="clearance-tracking.html"><button class="btn-fix">Fix Now</button></a>
     </div>
 
     <!-- Page title -->
@@ -706,9 +702,8 @@
           <div class="stat-card-icon" style="background:var(--approved-bg);">
             <span class="material-symbols-outlined" style="color:var(--approved);">task_alt</span>
           </div>
-          <span class="stat-tag" style="background:var(--approved-bg);color:var(--approved);">+2 this week</span>
         </div>
-        <div class="stat-value" style="color:var(--approved);">08</div>
+        <div class="stat-value" id="statCleared" style="color:var(--approved);">—</div>
         <div class="stat-label">Departments Cleared</div>
       </div>
 
@@ -719,7 +714,7 @@
             <span class="material-symbols-outlined" style="color:var(--pending);">hourglass_empty</span>
           </div>
         </div>
-        <div class="stat-value" style="color:var(--pending);">04</div>
+        <div class="stat-value" id="statPending" style="color:var(--pending);">—</div>
         <div class="stat-label">Pending Review</div>
       </div>
 
@@ -730,7 +725,7 @@
             <span class="material-symbols-outlined" style="color:var(--flagged);">flag</span>
           </div>
         </div>
-        <div class="stat-value" style="color:var(--flagged);">01</div>
+        <div class="stat-value" id="statFlagged" style="color:var(--flagged);">—</div>
         <div class="stat-label">Flagged Issues</div>
       </div>
 
@@ -741,7 +736,7 @@
             <span class="material-symbols-outlined" style="color:var(--purple);">pending_actions</span>
           </div>
         </div>
-        <div class="stat-value" style="color:var(--purple);">03</div>
+        <div class="stat-value" id="statNotStarted" style="color:var(--purple);">—</div>
         <div class="stat-label">Not Yet Started</div>
       </div>
     </div>
@@ -755,23 +750,22 @@
         <div class="ring-wrap">
           <svg viewBox="0 0 160 160">
             <circle class="ring-bg" cx="80" cy="80" r="68" fill="none" stroke-width="12"/>
-            <!-- 53% = circumference 427, dashoffset = 427 * (1 - 0.53) = 200.7 -->
-            <circle class="ring-fill" cx="80" cy="80" r="68" fill="none" stroke-width="12"
-              stroke-dasharray="427" stroke-dashoffset="201"/>
+              <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="68" fill="none" stroke-width="12"
+              stroke-dasharray="427" stroke-dashoffset="427"/>
           </svg>
           <div class="ring-label">
-            <div class="ring-pct">53%</div>
+            <div class="ring-pct" id="ringPct">0%</div>
             <div class="ring-sub">Complete</div>
           </div>
         </div>
         <div class="ring-meta">
           <div class="ring-meta-item">
-            <div class="ring-meta-label">Est. Completion</div>
-            <div class="ring-meta-val">Aug 30, 2024</div>
+            <div class="ring-meta-label">Departments Done</div>
+            <div class="ring-meta-val" id="ringDone">0 / 15</div>
           </div>
           <div class="ring-meta-item">
             <div class="ring-meta-label">Active Stage</div>
-            <div class="ring-meta-val" style="color:var(--flagged);">Chapel</div>
+            <div class="ring-meta-val" id="ringActiveStage">—</div>
           </div>
         </div>
       </div>
@@ -779,128 +773,8 @@
       <!-- Dept mini overview -->
       <div class="quick-card">
         <div class="quick-card-title">Department Status Overview</div>
-        <div class="dept-mini-grid">
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=0">
-            <div class="dept-mini-icon" style="background:var(--approved-bg);">
-              <span class="material-symbols-outlined" style="color:var(--approved);">school</span>
-            </div>
-            <div class="dept-mini-name">HOD</div>
-            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=1">
-            <div class="dept-mini-icon" style="background:var(--approved-bg);">
-              <span class="material-symbols-outlined" style="color:var(--approved);">payments</span>
-            </div>
-            <div class="dept-mini-name">CEDGS</div>
-            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=2">
-            <div class="dept-mini-icon" style="background:var(--approved-bg);">
-              <span class="material-symbols-outlined" style="color:var(--approved);">science</span>
-            </div>
-            <div class="dept-mini-name">Lab</div>
-            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=3">
-            <div class="dept-mini-icon" style="background:var(--approved-bg);">
-              <span class="material-symbols-outlined" style="color:var(--approved);">corporate_fare</span>
-            </div>
-            <div class="dept-mini-name">College Officer</div>
-            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=4">
-            <div class="dept-mini-icon" style="background:var(--flagged-bg);">
-              <span class="material-symbols-outlined" style="color:var(--flagged);">church</span>
-            </div>
-            <div class="dept-mini-name">Chapel</div>
-            <span class="dept-mini-status" style="background:var(--flagged-bg);color:var(--flagged);">Flagged</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=5">
-            <div class="dept-mini-icon" style="background:var(--approved-bg);">
-              <span class="material-symbols-outlined" style="color:var(--approved);">local_hospital</span>
-            </div>
-            <div class="dept-mini-name">Health</div>
-            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=6">
-            <div class="dept-mini-icon" style="background:var(--approved-bg);">
-              <span class="material-symbols-outlined" style="color:var(--approved);">sports</span>
-            </div>
-            <div class="dept-mini-name">Sport</div>
-            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=7">
-            <div class="dept-mini-icon" style="background:var(--approved-bg);">
-              <span class="material-symbols-outlined" style="color:var(--approved);">home</span>
-            </div>
-            <div class="dept-mini-name">Hall</div>
-            <span class="dept-mini-status" style="background:var(--approved-bg);color:var(--approved);">Approved</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=8">
-            <div class="dept-mini-icon" style="background:var(--pending-bg);">
-              <span class="material-symbols-outlined" style="color:var(--pending);">computer</span>
-            </div>
-            <div class="dept-mini-name">ICT Unit</div>
-            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=9">
-            <div class="dept-mini-icon" style="background:var(--pending-bg);">
-              <span class="material-symbols-outlined" style="color:var(--pending);">groups</span>
-            </div>
-            <div class="dept-mini-name">Alumni</div>
-            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=10">
-            <div class="dept-mini-icon" style="background:var(--pending-bg);">
-              <span class="material-symbols-outlined" style="color:var(--pending);">diversity_3</span>
-            </div>
-            <div class="dept-mini-name">Student Affairs</div>
-            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=11">
-            <div class="dept-mini-icon" style="background:#F0EAF5;">
-              <span class="material-symbols-outlined" style="color:var(--purple);">menu_book</span>
-            </div>
-            <div class="dept-mini-name">Library</div>
-            <span class="dept-mini-status" style="background:#F0EAF5;color:var(--purple);">Locked</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=12">
-            <div class="dept-mini-icon" style="background:#F0EAF5;">
-              <span class="material-symbols-outlined" style="color:var(--purple);">account_balance_wallet</span>
-            </div>
-            <div class="dept-mini-name">Bursary</div>
-            <span class="dept-mini-status" style="background:#F0EAF5;color:var(--purple);">Locked</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=13">
-            <div class="dept-mini-icon" style="background:var(--pending-bg);">
-              <span class="material-symbols-outlined" style="color:var(--pending);">music_note</span>
-            </div>
-            <div class="dept-mini-name">ESM</div>
-            <span class="dept-mini-status" style="background:var(--pending-bg);color:var(--pending);">Pending</span>
-          </a>
-
-          <a class="dept-mini" href="clearance-tracking.html?dept=14">
-            <div class="dept-mini-icon" style="background:#F0EAF5;">
-              <span class="material-symbols-outlined" style="color:var(--purple);">verified</span>
-            </div>
-            <div class="dept-mini-name">Academic Affairs</div>
-            <span class="dept-mini-status" style="background:#F0EAF5;color:var(--purple);">Locked</span>
-          </a>
-
+        <div class="dept-mini-grid" id="deptMiniGrid">
+          <div style="color:#6B7280;font-size:0.8rem;padding:0.5rem;">Loading…</div>
         </div>
       </div>
     </div>
@@ -911,63 +785,9 @@
         <h3>Recent Activity</h3>
         <a href="clearance-tracking.html">View Full Report →</a>
       </div>
-
-      <div class="activity-row">
-        <div class="activity-dept-icon" style="background:var(--approved-bg);">
-          <span class="material-symbols-outlined" style="color:var(--approved);">task_alt</span>
-        </div>
-        <div class="activity-info">
-          <div class="activity-dept">Head of Department (HOD)</div>
-          <div class="activity-note">4 bonded project copies, CDs, plagiarism result & signatures verified.</div>
-        </div>
-        <div class="activity-right">
-          <span class="badge badge-approved"><span class="material-symbols-outlined">check_circle</span> Approved</span>
-          <div class="activity-time">2 days ago</div>
-        </div>
+      <div id="activityList">
+        <div style="color:#6B7280;font-size:0.8rem;padding:1rem 0;">Loading…</div>
       </div>
-
-      <div class="activity-row">
-        <div class="activity-dept-icon" style="background:var(--approved-bg);">
-          <span class="material-symbols-outlined" style="color:var(--approved);">task_alt</span>
-        </div>
-        <div class="activity-info">
-          <div class="activity-dept">College Officer</div>
-          <div class="activity-note">HOD signature verified. College clearance granted.</div>
-        </div>
-        <div class="activity-right">
-          <span class="badge badge-approved"><span class="material-symbols-outlined">check_circle</span> Approved</span>
-          <div class="activity-time">3 days ago</div>
-        </div>
-      </div>
-
-      <div class="activity-row" style="border-left: 3px solid var(--flagged);">
-        <div class="activity-dept-icon" style="background:var(--flagged-bg);">
-          <span class="material-symbols-outlined" style="color:var(--flagged);">church</span>
-        </div>
-        <div class="activity-info">
-          <div class="activity-dept" style="color:var(--flagged);">University Chapel</div>
-          <div class="activity-note">Chapel attendance below threshold — more than 10 misses recorded.</div>
-        </div>
-        <div class="activity-right">
-          <span class="badge badge-flagged"><span class="material-symbols-outlined">flag</span> Flagged</span>
-          <div class="activity-time">1 day ago</div>
-        </div>
-      </div>
-
-      <div class="activity-row">
-        <div class="activity-dept-icon" style="background:var(--pending-bg);">
-          <span class="material-symbols-outlined" style="color:var(--pending);">hourglass_empty</span>
-        </div>
-        <div class="activity-info">
-          <div class="activity-dept">ICT Unit</div>
-          <div class="activity-note">Request submitted. Awaiting officer review.</div>
-        </div>
-        <div class="activity-right">
-          <span class="badge badge-pending"><span class="material-symbols-outlined">schedule</span> Pending</span>
-          <div class="activity-time">Today</div>
-        </div>
-      </div>
-
     </div>
 
   </div><!-- /content -->
@@ -997,27 +817,27 @@
         <div class="modal-student-info">
           <div>
             <div class="info-item-label">Full Name</div>
-            <div class="info-item-value">Odunukwe C. Jordan</div>
+            <div class="info-item-value" id="modalName">—</div>
           </div>
           <div>
             <div class="info-item-label">Matric Number</div>
-            <div class="info-item-value">MTU/CSC/2021/001</div>
+            <div class="info-item-value" id="modalMatric">—</div>
           </div>
           <div>
             <div class="info-item-label">Department</div>
-            <div class="info-item-value">Computer Science &amp; Mathematics</div>
+            <div class="info-item-value" id="modalDept">—</div>
           </div>
           <div>
             <div class="info-item-label">Programme</div>
-            <div class="info-item-value">B.Sc. Computer Science</div>
+            <div class="info-item-value" id="modalProg">—</div>
           </div>
           <div>
             <div class="info-item-label">College</div>
-            <div class="info-item-value">CBAS</div>
+            <div class="info-item-value" id="modalCollege">—</div>
           </div>
           <div>
             <div class="info-item-label">Session</div>
-            <div class="info-item-value">2023/2024</div>
+            <div class="info-item-value" id="modalSession">—</div>
           </div>
         </div>
 
@@ -1099,11 +919,7 @@
     btn.disabled = true;
     btn.textContent = 'Submitting…';
 
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const supabase = createClient(
-      'https://nywyjkfgmfgutgudnbur.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
-    );
+    const { supabase } = await import('../js/supabase.js');
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = '../login.html'; return; }
@@ -1146,34 +962,165 @@
     });
   });
 
-  // ── Session guard ──
+  // ── Department metadata (order matches clearance-tracking.html) ──
+  const DEPT_META = [
+    {id:'hod',            name:'HOD',             icon:'school',                  label:'Head of Department (HOD)'},
+    {id:'cedgs',          name:'CEDGS',            icon:'payments',                label:'CEDGS'},
+    {id:'lab',            name:'Lab',              icon:'science',                 label:'Lab Instructor'},
+    {id:'college',        name:'College Officer',  icon:'corporate_fare',          label:'College Officer'},
+    {id:'chapel',         name:'Chapel',           icon:'church',                  label:'University Chapel'},
+    {id:'health',         name:'Health',           icon:'local_hospital',          label:'Health Centre'},
+    {id:'sport',          name:'Sport',            icon:'sports',                  label:'Sport Unit'},
+    {id:'hall',           name:'Hall',             icon:'home',                    label:'Hall of Residence'},
+    {id:'ict',            name:'ICT Unit',         icon:'computer',                label:'ICT Unit'},
+    {id:'alumni',         name:'Alumni',           icon:'groups',                  label:'Alumni Association'},
+    {id:'student_affairs',name:'Student Affairs',  icon:'diversity_3',             label:'Student Affairs'},
+    {id:'library',        name:'Library',          icon:'menu_book',               label:'University Library'},
+    {id:'bursary',        name:'Bursary',          icon:'account_balance_wallet',  label:'Bursary Unit'},
+    {id:'esm',            name:'ESM',              icon:'music_note',              label:'ESM Unit'},
+    {id:'academic',       name:'Academic Affairs', icon:'verified',                label:'Academic Affairs (Registrar)'},
+  ];
+
+  const STATUS_STYLE = {
+    approved: {bg:'var(--approved-bg)', color:'var(--approved)', label:'Approved',       icon:'task_alt'},
+    pending:  {bg:'var(--pending-bg)',  color:'var(--pending)',  label:'Pending',        icon:'hourglass_empty'},
+    flagged:  {bg:'var(--flagged-bg)',  color:'var(--flagged)',  label:'Flagged',        icon:'flag'},
+    rejected: {bg:'var(--flagged-bg)',  color:'var(--flagged)',  label:'Rejected',       icon:'cancel'},
+    locked:   {bg:'#F0EAF5',           color:'var(--purple)',   label:'Locked',         icon:'lock'},
+  };
+
+  // ── Session guard + profile population ──
   (async () => {
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const supabase = createClient(
-      'https://nywyjkfgmfgutgudnbur.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55d3lqa2ZnbWZndXRndWRuYnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NDA2OTUsImV4cCI6MjA5MjAxNjY5NX0.W-jYGkrBD3XhrzhyTGNsN0RTBzXZfEGZHIUYE_hzY1s'
-    );
+    const { supabase } = await import('../js/supabase.js');
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = '../login.html'; return; }
 
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
     if (!profile || profile.role !== 'student') { window.location.href = '../login.html'; return; }
 
-    // Populate name in sidebar/topbar if elements exist
-    const nameEl = document.getElementById('studentFullName');
-    if (nameEl) nameEl.textContent = profile.first_name + ' ' + profile.last_name;
-    const matricEl = document.getElementById('studentMatric');
-    if (matricEl) matricEl.textContent = profile.matric_number || '';
+    const fullName = (profile.first_name + ' ' + profile.last_name).trim();
+    const initials = (profile.first_name?.[0] || '') + (profile.last_name?.[0] || '');
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+    document.getElementById('studentFullName').textContent     = fullName;
+    document.getElementById('studentMatric').textContent       = profile.matric_number || '';
+    document.getElementById('studentAvatar').textContent       = initials.toUpperCase();
+    document.getElementById('studentAvatarTopbar').textContent = initials.toUpperCase();
+    document.getElementById('studentGreeting').textContent     = `${greeting}, ${profile.first_name} 👋`;
+
+    // Modal info
+    const yr = new Date().getFullYear();
+    document.getElementById('modalName').textContent    = fullName;
+    document.getElementById('modalMatric').textContent  = profile.matric_number || '—';
+    document.getElementById('modalDept').textContent    = profile.department || '—';
+    document.getElementById('modalProg').textContent    = profile.programme  || '—';
+    document.getElementById('modalCollege').textContent = profile.college    || '—';
+    document.getElementById('modalSession').textContent = `${yr}/${yr + 1}`;
+
+    localStorage.setItem('cms_session', JSON.stringify({
+      id: session.user.id, role: profile.role,
+      name: fullName, email: profile.email,
+      department: profile.department || null,
+    }));
+
+    // ── Load clearance data ──
+    const { data: request } = await supabase
+      .from('clearance_requests')
+      .select('id')
+      .eq('student_id', session.user.id)
+      .order('submitted_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Build a status map: dept_id → status
+    const statusMap = {};
+    DEPT_META.forEach(d => { statusMap[d.id] = 'pending'; });
+
+    if (request) {
+      const { data: items } = await supabase
+        .from('clearance_items')
+        .select('department_id, status, officer_note')
+        .eq('request_id', request.id);
+      (items || []).forEach(item => { statusMap[item.department_id] = item.status; });
+    }
+
+    // ── Stats ──
+    const counts = {approved:0, pending:0, flagged:0, rejected:0};
+    Object.values(statusMap).forEach(s => { if (counts[s] !== undefined) counts[s]++; });
+    const cleared  = counts.approved;
+    const flagged  = counts.flagged + counts.rejected;
+    const pending  = counts.pending;
+    const notStarted = 15 - cleared - flagged - pending;
+
+    document.getElementById('statCleared').textContent    = String(cleared).padStart(2,'0');
+    document.getElementById('statPending').textContent    = String(pending).padStart(2,'0');
+    document.getElementById('statFlagged').textContent    = String(flagged).padStart(2,'0');
+    document.getElementById('statNotStarted').textContent = String(Math.max(0,notStarted)).padStart(2,'0');
+
+    // ── Progress ring ──
+    const pct = Math.round((cleared / 15) * 100);
+    const dashoffset = Math.round(427 * (1 - pct / 100));
+    document.getElementById('ringPct').textContent         = pct + '%';
+    document.getElementById('ringFill').setAttribute('stroke-dashoffset', dashoffset);
+    document.getElementById('ringDone').textContent        = `${cleared} / 15`;
+    const firstPending = DEPT_META.find(d => statusMap[d.id] !== 'approved');
+    document.getElementById('ringActiveStage').textContent = firstPending ? firstPending.name : 'All Clear! 🎉';
+
+    // ── Alert banner (show first flagged dept) ──
+    const firstFlagged = DEPT_META.find(d => statusMap[d.id] === 'flagged' || statusMap[d.id] === 'rejected');
+    if (firstFlagged) {
+      document.getElementById('alertBanner').style.display = '';
+      document.getElementById('alertTitle').textContent    = `Action Required — ${firstFlagged.label}`;
+      document.getElementById('alertDesc').textContent     = `Your ${firstFlagged.label} clearance has been flagged. Visit the department to resolve this before proceeding.`;
+    }
+
+    // ── Dept mini grid ──
+    document.getElementById('deptMiniGrid').innerHTML = DEPT_META.map((d, i) => {
+      const s = STATUS_STYLE[statusMap[d.id]] || STATUS_STYLE.pending;
+      return `<a class="dept-mini" href="clearance-tracking.html?dept=${i}">
+        <div class="dept-mini-icon" style="background:${s.bg};">
+          <span class="material-symbols-outlined" style="color:${s.color};">${d.icon}</span>
+        </div>
+        <div class="dept-mini-name">${d.name}</div>
+        <span class="dept-mini-status" style="background:${s.bg};color:${s.color};">${s.label}</span>
+      </a>`;
+    }).join('');
+
+    // ── Recent activity (non-pending items) ──
+    const activityItems = DEPT_META
+      .filter(d => statusMap[d.id] !== 'pending')
+      .slice(0, 5);
+    const activityHTML = activityItems.length
+      ? activityItems.map(d => {
+          const st = statusMap[d.id];
+          const s  = STATUS_STYLE[st] || STATUS_STYLE.pending;
+          const borderStyle = (st === 'flagged' || st === 'rejected') ? `style="border-left:3px solid ${s.color}"` : '';
+          return `<div class="activity-row" ${borderStyle}>
+            <div class="activity-dept-icon" style="background:${s.bg};">
+              <span class="material-symbols-outlined" style="color:${s.color};">${s.icon}</span>
+            </div>
+            <div class="activity-info">
+              <div class="activity-dept" style="color:${s.color === 'var(--approved)' ? 'inherit' : s.color}">${d.label}</div>
+              <div class="activity-note">${st === 'approved' ? 'Clearance approved.' : st === 'flagged' ? 'Flagged — visit the department to resolve.' : st === 'rejected' ? 'Rejected — contact the department officer.' : 'Awaiting review.'}</div>
+            </div>
+            <div class="activity-right">
+              <span class="badge badge-${st === 'approved' ? 'approved' : st === 'flagged' || st === 'rejected' ? 'flagged' : 'pending'}">
+                <span class="material-symbols-outlined">${s.icon}</span> ${s.label}
+              </span>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div style="color:#6B7280;font-size:0.8rem;padding:1rem 0;text-align:center;">No activity yet. Submit a clearance request to get started.</div>';
+    document.getElementById('activityList').innerHTML = activityHTML;
 
     // Logout links
-    document.querySelectorAll('a[href*="login.html"]').forEach(a => {
-      if (a.textContent.toLowerCase().includes('log') || a.dataset.logout !== undefined) {
-        a.addEventListener('click', async (e) => {
-          e.preventDefault();
-          await supabase.auth.signOut();
-          window.location.href = '../login.html';
-        });
-      }
+    document.querySelectorAll('a[href*="logout.html"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('cms_session');
+        window.location.href = '../logout.html';
+      });
     });
   })();
 </script>

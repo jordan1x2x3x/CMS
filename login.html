@@ -545,30 +545,22 @@
 </footer>
 
 <script type="module">
-  // ── Set to false to reconnect Supabase ─────────────────────
-  const MOCK_MODE = false;
-
   // ── Redirect if already logged in ──────────────────────────
-  if (MOCK_MODE) {
-    const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-    if (sess.role) redirectByRole(sess.role);
-  } else {
-    const { supabase } = await import('./js/supabase.js');
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles').select('*').eq('id', session.user.id).single();
-        if (profile) {
-          localStorage.setItem('cms_session', JSON.stringify({
-            id: session.user.id, role: profile.role,
-            name: (profile.first_name + ' ' + profile.last_name).trim(),
-            email: profile.email, department: profile.department || null,
-          }));
-          redirectByRole(profile.role);
-        }
+  const { supabase } = await import('./js/supabase.js');
+  {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { data: profile } = await supabase
+        .from('profiles').select('*').eq('id', session.user.id).single();
+      if (profile) {
+        localStorage.setItem('cms_session', JSON.stringify({
+          id: session.user.id, role: profile.role,
+          name: (profile.first_name + ' ' + profile.last_name).trim(),
+          email: profile.email, department: profile.department || null,
+        }));
+        redirectByRole(profile.role);
       }
-    })();
+    }
   }
 
   // ── Toggle password visibility ─────────────────────────────
@@ -611,29 +603,7 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Signing in…';
 
-    if (MOCK_MODE) {
-      // ── Mock login: check cms_users in localStorage ──────────
-      const users = JSON.parse(localStorage.getItem('cms_users') || '[]');
-      const user = users.find(u =>
-        (u.email === identifier || u.matric === identifier.toUpperCase()) &&
-        u.password === password && u.role === role
-      );
-      if (!user) {
-        showError('Incorrect email/matric, password, or role. Please try again.');
-        document.getElementById('field-password').classList.add('has-error');
-        resetBtn(submitBtn); return;
-      }
-      localStorage.setItem('cms_session', JSON.stringify({
-        id: user.id, role: user.role, name: user.name,
-        email: user.email, department: user.department || null,
-      }));
-      errBox.style.display = 'none';
-      redirectByRole(role);
-      return;
-    }
-
     // ── Supabase login ──────────────────────────────────────────
-    const { supabase } = await import('./js/supabase.js');
     let email = identifier;
     if (!identifier.includes('@')) {
       const { data: profile } = await supabase

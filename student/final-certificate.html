@@ -206,8 +206,8 @@
     <div><div class="brand-name">MTU Clearance</div><div class="brand-sub">Student Portal</div></div>
   </div>
   <div class="sidebar-profile">
-    <div class="profile-avatar">OJ</div>
-    <div><div class="profile-name">Odunukwe Chidire Jordan</div><div class="profile-matric">MTU/CSC/2021/001</div></div>
+    <div class="profile-avatar" id="sidebarAvatar">OJ</div>
+    <div><div class="profile-name" id="sidebarName">Odunukwe Chidire Jordan</div><div class="profile-matric" id="sidebarMatric">MTU/CSC/2021/001</div></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-label">Main</div>
@@ -220,7 +220,7 @@
     <a href="student-help.html" class="nav-item"><span class="material-symbols-outlined">help</span>Help Center</a>
   </nav>
   <div class="sidebar-footer">
-    <a href="../login.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
+    <a href="../logout.html" class="nav-item danger"><span class="material-symbols-outlined">logout</span>Logout</a>
   </div>
 </aside>
 
@@ -233,7 +233,7 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn"><span class="material-symbols-outlined">notifications</span><span class="notif-dot"></span></button>
-      <div class="profile-avatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
+      <div class="profile-avatar" id="topbarAvatar" style="width:36px;height:36px;font-size:12px;background:var(--purple);cursor:pointer;">OJ</div>
     </div>
   </header>
 
@@ -247,8 +247,8 @@
     <div class="status-banner locked">
       <div class="status-banner-icon"><span class="material-symbols-outlined">lock</span></div>
       <div>
-        <div class="status-banner-title">Certificate Locked — 53% Complete</div>
-        <div class="status-banner-desc">8 of 15 departments cleared. Resolve the Chapel flagged issue to continue.</div>
+        <div class="status-banner-title" id="bannerTitle">Certificate Locked — 53% Complete</div>
+        <div class="status-banner-desc" id="bannerDesc">8 of 15 departments cleared. Resolve the Chapel flagged issue to continue.</div>
       </div>
     </div>
 
@@ -278,10 +278,10 @@
 
                 <div class="cert-body">
                   <div class="cert-certify">This is to certify that</div>
-                  <div class="cert-student-name">Odunukwe Chidire Jordan</div>
-                  <div class="cert-matric">Matriculation No: MTU/CSC/2021/001</div>
-                  <div class="cert-programme">B.Sc. Computer Science</div>
-                  <div class="cert-dept">Department of Computer Science and Mathematics, CBAS</div>
+                  <div class="cert-student-name" id="certName">Odunukwe Chidire Jordan</div>
+                  <div class="cert-matric" id="certMatric">Matriculation No: MTU/CSC/2021/001</div>
+                  <div class="cert-programme" id="certProgramme">B.Sc. Computer Science</div>
+                  <div class="cert-dept" id="certDept">Department of Computer Science and Mathematics, CBAS</div>
                   <div class="cert-statement">
                     has satisfactorily completed all university clearance requirements for the
                     <strong>2023/2024 Academic Session</strong> and is hereby cleared for graduation
@@ -331,29 +331,15 @@
         <div class="checklist-card">
           <div class="checklist-header">
             <h3>Clearance Checklist</h3>
-            <span class="checklist-progress">8 / 15</span>
+            <span class="checklist-progress" id="checklistProgress">8 / 15</span>
           </div>
           <div style="padding:0.75rem 1.25rem 0;">
             <div class="progress-bar-wrap">
-              <div class="progress-bar-fill"></div>
+              <div class="progress-bar-fill" id="checklistBar"></div>
             </div>
           </div>
-          <div class="checklist-list">
-            <div class="check-item check-done"><div class="check-icon"><span class="material-symbols-outlined">check</span></div><span class="check-name">Head of Department</span></div>
-            <div class="check-item check-done"><div class="check-icon"><span class="material-symbols-outlined">check</span></div><span class="check-name">CEDGS</span></div>
-            <div class="check-item check-done"><div class="check-icon"><span class="material-symbols-outlined">check</span></div><span class="check-name">Lab Instructor</span></div>
-            <div class="check-item check-done"><div class="check-icon"><span class="material-symbols-outlined">check</span></div><span class="check-name">College Officer</span></div>
-            <div class="check-item check-flagged"><div class="check-icon"><span class="material-symbols-outlined">flag</span></div><span class="check-name" style="color:var(--flagged);font-weight:600;">Chapel ⚠ Flagged</span></div>
-            <div class="check-item check-done"><div class="check-icon"><span class="material-symbols-outlined">check</span></div><span class="check-name">Health Centre</span></div>
-            <div class="check-item check-done"><div class="check-icon"><span class="material-symbols-outlined">check</span></div><span class="check-name">Sport Unit</span></div>
-            <div class="check-item check-done"><div class="check-icon"><span class="material-symbols-outlined">check</span></div><span class="check-name">Hall of Residence</span></div>
-            <div class="check-item check-pending"><div class="check-icon"><span class="material-symbols-outlined">schedule</span></div><span class="check-name">ICT Unit</span></div>
-            <div class="check-item check-pending"><div class="check-icon"><span class="material-symbols-outlined">schedule</span></div><span class="check-name">Alumni Association</span></div>
-            <div class="check-item check-pending"><div class="check-icon"><span class="material-symbols-outlined">schedule</span></div><span class="check-name">Student Affairs</span></div>
-            <div class="check-item check-locked"><div class="check-icon"><span class="material-symbols-outlined">lock</span></div><span class="check-name">University Library</span></div>
-            <div class="check-item check-locked"><div class="check-icon"><span class="material-symbols-outlined">lock</span></div><span class="check-name">Bursary Unit</span></div>
-            <div class="check-item check-pending"><div class="check-icon"><span class="material-symbols-outlined">schedule</span></div><span class="check-name">ESM Unit</span></div>
-            <div class="check-item check-locked"><div class="check-icon"><span class="material-symbols-outlined">lock</span></div><span class="check-name">Academic Affairs</span></div>
+          <div class="checklist-list" id="checklistItems">
+            <!-- populated by Supabase -->
           </div>
         </div>
 
@@ -383,5 +369,97 @@
   <footer>&copy; 2024 Mountain Top University &mdash; Academic Portal &nbsp;|&nbsp; Support: registrar@mtu.edu.ng</footer>
 </div>
 
+<script type="module">
+  const DEPT_META = [
+    { id:'hod',            name:'Head of Department' },
+    { id:'cedgs',          name:'CEDGS' },
+    { id:'lab',            name:'Lab Instructor' },
+    { id:'college',        name:'College Officer' },
+    { id:'chapel',         name:'Chapel' },
+    { id:'health',         name:'Health Centre' },
+    { id:'sport',          name:'Sport Unit' },
+    { id:'hall',           name:'Hall of Residence' },
+    { id:'ict',            name:'ICT Unit' },
+    { id:'alumni',         name:'Alumni Association' },
+    { id:'student_affairs',name:'Student Affairs' },
+    { id:'library',        name:'University Library' },
+    { id:'bursary',        name:'Bursary Unit' },
+    { id:'esm',            name:'ESM Unit' },
+    { id:'academic',       name:'Academic Affairs' },
+  ];
+
+  const STATUS_MAP = {
+    approved: { cls:'check-done',    icon:'check',    label:'' },
+    flagged:  { cls:'check-flagged', icon:'flag',     label:' ⚠ Flagged' },
+    pending:  { cls:'check-pending', icon:'schedule', label:'' },
+    default:  { cls:'check-pending', icon:'schedule', label:'' },
+  };
+
+  (async () => {
+    const { supabase } = await import('../js/supabase.js');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if (!profile) { window.location.href = '../login.html'; return; }
+
+    const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
+    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('sidebarName').textContent   = fullName;
+    document.getElementById('sidebarMatric').textContent = profile.matric_number || '—';
+    document.getElementById('topbarAvatar').textContent  = initials;
+    document.getElementById('certName').textContent      = fullName;
+    document.getElementById('certMatric').textContent    = 'Matriculation No: ' + (profile.matric_number || '—');
+    document.getElementById('certProgramme').textContent = profile.programme || '—';
+    document.getElementById('certDept').textContent      = [profile.department, profile.college].filter(Boolean).join(', ') || '—';
+
+    // Load latest clearance request
+    const { data: req } = await supabase.from('clearance_requests')
+      .select('id, status').eq('student_id', session.user.id)
+      .order('submitted_at', { ascending: false }).limit(1).maybeSingle();
+
+    if (!req) {
+      document.getElementById('bannerTitle').textContent = 'No Clearance Request Found';
+      document.getElementById('bannerDesc').textContent  = 'Submit a clearance request from the Dashboard to begin.';
+      document.getElementById('checklistItems').innerHTML = '<p style="padding:1rem;color:var(--text-muted);font-size:0.82rem;">No active clearance request.</p>';
+      return;
+    }
+
+    const { data: items } = await supabase.from('clearance_items')
+      .select('department_id, status').eq('request_id', req.id);
+
+    const statusMap = {};
+    (items || []).forEach(i => { statusMap[i.department_id] = i.status; });
+
+    let cleared = 0;
+    const total  = DEPT_META.length;
+    let flagged  = false;
+    const listEl = document.getElementById('checklistItems');
+    listEl.innerHTML = '';
+
+    DEPT_META.forEach(dept => {
+      const st = statusMap[dept.id] || 'pending';
+      if (st === 'approved') cleared++;
+      if (st === 'flagged')  flagged = true;
+      const { cls, icon, label } = STATUS_MAP[st] || STATUS_MAP.default;
+      const nameText = dept.name + label;
+      const nameStyle = st === 'flagged' ? ' style="color:var(--flagged);font-weight:600;"' : '';
+      listEl.innerHTML += `<div class="check-item ${cls}"><div class="check-icon"><span class="material-symbols-outlined">${icon}</span></div><span class="check-name"${nameStyle}>${nameText}</span></div>`;
+    });
+
+    const pct = Math.round((cleared / total) * 100);
+    document.getElementById('checklistProgress').textContent = `${cleared} / ${total}`;
+    document.getElementById('checklistBar').style.width      = pct + '%';
+
+    if (cleared === total) {
+      document.getElementById('bannerTitle').textContent = 'Certificate Unlocked — 100% Complete';
+      document.getElementById('bannerDesc').textContent  = 'All departments have cleared you. Your certificate is ready to download.';
+    } else {
+      document.getElementById('bannerTitle').textContent = `Certificate Locked — ${pct}% Complete`;
+      document.getElementById('bannerDesc').textContent  = `${cleared} of ${total} departments cleared.${flagged ? ' Resolve flagged items to continue.' : ''}`;
+    }
+  })();
+</script>
 </body>
 </html>

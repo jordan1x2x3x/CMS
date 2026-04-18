@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users | MTU Super Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple: #6B0080; --purple-dark: #4A0058; --purple-light: #8B20A0;
+      --green: #76B82A; --surface: #F4F6F9; --white: #FFFFFF;
+      --border: #D1D9E6; --text-main: #1A0020; --text-muted: #5A6A80;
+      --sidebar-w: 240px;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; }
+    .sidebar { width: var(--sidebar-w); background: var(--purple-dark); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); text-decoration: none; }
+    .sidebar-brand img { width: 36px; height: 36px; border-radius: 6px; background: white; padding: 2px; object-fit: contain; }
+    .sidebar-brand-text { font-family: 'Newsreader', serif; font-size: 0.9rem; font-weight: 700; color: white; line-height: 1.2; }
+    .sidebar-brand-text span { display: block; font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 500; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-section-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 0.75rem 1.25rem 0.25rem; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.65rem 1.25rem; text-decoration: none; color: rgba(255,255,255,0.65); font-size: 0.83rem; font-weight: 500; border-left: 3px solid transparent; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: white; border-left-color: #B5E048; }
+    .nav-item .material-symbols-outlined { font-size: 18px; }
+    .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-user { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+    .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-light); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .sidebar-user-name { font-size: 0.78rem; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user-role { font-size: 0.65rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.07em; }
+    .btn-logout { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.15s, color 0.15s; }
+    .btn-logout:hover { background: rgba(239,68,68,0.15); color: #FCA5A5; border-color: rgba(239,68,68,0.3); }
+    .btn-logout .material-symbols-outlined { font-size: 16px; }
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: white; border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+    .topbar-title { font-size: 1rem; font-weight: 600; }
+    .topbar-badge { display: inline-flex; align-items: center; gap: 6px; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; border-radius: 20px; padding: 4px 12px; font-size: 0.72rem; font-weight: 600; }
+    .topbar-badge .material-symbols-outlined { font-size: 14px; }
+    .content { padding: 2rem; flex: 1; }
+    .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .card-header h2 { font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-right: auto; }
+    .card-header h2 .material-symbols-outlined { font-size: 18px; color: var(--purple); }
+
+    /* Filter tabs */
+    .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tab { padding: 6px 16px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--text-muted); transition: all 0.15s; }
+    .tab.active, .tab:hover { background: var(--purple); color: white; border-color: var(--purple); }
+
+    /* Search + filter bar */
+    .toolbar { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap .material-symbols-outlined { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 17px; pointer-events: none; }
+    .search-wrap input { width: 100%; padding: 9px 9px 9px 36px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-main); outline: none; transition: border-color 0.2s; }
+    .search-wrap input:focus { border-color: var(--purple); }
+    select.filter-sel { padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.82rem; color: var(--text-main); outline: none; background: white; cursor: pointer; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { text-align: left; padding: 0.55rem 0.75rem; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: #FAFBFD; }
+    td { padding: 0.7rem 0.75rem; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFBFD; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 600; }
+    .badge-green  { background: #D1FAE5; color: #065F46; }
+    .badge-purple { background: #F5EEFF; color: var(--purple); }
+    .badge-blue   { background: #DBEAFE; color: #1E40AF; }
+    .badge-amber  { background: #FEF3C7; color: #92400E; }
+    .badge-red    { background: #FEE2E2; color: #991B1B; }
+    .badge-gray   { background: #F3F4F6; color: #374151; }
+
+    .action-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; border: none; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .action-btn.deactivate { background: #FEE2E2; color: #991B1B; }
+    .action-btn.deactivate:hover { background: #FCA5A5; }
+    .action-btn.activate { background: #D1FAE5; color: #065F46; }
+    .action-btn.activate:hover { background: #A7F3D0; }
+    .action-btn .material-symbols-outlined { font-size: 13px; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.85rem; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 14px; padding: 2rem; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main); }
+    .modal p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+    .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+    .btn-cancel { padding: 9px 20px; border: 1.5px solid var(--border); border-radius: 8px; background: white; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: var(--text-muted); }
+    .btn-cancel:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-confirm { padding: 9px 20px; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; color: white; }
+    .btn-confirm.danger { background: #DC2626; }
+    .btn-confirm.safe  { background: #16A34A; }
+    .btn-confirm:hover { opacity: 0.9; }
+
+    .count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; background: var(--purple); color: white; border-radius: 10px; font-size: 0.65rem; font-weight: 700; padding: 0 5px; margin-left: 6px; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a class="sidebar-brand" href="../index.html">
+    <img src="../assets/mtu-logo.png" alt="MTU" />
+    <div class="sidebar-brand-text">MTU Clearance <span>Super Admin</span></div>
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item" href="super-admin-dashboard.html"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+    <div class="nav-section-label">Management</div>
+    <a class="nav-item active" href="super-admin-users.html"><span class="material-symbols-outlined">group</span> Users</a>
+    <a class="nav-item" href="super-admin-access-codes.html"><span class="material-symbols-outlined">key</span> Access Codes</a>
+    <div class="nav-section-label">System</div>
+    <a class="nav-item" href="super-admin-audit.html"><span class="material-symbols-outlined">receipt_long</span> Audit Log</a>
+    <a class="nav-item" href="super-admin-settings.html"><span class="material-symbols-outlined">settings</span> Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="sidebarAvatar">SA</div>
+      <div>
+        <div class="sidebar-user-name" id="sidebarName">Super Admin</div>
+        <div class="sidebar-user-role">ICT Unit</div>
+      </div>
+    </div>
+    <a class="btn-logout" href="../logout.html"><span class="material-symbols-outlined">logout</span> Sign Out</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">User Management</div>
+    <span class="topbar-badge"><span class="material-symbols-outlined">shield_person</span> Super Admin</span>
+  </div>
+  <div class="content">
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="tab active" data-role="all">All Users <span class="count-badge" id="cnt-all">0</span></button>
+      <button class="tab" data-role="student">Students <span class="count-badge" id="cnt-student">0</span></button>
+      <button class="tab" data-role="officer">Officers <span class="count-badge" id="cnt-officer">0</span></button>
+      <button class="tab" data-role="admin">Admins <span class="count-badge" id="cnt-admin">0</span></button>
+      <button class="tab" data-role="super_admin">Super Admins <span class="count-badge" id="cnt-super_admin">0</span></button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" id="searchInput" placeholder="Search by name, email, or matric number…" />
+      </div>
+      <select class="filter-sel" id="statusFilter">
+        <option value="all">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div class="card-body" style="padding:0;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Dept / Matric</th>
+              <th>Joined</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody">
+            <tr><td colspan="7" class="empty-state">Loading users…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="modalTitle">Confirm Action</h3>
+    <p id="modalBody">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modalCancel">Cancel</button>
+      <button class="btn-confirm" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile || profile.role !== 'super_admin') { window.location.href = '../login.html'; }
+
+  const _initials = ((profile.first_name?.[0]||'') + (profile.last_name?.[0]||'')).toUpperCase() || 'SA';
+  const _fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Super Admin';
+  document.getElementById('sidebarName').textContent = _fullName;
+  document.getElementById('sidebarAvatar').textContent = _initials;
+
+  let allUsers = [];
+  let activeRole = 'all';
+  const roleColors = { student:'badge-green', officer:'badge-blue', admin:'badge-purple', super_admin:'badge-amber' };
+
+  const { data: profiles } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  allUsers = profiles || [];
+
+  // Update tab counts
+  ['all','student','officer','admin','super_admin'].forEach(r => {
+    const cnt = r === 'all' ? allUsers.length : allUsers.filter(u => u.role === r).length;
+    document.getElementById(`cnt-${r}`).textContent = cnt;
+  });
+
+  function renderTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    let filtered = allUsers;
+    if (activeRole !== 'all') filtered = filtered.filter(u => u.role === activeRole);
+    if (status === 'active')   filtered = filtered.filter(u => u.is_active);
+    if (status === 'inactive') filtered = filtered.filter(u => !u.is_active);
+    if (search) filtered = filtered.filter(u =>
+      `${u.first_name} ${u.last_name}`.toLowerCase().includes(search) ||
+      (u.email || '').toLowerCase().includes(search) ||
+      (u.matric_number || '').toLowerCase().includes(search)
+    );
+
+    const tbody = document.getElementById('usersBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No users found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(u => `
+      <tr>
+        <td><strong>${u.first_name} ${u.last_name}</strong></td>
+        <td style="color:var(--text-muted);font-size:0.78rem;">${u.email}</td>
+        <td><span class="badge ${roleColors[u.role]||'badge-gray'}">${u.role}</span></td>
+        <td style="font-size:0.78rem;color:var(--text-muted);">${u.matric_number || u.department || '—'}</td>
+        <td style="font-size:0.78rem;color:var(--text-muted);">${new Date(u.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+        <td><span class="badge ${u.is_active ? 'badge-green' : 'badge-red'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          ${u.id !== profile.id ? `
+            <button class="action-btn ${u.is_active ? 'deactivate' : 'activate'}" onclick="toggleUser('${u.id}','${u.first_name} ${u.last_name}',${u.is_active})">
+              <span class="material-symbols-outlined">${u.is_active ? 'block' : 'check_circle'}</span>
+              ${u.is_active ? 'Deactivate' : 'Activate'}
+            </button>
+          ` : '<span style="font-size:0.72rem;color:var(--text-muted);">You</span>'}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  renderTable();
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeRole = tab.dataset.role;
+      renderTable();
+    });
+  });
+  document.getElementById('searchInput').addEventListener('input', renderTable);
+  document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+  // Modal
+  let pendingAction = null;
+  window.toggleUser = (id, name, isActive) => {
+    const action = isActive ? 'deactivate' : 'activate';
+    document.getElementById('modalTitle').textContent = `${action.charAt(0).toUpperCase()+action.slice(1)} User`;
+    document.getElementById('modalBody').textContent = `Are you sure you want to ${action} ${name}? ${isActive ? 'They will lose access to the portal.' : 'They will regain access to the portal.'}`;
+    const btn = document.getElementById('modalConfirm');
+    btn.className = `btn-confirm ${isActive ? 'danger' : 'safe'}`;
+    btn.textContent = action.charAt(0).toUpperCase() + action.slice(1);
+    pendingAction = { id, isActive };
+    document.getElementById('confirmModal').classList.add('open');
+  };
+
+  document.getElementById('modalCancel').addEventListener('click', () => {
+    document.getElementById('confirmModal').classList.remove('open');
+    pendingAction = null;
+  });
+
+  document.getElementById('modalConfirm').addEventListener('click', async () => {
+    if (!pendingAction) return;
+    const { id, isActive } = pendingAction;
+    document.getElementById('confirmModal').classList.remove('open');
+    await supabase.from('profiles').update({ is_active: !isActive }).eq('id', id);
+    const user = allUsers.find(u => u.id === id);
+    if (user) user.is_active = !isActive;
+    renderTable();
+    pendingAction = null;
+  });
+</script>
+</body>
+</html>
