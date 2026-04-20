@@ -478,86 +478,152 @@
   const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
   const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
   document.getElementById('sidebarAvatar').textContent = initials;
-  document.getElementById('sidebarName').textContent = fullName;
+  document.getElementById('sidebarName').textContent   = fullName;
   document.getElementById('sidebarMatric').textContent = profile.matric_number || '—';
-  document.getElementById('topbarAvatar').textContent = initials;
+  document.getElementById('topbarAvatar').textContent  = initials;
 
-  // ── Department Classification ──────────────────────────────
-  // Category 1: Upload Required — student submits file, officer reviews
-  // Category 2: Record-Check   — officer verifies internally, no upload
-  // Category 3: Locked         — depends on another dept being approved first
+  // ── Canonical department config (all 15) ──────────────────
+  // type:'upload'       → student submits a file, officer reviews it
+  // type:'record_check' → officer checks internally, no upload needed
+  // dependsOn           → locked until that dept is approved
+  // dependsOnAll:true   → locked until ALL 14 others are approved (academic only)
 
-  const DEPT_CONFIG = [
-    {
-      id: 'bursary',
-      name: 'Bursary: School Fee Receipt',
-      sub: 'Academic Session 2023/2024',
-      category: 'upload',
-      icon: 'account_balance_wallet',
-      iconColor: 'var(--rejected)', iconBg: 'var(--rejected-bg)',
-      requirement: 'Official digital receipt (PDF, max 5MB)',
-    },
-    {
-      id: 'hod',
-      name: 'HOD: Project Soft Copy',
-      sub: 'Final Year Project Repository',
-      category: 'upload',
-      icon: 'inventory_2',
-      iconColor: 'var(--purple)', iconBg: '#F0EAF5',
-      requirement: 'Submit your final year project soft copy (PDF or ZIP, max 50MB)',
-    },
-    {
-      id: 'cedgs',
-      name: 'CEDGS: Poise / Entrepreneurship Proof',
-      sub: 'Certificate of Completion',
-      category: 'upload',
-      icon: 'workspace_premium',
-      iconColor: 'var(--approved)', iconBg: 'var(--approved-bg)',
-      requirement: 'Certificate of completion for Poise/Entrepreneurship programme (PDF)',
-    },
-    {
-      id: 'chapel',
-      name: 'Chapel: Attendance Verification',
-      sub: 'Chaplaincy Unit — 2023/2024',
-      category: 'record-check',
-      icon: 'church',
-      iconColor: '#2563EB', iconBg: '#DBEAFE',
-      verifyInfo: 'The Chapel officer verifies your attendance records internally. No document upload is required. You will be notified once your attendance has been reviewed.',
-    },
-    {
-      id: 'library',
-      name: 'Library: Book Return Confirmation',
-      sub: 'University Library Clearance',
-      category: 'record-check',
-      icon: 'menu_book',
-      iconColor: '#7C3AED', iconBg: '#EDE9FE',
-      verifyInfo: 'The Library officer verifies your book return status from their system. Ensure all borrowed books have been returned before expecting approval.',
-    },
-    {
-      id: 'alumni',
-      name: 'Alumni: Dues & Contributions',
-      sub: 'Graduating Class Contributions',
-      category: 'record-check',
-      icon: 'groups',
-      iconColor: '#0891B2', iconBg: '#CFFAFE',
-      verifyInfo: 'Alumni verifies payment of graduating dues from their records. No upload needed.',
-      dependsOn: 'bursary',
-      dependsOnName: 'Bursary',
-    },
+  let DEPT_CONFIG = [
+    { id:'bursary', name:'Bursary: School Fee Receipt', sub:'Academic Session 2023/2024',
+      type:'upload', icon:'account_balance_wallet', iconColor:'var(--rejected)', iconBg:'var(--rejected-bg)',
+      requirement:'Official digital receipt of final session school fees (PDF, max 5MB)' },
+
+    { id:'hod', name:'HOD: Project Soft Copy', sub:'Final Year Project Repository',
+      type:'upload', icon:'inventory_2', iconColor:'var(--purple)', iconBg:'#F0EAF5',
+      requirement:'Final year project: 4 bonded hard copies + digital thesis (PDF/ZIP, max 50MB)' },
+
+    { id:'cedgs', name:'CEDGS: Poise / Entrepreneurship', sub:'Certificate of Completion',
+      type:'upload', icon:'workspace_premium', iconColor:'var(--approved)', iconBg:'var(--approved-bg)',
+      requirement:'Poise/Entrepreneurship completion certificate and CEDGS fee payment proof (PDF)' },
+
+    { id:'chapel', name:'Chapel: Attendance Verification', sub:'Chaplaincy Unit — 2023/2024',
+      type:'record_check', icon:'church', iconColor:'#2563EB', iconBg:'#DBEAFE',
+      verifyInfo:'The Chapel officer verifies your attendance records internally. No document upload is required. You will be notified once your attendance has been reviewed.' },
+
+    { id:'library', name:'Library: Book Return Confirmation', sub:'University Library Clearance',
+      type:'record_check', icon:'menu_book', iconColor:'#7C3AED', iconBg:'#EDE9FE',
+      verifyInfo:'The Library officer verifies your book return status. Ensure all borrowed books are returned and any outstanding fines are settled.' },
+
+    { id:'alumni', name:'Alumni: Dues & Contributions', sub:'Graduating Class Contributions',
+      type:'record_check', icon:'groups', iconColor:'#0891B2', iconBg:'#CFFAFE',
+      verifyInfo:'Alumni verifies payment of graduating class dues. No upload needed. Requires Bursary to be approved first.',
+      dependsOn:'bursary', dependsOnName:'Bursary' },
+
+    { id:'sport', name:'Sport Unit: Equipment Clearance', sub:'Sport Unit — MTU',
+      type:'record_check', icon:'sports', iconColor:'#EA580C', iconBg:'#FFEDD5',
+      verifyInfo:'The Sport Unit officer verifies all borrowed equipment is returned and no damages are recorded against your name.' },
+
+    { id:'health', name:'Health Centre: Medical Clearance', sub:'University Health Centre',
+      type:'record_check', icon:'local_hospital', iconColor:'#DC2626', iconBg:'#FEE2E2',
+      verifyInfo:'The Health Centre reviews your medical records and confirms no outstanding bills or unresolved medical obligations.' },
+
+    { id:'lab', name:'Lab Instructor: Equipment Check', sub:'University Laboratory Unit',
+      type:'record_check', icon:'science', iconColor:'#059669', iconBg:'#D1FAE5',
+      verifyInfo:'The Lab Instructor verifies all equipment is returned and your lab access card is submitted with no damage or loss reported.' },
+
+    { id:'college', name:'College Officer: College Clearance', sub:'College Academic Office',
+      type:'record_check', icon:'corporate_fare', iconColor:'#6B0080', iconBg:'#F0EAF5',
+      verifyInfo:'The College Officer reviews your clearance after HOD confirmation is received. HOD must be approved first.',
+      dependsOn:'hod', dependsOnName:'HOD' },
+
+    { id:'hall', name:'Hall of Residence: Hostel Clearance', sub:'Student Hostel Administration',
+      type:'record_check', icon:'home', iconColor:'#B45309', iconBg:'#FEF3C7',
+      verifyInfo:'Hostel officer verifies your room key is returned, no property damage recorded, and all hostel dues are fully paid.' },
+
+    { id:'ict', name:'ICT Unit: System Access Clearance', sub:'ICT Services — MTU',
+      type:'record_check', icon:'computer', iconColor:'#0284C7', iconBg:'#E0F2FE',
+      verifyInfo:'ICT Unit verifies your university system access is properly deactivated. Requires HOD approval first.',
+      dependsOn:'hod', dependsOnName:'HOD' },
+
+    { id:'student_affairs', name:'Student Affairs: Clearance', sub:'Dean of Student Affairs',
+      type:'record_check', icon:'diversity_3', iconColor:'#7C3AED', iconBg:'#EDE9FE',
+      verifyInfo:'Student Affairs reviews your student records after Hall of Residence clearance is confirmed.',
+      dependsOn:'hall', dependsOnName:'Hall of Residence' },
+
+    { id:'esm', name:'ESM Unit: Spiritual Music Clearance', sub:'Ensemble for Spiritual Music',
+      type:'record_check', icon:'music_note', iconColor:'#DB2777', iconBg:'#FCE7F3',
+      verifyInfo:'ESM Coordinator verifies attendance of all mandatory spiritual music sessions and signs your clearance form.' },
+
+    { id:'academic', name:'Academic Affairs (Registrar)', sub:'Final Step — Office of the Registrar',
+      type:'record_check', icon:'verified', iconColor:'#6B0080', iconBg:'#F0EAF5',
+      verifyInfo:'Final clearance by the Registrar. All 14 departments must be fully approved before this step unlocks.',
+      dependsOnAll: true },
   ];
 
-  // ── Get status from getDeptStatus (same seed used on student dashboard) ──
-  function getDeptStatus(studentId, dept) {
-    const PRIMES = { hod:2, cedgs:3, lab:5, college:7, chapel:11, health:13, sport:17, hall:19, ict:23, alumni:29, affairs:31, library:37, bursary:41, esm:43, academic:47 };
-    const seed = studentId.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
-    const prime = PRIMES[dept] || 53;
-    const statuses = ['approved','approved','approved','pending','flagged','rejected'];
-    return statuses[(seed * prime) % statuses.length];
-  }
+  // ── Optionally override with live data from departments table ──
+  // Falls back silently to the hardcoded config above if the table
+  // doesn't exist yet (before the SQL migration is run).
+  try {
+    const { data: dbDepts } = await supabase
+      .from('departments')
+      .select('id,name,sub_label,type,icon,icon_color,icon_bg,requirement,verify_info,depends_on,depends_on_name,depends_on_all,sort_order')
+      .eq('is_active', true)
+      .order('sort_order');
 
-  const studentId = profile.id || 'demo';
+    if (dbDepts && dbDepts.length > 0) {
+      DEPT_CONFIG = DEPT_CONFIG.map(cfg => {
+        const row = dbDepts.find(r => r.id === cfg.id);
+        if (!row) return cfg;
+        return {
+          ...cfg,
+          name:          row.name          || cfg.name,
+          sub:           row.sub_label     || cfg.sub,
+          type:          row.type          || cfg.type,
+          icon:          row.icon          || cfg.icon,
+          iconColor:     row.icon_color    || cfg.iconColor,
+          iconBg:        row.icon_bg       || cfg.iconBg,
+          requirement:   row.requirement   || cfg.requirement,
+          verifyInfo:    row.verify_info   || cfg.verifyInfo,
+          dependsOn:     row.depends_on    || cfg.dependsOn,
+          dependsOnName: row.depends_on_name || cfg.dependsOnName,
+          dependsOnAll:  row.depends_on_all ?? cfg.dependsOnAll ?? false,
+        };
+      });
+      // Add any new DB rows not yet in hardcoded config
+      dbDepts.forEach(row => {
+        if (!DEPT_CONFIG.find(c => c.id === row.id)) {
+          DEPT_CONFIG.push({
+            id: row.id, name: row.name, sub: row.sub_label || '',
+            type: row.type, icon: row.icon || 'description',
+            iconColor: row.icon_color || '#6B0080', iconBg: row.icon_bg || '#F0EAF5',
+            requirement: row.requirement, verifyInfo: row.verify_info,
+            dependsOn: row.depends_on, dependsOnName: row.depends_on_name,
+            dependsOnAll: row.depends_on_all || false,
+          });
+        }
+      });
+    }
+  } catch (_) { /* departments table not yet created — using hardcoded config */ }
+
+  // ── Fetch real clearance status from Supabase ──────────────
+  // Default: upload depts → 'not-started', record_check depts → 'pending'
   const statusCache = {};
-  DEPT_CONFIG.forEach(d => { statusCache[d.id] = getDeptStatus(studentId, d.id); });
+  DEPT_CONFIG.forEach(d => {
+    statusCache[d.id] = d.type === 'upload' ? 'not-started' : 'pending';
+  });
+
+  try {
+    const { data: request } = await supabase
+      .from('clearance_requests')
+      .select('id')
+      .eq('student_id', session.user.id)
+      .order('submitted_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (request) {
+      const { data: items } = await supabase
+        .from('clearance_items')
+        .select('department_id, status')
+        .eq('request_id', request.id);
+      (items || []).forEach(item => { statusCache[item.department_id] = item.status; });
+    }
+  } catch (_) { /* use defaults */ }
 
   // ── Render ──────────────────────────────────────────────────
   function renderDocs() {
@@ -566,35 +632,43 @@
   }
 
   function buildCard(dept) {
-    const status = statusCache[dept.id];
+    const status = statusCache[dept.id] || (dept.type === 'upload' ? 'not-started' : 'pending');
 
-    // Check dependency lock
-    if (dept.dependsOn) {
-      const prereqStatus = statusCache[dept.dependsOn];
-      if (prereqStatus !== 'approved') {
-        return lockedCard(dept, dept.dependsOnName);
+    // Academic: locked until ALL 14 others are approved
+    if (dept.dependsOnAll) {
+      const others = DEPT_CONFIG.filter(d => !d.dependsOnAll);
+      const approvedCount = others.filter(d => statusCache[d.id] === 'approved').length;
+      if (approvedCount < others.length) {
+        return lockedCard(dept, `all 14 departments (${approvedCount} / ${others.length} approved)`);
       }
     }
 
-    if (dept.category === 'upload') return uploadCard(dept, status);
-    if (dept.category === 'record-check') return recordCheckCard(dept, status);
+    // Single-dependency lock
+    if (dept.dependsOn && statusCache[dept.dependsOn] !== 'approved') {
+      return lockedCard(dept, dept.dependsOnName);
+    }
+
+    if (dept.type === 'upload')       return uploadCard(dept, status);
+    if (dept.type === 'record_check') return recordCheckCard(dept, status);
     return '';
   }
 
   function uploadCard(dept, status) {
     const statusMap = {
-      approved: { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',    label:'Approved' },
-      pending:  { cls:'pending',       badgeCls:'s-pending',  icon:'hourglass_empty', label:'Pending Review' },
-      flagged:  { cls:'action-needed', badgeCls:'s-action',   icon:'flag',            label:'Action Needed' },
-      rejected: { cls:'action-needed', badgeCls:'s-action',   icon:'error',           label:'Rejected — Re-upload' },
+      'not-started': { cls:'not-started',  badgeCls:'s-none',     icon:'radio_button_unchecked', label:'Not Submitted' },
+      approved:      { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',           label:'Approved' },
+      pending:       { cls:'pending',       badgeCls:'s-pending',  icon:'hourglass_empty',        label:'Pending Review' },
+      flagged:       { cls:'action-needed', badgeCls:'s-action',   icon:'flag',                   label:'Action Needed' },
+      rejected:      { cls:'action-needed', badgeCls:'s-action',   icon:'error',                  label:'Rejected — Re-upload' },
     };
-    const s = statusMap[status] || statusMap.pending;
+    const s = statusMap[status] || statusMap['not-started'];
 
-    const actionBtn = status === 'approved'
-      ? `<button class="btn-download"><span class="material-symbols-outlined">download</span> Download Receipt</button>`
-      : status === 'pending'
-      ? `<button class="btn-view"><span class="material-symbols-outlined">visibility</span> View Submission</button>`
-      : `<button class="btn-upload" onclick="triggerUpload('${dept.id}')"><span class="material-symbols-outlined">upload</span> Upload Now</button>`;
+    const actionBtn =
+      status === 'approved'
+        ? `<button class="btn-download"><span class="material-symbols-outlined">download</span> Download Receipt</button>`
+        : status === 'pending'
+        ? `<button class="btn-view"><span class="material-symbols-outlined">visibility</span> View Submission</button>`
+        : `<button class="btn-upload" onclick="triggerUpload('${dept.id}')"><span class="material-symbols-outlined">upload</span> Upload Now</button>`;
 
     return `
       <div class="doc-card ${s.cls}">
@@ -625,10 +699,11 @@
 
   function recordCheckCard(dept, status) {
     const statusMap = {
-      approved: { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',    label:'Approved' },
-      pending:  { cls:'record-check',  badgeCls:'s-verify',   icon:'manage_search',   label:'Awaiting Verification' },
-      flagged:  { cls:'action-needed', badgeCls:'s-flagged',  icon:'flag',            label:'Flagged' },
-      rejected: { cls:'action-needed', badgeCls:'s-action',   icon:'cancel',          label:'Rejected' },
+      'not-started': { cls:'record-check',  badgeCls:'s-verify',   icon:'manage_search', label:'Awaiting Verification' },
+      approved:      { cls:'approved',       badgeCls:'s-approved', icon:'check_circle',  label:'Approved' },
+      pending:       { cls:'record-check',   badgeCls:'s-verify',   icon:'manage_search', label:'Awaiting Verification' },
+      flagged:       { cls:'action-needed',  badgeCls:'s-flagged',  icon:'flag',          label:'Flagged' },
+      rejected:      { cls:'action-needed',  badgeCls:'s-action',   icon:'cancel',        label:'Rejected' },
     };
     const s = statusMap[status] || statusMap.pending;
 
@@ -684,7 +759,7 @@
         <div class="doc-card-body" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
           <div class="locked-info">
             <span class="material-symbols-outlined">lock</span>
-            Complete <strong>${prereqName}</strong> clearance first. This department will unlock automatically once ${prereqName} is approved.
+            Complete <strong>${prereqName}</strong> clearance first. This department unlocks automatically once the prerequisite is approved.
           </div>
         </div>
       </div>`;
