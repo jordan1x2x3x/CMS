@@ -177,8 +177,8 @@ VALUES
  'hall', 'Hall of Residence', FALSE, 13),
 
 ('esm',
- 'ESM Unit: Spiritual Music Clearance',
- 'Ensemble for Spiritual Music',
+ 'ESM Unit: Clearance',
+ 'Every Student is a Musician',
  'record_check', FALSE,
  'music_note', '#DB2777', '#FCE7F3',
  NULL,
