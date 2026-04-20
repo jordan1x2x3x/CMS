@@ -218,6 +218,29 @@
     }
     .btn-chat:hover { opacity: 0.9; }
 
+    /* ── RECORD-CHECK CARD ── */
+    .doc-card.record-check { border-left: 4px solid #2563EB; }
+    .doc-card.locked        { border-left: 4px solid var(--border); opacity: 0.65; }
+    .s-verify  { background: #DBEAFE; color: #1E40AF; }
+    .s-locked  { background: #F3F4F6; color: #374151; border: 1px solid var(--border); }
+    .s-flagged { background: var(--flagged-bg); color: var(--flagged); }
+
+    .record-check-info {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #EFF6FF; border: 1px solid #BFDBFE;
+      border-radius: 8px; padding: 10px 12px; margin-top: 0.5rem;
+      font-size: 0.78rem; color: #1E40AF; line-height: 1.5;
+    }
+    .record-check-info .material-symbols-outlined { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    .locked-info {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: #F9FAFB; border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; margin-top: 0.5rem;
+      font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;
+    }
+    .locked-info .material-symbols-outlined { font-size: 16px; flex-shrink: 0; margin-top: 1px; color: #6B7280; }
+
     /* Toast notification */
     .toast {
       position: fixed; bottom: 2rem; right: 2rem;
@@ -337,185 +360,8 @@
     <div class="upload-layout">
 
       <!-- ── DOCUMENT LIST ── -->
-      <div class="doc-list">
-
-        <!-- 1. Bursary — Action Needed -->
-        <div class="doc-card action-needed">
-          <div class="doc-card-top">
-            <div class="doc-card-left">
-              <div class="doc-icon" style="background:var(--rejected-bg);">
-                <span class="material-symbols-outlined" style="color:var(--rejected);">account_balance_wallet</span>
-              </div>
-              <div>
-                <div class="doc-name">Bursary: School Fee Receipt</div>
-                <div class="doc-sub">Academic Session 2023/2024</div>
-              </div>
-            </div>
-            <span class="status-badge s-action">
-              <span class="material-symbols-outlined">error</span>
-              Action Needed
-            </span>
-          </div>
-          <div class="doc-card-body">
-            <div class="doc-req">
-              <strong>Requirement</strong>
-              Official digital receipt (PDF, max 5MB)
-            </div>
-            <button class="btn-upload" onclick="triggerUpload('bursary')">
-              <span class="material-symbols-outlined">upload</span>
-              Upload Now
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. HOD — Pending Review -->
-        <div class="doc-card pending">
-          <div class="doc-card-top">
-            <div class="doc-card-left">
-              <div class="doc-icon" style="background:#F0EAF5;">
-                <span class="material-symbols-outlined" style="color:var(--purple);">inventory_2</span>
-              </div>
-              <div>
-                <div class="doc-name">HOD: Project CD / Soft Copy</div>
-                <div class="doc-sub">Final Year Project Repository</div>
-              </div>
-            </div>
-            <span class="status-badge s-pending">
-              <span class="material-symbols-outlined">hourglass_empty</span>
-              Pending Review
-            </span>
-          </div>
-          <div class="doc-card-body">
-            <div class="doc-req">
-              <strong>Uploaded File</strong>
-              <span class="doc-file">
-                <span class="material-symbols-outlined">folder_zip</span>
-                My_Project_Final.zip (12.4 MB)
-              </span>
-            </div>
-            <button class="btn-view">
-              <span class="material-symbols-outlined">visibility</span>
-              View Submission
-            </button>
-          </div>
-        </div>
-
-        <!-- 3. CEDGS — Approved -->
-        <div class="doc-card approved">
-          <div class="doc-card-top">
-            <div class="doc-card-left">
-              <div class="doc-icon" style="background:var(--approved-bg);">
-                <span class="material-symbols-outlined" style="color:var(--approved);">workspace_premium</span>
-              </div>
-              <div>
-                <div class="doc-name">CEDGS: Poise / Entrepreneurship Proof</div>
-                <div class="doc-sub">Certificate of Completion</div>
-              </div>
-            </div>
-            <span class="status-badge s-approved">
-              <span class="material-symbols-outlined">check_circle</span>
-              Approved
-            </span>
-          </div>
-          <div class="doc-card-body">
-            <div class="doc-req">
-              <strong>Verification Date</strong>
-              Sept 12, 2023
-            </div>
-            <button class="btn-download">
-              <span class="material-symbols-outlined">download</span>
-              Download Receipt
-            </button>
-          </div>
-        </div>
-
-        <!-- 4. Chapel — Action Needed -->
-        <div class="doc-card action-needed">
-          <div class="doc-card-top">
-            <div class="doc-card-left">
-              <div class="doc-icon" style="background:var(--flagged-bg);">
-                <span class="material-symbols-outlined" style="color:var(--flagged);">church</span>
-              </div>
-              <div>
-                <div class="doc-name">Chapel: Attendance Clearance Form</div>
-                <div class="doc-sub">Chaplaincy Unit — 2023/2024</div>
-              </div>
-            </div>
-            <span class="status-badge s-action">
-              <span class="material-symbols-outlined">flag</span>
-              Flagged
-            </span>
-          </div>
-          <div class="doc-card-body">
-            <div class="doc-req">
-              <strong>Requirement</strong>
-              Signed attendance clearance letter from Chaplain (PDF)
-            </div>
-            <button class="btn-upload" onclick="triggerUpload('chapel')">
-              <span class="material-symbols-outlined">upload</span>
-              Upload Letter
-            </button>
-          </div>
-        </div>
-
-        <!-- 5. Alumni — Not Started -->
-        <div class="doc-card not-started">
-          <div class="doc-card-top">
-            <div class="doc-card-left">
-              <div class="doc-icon" style="background:var(--surface);">
-                <span class="material-symbols-outlined" style="color:var(--text-muted);">groups</span>
-              </div>
-              <div>
-                <div class="doc-name">Alumni: Alumni Fee Payment Proof</div>
-                <div class="doc-sub">Graduating Class Contributions</div>
-              </div>
-            </div>
-            <span class="status-badge s-none">
-              <span class="material-symbols-outlined">remove_circle</span>
-              Not Started
-            </span>
-          </div>
-          <div class="doc-card-body">
-            <div class="doc-req">
-              <strong>Requirement</strong>
-              Payment must be cleared first
-            </div>
-            <button class="btn-disabled" disabled>
-              <span class="material-symbols-outlined">lock</span>
-              Upload Disabled
-            </button>
-          </div>
-        </div>
-
-        <!-- 6. Library — Not Started -->
-        <div class="doc-card not-started">
-          <div class="doc-card-top">
-            <div class="doc-card-left">
-              <div class="doc-icon" style="background:var(--surface);">
-                <span class="material-symbols-outlined" style="color:var(--text-muted);">menu_book</span>
-              </div>
-              <div>
-                <div class="doc-name">Library: Book Return Confirmation</div>
-                <div class="doc-sub">University Library Clearance</div>
-              </div>
-            </div>
-            <span class="status-badge s-none">
-              <span class="material-symbols-outlined">lock</span>
-              Locked
-            </span>
-          </div>
-          <div class="doc-card-body">
-            <div class="doc-req">
-              <strong>Locked Until</strong>
-              CEDGS, HOD &amp; College Officer clearances met (all approved — unlocks after Chapel resolved)
-            </div>
-            <button class="btn-disabled" disabled>
-              <span class="material-symbols-outlined">lock</span>
-              Upload Disabled
-            </button>
-          </div>
-        </div>
-
+      <div class="doc-list" id="docList">
+        <div style="text-align:center;padding:3rem;color:var(--text-muted);">Loading documents…</div>
       </div><!-- /doc-list -->
 
       <!-- ── RIGHT PANEL ── -->
@@ -623,19 +469,228 @@
 </div>
 
 <script type="module">
-  (async () => {
-    const { supabase } = await import('../js/supabase.js');
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
-    if (!profile) { window.location.href = '../login.html'; return; }
-    const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
-    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
-    document.getElementById('sidebarAvatar').textContent = initials;
-    document.getElementById('sidebarName').textContent = fullName;
-    document.getElementById('sidebarMatric').textContent = profile.matric_number || '—';
-    document.getElementById('topbarAvatar').textContent = initials;
-  })();
+  // ── Session guard ──────────────────────────────────────────
+  const { supabase } = await import('../js/supabase.js');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { window.location.href = '../login.html'; }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  if (!profile) { window.location.href = '../login.html'; }
+  const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+  document.getElementById('sidebarAvatar').textContent = initials;
+  document.getElementById('sidebarName').textContent = fullName;
+  document.getElementById('sidebarMatric').textContent = profile.matric_number || '—';
+  document.getElementById('topbarAvatar').textContent = initials;
+
+  // ── Department Classification ──────────────────────────────
+  // Category 1: Upload Required — student submits file, officer reviews
+  // Category 2: Record-Check   — officer verifies internally, no upload
+  // Category 3: Locked         — depends on another dept being approved first
+
+  const DEPT_CONFIG = [
+    {
+      id: 'bursary',
+      name: 'Bursary: School Fee Receipt',
+      sub: 'Academic Session 2023/2024',
+      category: 'upload',
+      icon: 'account_balance_wallet',
+      iconColor: 'var(--rejected)', iconBg: 'var(--rejected-bg)',
+      requirement: 'Official digital receipt (PDF, max 5MB)',
+    },
+    {
+      id: 'hod',
+      name: 'HOD: Project Soft Copy',
+      sub: 'Final Year Project Repository',
+      category: 'upload',
+      icon: 'inventory_2',
+      iconColor: 'var(--purple)', iconBg: '#F0EAF5',
+      requirement: 'Submit your final year project soft copy (PDF or ZIP, max 50MB)',
+    },
+    {
+      id: 'cedgs',
+      name: 'CEDGS: Poise / Entrepreneurship Proof',
+      sub: 'Certificate of Completion',
+      category: 'upload',
+      icon: 'workspace_premium',
+      iconColor: 'var(--approved)', iconBg: 'var(--approved-bg)',
+      requirement: 'Certificate of completion for Poise/Entrepreneurship programme (PDF)',
+    },
+    {
+      id: 'chapel',
+      name: 'Chapel: Attendance Verification',
+      sub: 'Chaplaincy Unit — 2023/2024',
+      category: 'record-check',
+      icon: 'church',
+      iconColor: '#2563EB', iconBg: '#DBEAFE',
+      verifyInfo: 'The Chapel officer verifies your attendance records internally. No document upload is required. You will be notified once your attendance has been reviewed.',
+    },
+    {
+      id: 'library',
+      name: 'Library: Book Return Confirmation',
+      sub: 'University Library Clearance',
+      category: 'record-check',
+      icon: 'menu_book',
+      iconColor: '#7C3AED', iconBg: '#EDE9FE',
+      verifyInfo: 'The Library officer verifies your book return status from their system. Ensure all borrowed books have been returned before expecting approval.',
+    },
+    {
+      id: 'alumni',
+      name: 'Alumni: Dues & Contributions',
+      sub: 'Graduating Class Contributions',
+      category: 'record-check',
+      icon: 'groups',
+      iconColor: '#0891B2', iconBg: '#CFFAFE',
+      verifyInfo: 'Alumni verifies payment of graduating dues from their records. No upload needed.',
+      dependsOn: 'bursary',
+      dependsOnName: 'Bursary',
+    },
+  ];
+
+  // ── Get status from getDeptStatus (same seed used on student dashboard) ──
+  function getDeptStatus(studentId, dept) {
+    const PRIMES = { hod:2, cedgs:3, lab:5, college:7, chapel:11, health:13, sport:17, hall:19, ict:23, alumni:29, affairs:31, library:37, bursary:41, esm:43, academic:47 };
+    const seed = studentId.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+    const prime = PRIMES[dept] || 53;
+    const statuses = ['approved','approved','approved','pending','flagged','rejected'];
+    return statuses[(seed * prime) % statuses.length];
+  }
+
+  const studentId = profile.id || 'demo';
+  const statusCache = {};
+  DEPT_CONFIG.forEach(d => { statusCache[d.id] = getDeptStatus(studentId, d.id); });
+
+  // ── Render ──────────────────────────────────────────────────
+  function renderDocs() {
+    const list = document.getElementById('docList');
+    list.innerHTML = DEPT_CONFIG.map(dept => buildCard(dept)).join('');
+  }
+
+  function buildCard(dept) {
+    const status = statusCache[dept.id];
+
+    // Check dependency lock
+    if (dept.dependsOn) {
+      const prereqStatus = statusCache[dept.dependsOn];
+      if (prereqStatus !== 'approved') {
+        return lockedCard(dept, dept.dependsOnName);
+      }
+    }
+
+    if (dept.category === 'upload') return uploadCard(dept, status);
+    if (dept.category === 'record-check') return recordCheckCard(dept, status);
+    return '';
+  }
+
+  function uploadCard(dept, status) {
+    const statusMap = {
+      approved: { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',    label:'Approved' },
+      pending:  { cls:'pending',       badgeCls:'s-pending',  icon:'hourglass_empty', label:'Pending Review' },
+      flagged:  { cls:'action-needed', badgeCls:'s-action',   icon:'flag',            label:'Action Needed' },
+      rejected: { cls:'action-needed', badgeCls:'s-action',   icon:'error',           label:'Rejected — Re-upload' },
+    };
+    const s = statusMap[status] || statusMap.pending;
+
+    const actionBtn = status === 'approved'
+      ? `<button class="btn-download"><span class="material-symbols-outlined">download</span> Download Receipt</button>`
+      : status === 'pending'
+      ? `<button class="btn-view"><span class="material-symbols-outlined">visibility</span> View Submission</button>`
+      : `<button class="btn-upload" onclick="triggerUpload('${dept.id}')"><span class="material-symbols-outlined">upload</span> Upload Now</button>`;
+
+    return `
+      <div class="doc-card ${s.cls}">
+        <div class="doc-card-top">
+          <div class="doc-card-left">
+            <div class="doc-icon" style="background:${dept.iconBg};">
+              <span class="material-symbols-outlined" style="color:${dept.iconColor};">${dept.icon}</span>
+            </div>
+            <div>
+              <div class="doc-name">${dept.name}</div>
+              <div class="doc-sub">${dept.sub}</div>
+            </div>
+          </div>
+          <span class="status-badge ${s.badgeCls}">
+            <span class="material-symbols-outlined">${s.icon}</span>
+            ${s.label}
+          </span>
+        </div>
+        <div class="doc-card-body">
+          <div class="doc-req">
+            <strong>Requirement</strong>
+            ${dept.requirement}
+          </div>
+          ${actionBtn}
+        </div>
+      </div>`;
+  }
+
+  function recordCheckCard(dept, status) {
+    const statusMap = {
+      approved: { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',    label:'Approved' },
+      pending:  { cls:'record-check',  badgeCls:'s-verify',   icon:'manage_search',   label:'Awaiting Verification' },
+      flagged:  { cls:'action-needed', badgeCls:'s-flagged',  icon:'flag',            label:'Flagged' },
+      rejected: { cls:'action-needed', badgeCls:'s-action',   icon:'cancel',          label:'Rejected' },
+    };
+    const s = statusMap[status] || statusMap.pending;
+
+    const infoBox = status !== 'approved'
+      ? `<div class="record-check-info">
+           <span class="material-symbols-outlined">info</span>
+           ${dept.verifyInfo}
+         </div>`
+      : '';
+
+    return `
+      <div class="doc-card ${s.cls}">
+        <div class="doc-card-top">
+          <div class="doc-card-left">
+            <div class="doc-icon" style="background:${dept.iconBg};">
+              <span class="material-symbols-outlined" style="color:${dept.iconColor};">${dept.icon}</span>
+            </div>
+            <div>
+              <div class="doc-name">${dept.name}</div>
+              <div class="doc-sub">${dept.sub}</div>
+            </div>
+          </div>
+          <span class="status-badge ${s.badgeCls}">
+            <span class="material-symbols-outlined">${s.icon}</span>
+            ${s.label}
+          </span>
+        </div>
+        <div class="doc-card-body" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
+          ${infoBox}
+          ${status === 'approved' ? `<span style="font-size:0.78rem;color:var(--approved);font-weight:600;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:15px;font-variation-settings:'FILL' 1;">check_circle</span> Cleared by officer — no action required.</span>` : ''}
+        </div>
+      </div>`;
+  }
+
+  function lockedCard(dept, prereqName) {
+    return `
+      <div class="doc-card locked">
+        <div class="doc-card-top">
+          <div class="doc-card-left">
+            <div class="doc-icon" style="background:var(--surface);">
+              <span class="material-symbols-outlined" style="color:var(--text-muted);">${dept.icon}</span>
+            </div>
+            <div>
+              <div class="doc-name">${dept.name}</div>
+              <div class="doc-sub">${dept.sub}</div>
+            </div>
+          </div>
+          <span class="status-badge s-locked">
+            <span class="material-symbols-outlined">lock</span>
+            Locked
+          </span>
+        </div>
+        <div class="doc-card-body" style="flex-direction:column;align-items:flex-start;gap:0.5rem;">
+          <div class="locked-info">
+            <span class="material-symbols-outlined">lock</span>
+            Complete <strong>${prereqName}</strong> clearance first. This department will unlock automatically once ${prereqName} is approved.
+          </div>
+        </div>
+      </div>`;
+  }
+
+  renderDocs();
 </script>
 <script>
   // ── File input handler ──
