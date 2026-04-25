@@ -1038,7 +1038,7 @@
     if (request) {
       const { data: items } = await supabase
         .from('clearance_items')
-        .select('department_id, status, officer_note')
+        .select('department_id, status')
         .eq('request_id', request.id);
       (items || []).forEach(item => { statusMap[item.department_id] = item.status; });
     }
