@@ -421,8 +421,7 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
   const { data: items } = await supabase
     .from('clearance_items')
     .select('id, status, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme))')
-    .eq('department_id', dept)
-    .order('id', { ascending: false });
+    .eq('department_id', dept);
 
   const rows = (items || []).map((item, i) => {
     const req = item.clearance_requests;

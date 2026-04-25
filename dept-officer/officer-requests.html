@@ -296,8 +296,7 @@ window.filterTable   = (v) => { searchQuery = v.toLowerCase(); renderTable(); };
   const { data: items } = await supabase
     .from('clearance_items')
     .select('id, status, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme))')
-    .eq('department_id', dept)
-    .order('id', { ascending: false });
+    .eq('department_id', dept);
 
   ALL_ROWS = (items || []).map((item, i) => {
     const req = item.clearance_requests;
