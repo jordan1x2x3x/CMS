@@ -394,7 +394,7 @@ renderDetail(selected);
   if (request) {
     const { data: items } = await supabase
       .from('clearance_items')
-      .select('department_id, status, officer_note')
+      .select('department_id, status, reason')
       .eq('request_id', request.id);
 
     (items || []).forEach(item => {
@@ -407,7 +407,7 @@ renderDetail(selected);
       dept.borderClass = props.borderClass;
       dept.tagColor    = props.tagColor;
       dept.requirements = dept.requirements.map(r => ({...r, done: item.status === 'approved'}));
-      dept.note = item.officer_note
+      dept.note = item.reason
         || (item.status === 'approved'  ? 'Cleared. No further action required.'
           : item.status === 'rejected'  ? 'Clearance rejected. Contact the department officer for details.'
           : item.status === 'flagged'   ? 'Flagged for action. Visit the department office to resolve this issue.'
@@ -445,7 +445,7 @@ renderDetail(selected);
         dept.borderClass = props.borderClass;
         dept.tagColor    = props.tagColor;
         dept.requirements = dept.requirements.map(r => ({...r, done: payload.new.status === 'approved'}));
-        dept.note = payload.new.officer_note
+        dept.note = payload.new.reason
           || (payload.new.status === 'approved' ? 'Cleared. No further action required.'
             : payload.new.status === 'rejected' ? 'Clearance rejected. Contact the department officer for details.'
             : payload.new.status === 'flagged'  ? 'Flagged for action. Visit the department office to resolve this issue.'
