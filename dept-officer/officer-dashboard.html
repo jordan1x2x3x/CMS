@@ -420,8 +420,9 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
   // Load all clearance items for this department
   const { data: items } = await supabase
     .from('clearance_items')
-    .select('id, status, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme))')
-    .eq('department_id', dept);
+    .select('id, status, updated_at, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme))')
+    .eq('department_id', dept)
+    .order('updated_at', { ascending: false });
 
   const rows = (items || []).map((item, i) => {
     const req = item.clearance_requests;
@@ -433,7 +434,7 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
       name: [fn, ln].filter(Boolean).join(' ') || 'Unknown Student',
       matric: p?.matric_number || '—',
       programme: p?.programme || '—',
-      type: req?.type || 'Graduation',
+      type: 'Graduation',
       initials: ((fn[0]||'') + (ln[0]||'')).toUpperCase() || '??',
       color: AVA_COLORS[i % AVA_COLORS.length],
       submittedAt: req?.submitted_at || null,

@@ -620,7 +620,7 @@ function showToast(msg, type = 'approved') {
   if (itemId) {
     const { data: item } = await supabase
       .from('clearance_items')
-      .select('id, status, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme, college))')
+      .select('id, status, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme, college))')
       .eq('id', itemId).maybeSingle();
 
     if (item) {
@@ -630,7 +630,7 @@ function showToast(msg, type = 'approved') {
       const ini = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '??';
       student = { name: [fn, ln].filter(Boolean).join(' '), matric: p?.matric_number || '—',
         programme: p?.programme || '—', college: p?.college || '—',
-        type: req?.type || 'Graduation', initials: ini };
+        type: 'Graduation', initials: ini };
       status = item.status || 'pending';
       submittedDate = req?.submitted_at ? new Date(req.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
     }

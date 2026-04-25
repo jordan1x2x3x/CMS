@@ -295,8 +295,9 @@ window.filterTable   = (v) => { searchQuery = v.toLowerCase(); renderTable(); };
 
   const { data: items } = await supabase
     .from('clearance_items')
-    .select('id, status, clearance_requests(id, type, submitted_at, profiles(first_name, last_name, matric_number, programme))')
-    .eq('department_id', dept);
+    .select('id, status, updated_at, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme))')
+    .eq('department_id', dept)
+    .order('updated_at', { ascending: false });
 
   ALL_ROWS = (items || []).map((item, i) => {
     const req = item.clearance_requests;
@@ -308,7 +309,7 @@ window.filterTable   = (v) => { searchQuery = v.toLowerCase(); renderTable(); };
       name: [fn, ln].filter(Boolean).join(' ') || 'Unknown',
       matric: p?.matric_number || '—',
       programme: p?.programme || '—',
-      type: req?.type || 'Graduation',
+      type: 'Graduation',
       initials: ((fn[0]||'') + (ln[0]||'')).toUpperCase() || '??',
       color: AVA_COLORS[i % AVA_COLORS.length],
       submitted: req?.submitted_at ? new Date(req.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—',
