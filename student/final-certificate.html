@@ -75,9 +75,12 @@
     .status-banner-icon .material-symbols-outlined { font-size:22px; font-variation-settings:'FILL' 1; }
     .status-banner-title { font-size:0.9rem; font-weight:700; }
     .status-banner-desc  { font-size:0.78rem; margin-top:2px; color:var(--text-muted); }
-    .status-banner.locked { background:#F5EEFF; border-color:#E9D5FF; }
-    .status-banner.locked .status-banner-icon { background:#E9D5FF; color:var(--purple); }
-    .status-banner.locked .status-banner-title { color:var(--purple-dark); }
+    .status-banner.locked   { background:#F5EEFF; border-color:#E9D5FF; }
+    .status-banner.locked   .status-banner-icon { background:#E9D5FF; color:var(--purple); }
+    .status-banner.locked   .status-banner-title { color:var(--purple-dark); }
+    .status-banner.approved { background:var(--approved-bg); border-color:var(--approved); }
+    .status-banner.approved .status-banner-icon { background:var(--approved); color:white; }
+    .status-banner.approved .status-banner-title { color:#065f46; }
 
     /* CERTIFICATE PREVIEW */
     .cert-preview-card {
@@ -244,11 +247,11 @@
     </div>
 
     <!-- Status banner -->
-    <div class="status-banner locked">
-      <div class="status-banner-icon"><span class="material-symbols-outlined">lock</span></div>
+    <div class="status-banner locked" id="statusBanner">
+      <div class="status-banner-icon" id="bannerIcon"><span class="material-symbols-outlined" id="bannerIconSymbol">lock</span></div>
       <div>
-        <div class="status-banner-title" id="bannerTitle">Certificate Locked — 53% Complete</div>
-        <div class="status-banner-desc" id="bannerDesc">8 of 15 departments cleared. Resolve the Chapel flagged issue to continue.</div>
+        <div class="status-banner-title" id="bannerTitle">Certificate Locked — 0% Complete</div>
+        <div class="status-banner-desc" id="bannerDesc">Loading clearance status…</div>
       </div>
     </div>
 
@@ -263,7 +266,7 @@
           </div>
 
           <div style="position:relative;">
-            <div class="certificate">
+            <div class="certificate" id="certPreview">
               <div class="cert-border">
                 <div class="cert-watermark">MTU CLEARANCE</div>
 
@@ -297,7 +300,7 @@
                   </div>
                   <div style="text-align:center;">
                     <div class="cert-seal"><span class="material-symbols-outlined">verified</span></div>
-                    <div class="cert-date" style="margin-top:4px;">Date: ___________</div>
+                    <div class="cert-date" id="certDate" style="margin-top:4px;">Date: ___________</div>
                   </div>
                   <div class="cert-sig">
                     <div class="cert-sig-line"></div>
@@ -309,7 +312,7 @@
             </div>
 
             <!-- Locked overlay -->
-            <div class="cert-overlay">
+            <div class="cert-overlay" id="certOverlay">
               <span class="material-symbols-outlined">lock</span>
               <p>Complete all clearances to unlock</p>
             </div>
@@ -343,22 +346,22 @@
           </div>
         </div>
 
-        <button class="btn-download-cert" disabled>
+        <button class="btn-download-cert" id="downloadBtn" disabled>
           <span class="material-symbols-outlined">download</span>
           Download Certificate (PDF)
         </button>
 
-        <div style="margin-top:0.75rem;text-align:center;font-size:0.72rem;color:var(--text-muted);">
+        <div id="downloadHint" style="margin-top:0.75rem;text-align:center;font-size:0.72rem;color:var(--text-muted);">
           Certificate becomes available once all 15 departments are cleared
         </div>
 
-        <!-- Resolve chapel CTA -->
-        <div style="margin-top:1.25rem;background:var(--flagged-bg);border:1px solid #FED7AA;border-radius:10px;padding:1rem;">
+        <!-- Resolve flagged dept CTA (shown only when something is flagged) -->
+        <div id="resolveCta" style="display:none;margin-top:1.25rem;background:var(--flagged-bg);border:1px solid #FED7AA;border-radius:10px;padding:1rem;">
           <div style="font-size:0.78rem;font-weight:700;color:var(--flagged);margin-bottom:4px;">⚠ Next Action Required</div>
-          <div style="font-size:0.78rem;color:#92400E;margin-bottom:0.75rem;line-height:1.5;">Resolve your Chapel attendance flag to unblock Library, Bursary, and Academic Affairs.</div>
+          <div id="resolveDesc" style="font-size:0.78rem;color:#92400E;margin-bottom:0.75rem;line-height:1.5;"></div>
           <a href="clearance-tracking.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--flagged);color:white;border-radius:8px;padding:9px 16px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
             <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span>
-            Resolve Chapel Issue
+            <span id="resolveBtn">Resolve Issue</span>
           </a>
         </div>
       </div>
@@ -420,9 +423,9 @@
       .order('submitted_at', { ascending: false }).limit(1).maybeSingle();
 
     if (!req) {
-      document.getElementById('bannerTitle').textContent = 'No Clearance Request Found';
-      document.getElementById('bannerDesc').textContent  = 'Submit a clearance request from the Dashboard to begin.';
-      document.getElementById('checklistItems').innerHTML = '<p style="padding:1rem;color:var(--text-muted);font-size:0.82rem;">No active clearance request.</p>';
+      document.getElementById('bannerTitle').textContent   = 'No Clearance Request Found';
+      document.getElementById('bannerDesc').textContent    = 'Submit a clearance request from your Dashboard to begin the clearance process.';
+      document.getElementById('checklistItems').innerHTML  = '<p style="padding:1rem;color:var(--text-muted);font-size:0.82rem;">No active clearance request.</p>';
       return;
     }
 
@@ -434,17 +437,19 @@
 
     let cleared = 0;
     const total  = DEPT_META.length;
-    let flagged  = false;
+    let firstFlagged = null;
+    let firstRejected = null;
     const listEl = document.getElementById('checklistItems');
     listEl.innerHTML = '';
 
     DEPT_META.forEach(dept => {
       const st = statusMap[dept.id] || 'pending';
       if (st === 'approved') cleared++;
-      if (st === 'flagged')  flagged = true;
+      if (st === 'flagged'  && !firstFlagged)  firstFlagged  = dept;
+      if (st === 'rejected' && !firstRejected) firstRejected = dept;
       const { cls, icon, label } = STATUS_MAP[st] || STATUS_MAP.default;
-      const nameText = dept.name + label;
-      const nameStyle = st === 'flagged' ? ' style="color:var(--flagged);font-weight:600;"' : '';
+      const nameText  = dept.name + label;
+      const nameStyle = (st === 'flagged' || st === 'rejected') ? ' style="color:var(--flagged);font-weight:600;"' : '';
       listEl.innerHTML += `<div class="check-item ${cls}"><div class="check-icon"><span class="material-symbols-outlined">${icon}</span></div><span class="check-name"${nameStyle}>${nameText}</span></div>`;
     });
 
@@ -453,11 +458,41 @@
     document.getElementById('checklistBar').style.width      = pct + '%';
 
     if (cleared === total) {
-      document.getElementById('bannerTitle').textContent = 'Certificate Unlocked — 100% Complete';
-      document.getElementById('bannerDesc').textContent  = 'All departments have cleared you. Your certificate is ready to download.';
+      // ── All cleared: unlock everything ──
+      const banner = document.getElementById('statusBanner');
+      banner.className = 'status-banner approved';
+      document.getElementById('bannerIconSymbol').textContent = 'verified';
+      document.getElementById('bannerTitle').textContent      = 'Certificate Unlocked — 100% Complete';
+      document.getElementById('bannerDesc').textContent       = 'All 15 departments have cleared you. Your certificate is ready to download.';
+
+      document.getElementById('certOverlay').style.display = 'none';
+      document.getElementById('certPreview').classList.add('unlocked');
+
+      const today = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+      document.getElementById('certDate').textContent = 'Date: ' + today;
+
+      const btn = document.getElementById('downloadBtn');
+      btn.disabled = false;
+      btn.classList.add('active');
+      btn.onclick = () => window.print();
+
+      document.getElementById('downloadHint').style.display = 'none';
+      document.getElementById('resolveCta').style.display   = 'none';
+
     } else {
+      // ── Still locked ──
       document.getElementById('bannerTitle').textContent = `Certificate Locked — ${pct}% Complete`;
-      document.getElementById('bannerDesc').textContent  = `${cleared} of ${total} departments cleared.${flagged ? ' Resolve flagged items to continue.' : ''}`;
+      document.getElementById('bannerDesc').textContent  = `${cleared} of ${total} departments cleared.${(firstFlagged || firstRejected) ? ' Resolve flagged items to continue.' : ''}`;
+
+      // Show dynamic resolve CTA if anything is flagged or rejected
+      const problem = firstFlagged || firstRejected;
+      if (problem) {
+        const isRejected = firstRejected && !firstFlagged;
+        document.getElementById('resolveCta').style.display = '';
+        document.getElementById('resolveDesc').textContent  =
+          `Your ${problem.name} clearance has been ${isRejected ? 'rejected' : 'flagged'}. Visit the clearance tracking page to see the officer's note and resolve it.`;
+        document.getElementById('resolveBtn').textContent   = `Resolve ${problem.name} Issue`;
+      }
     }
   })();
 </script>
