@@ -426,6 +426,37 @@ renderDetail(selected);
   }
   renderStepper();
   renderDetail(selected);
+
+  // Live updates — re-render whenever an officer changes a clearance item status
+  if (request) {
+    supabase.channel('tracking-' + request.id)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'clearance_items',
+        filter: `request_id=eq.${request.id}`
+      }, payload => {
+        const dept = DEPTS.find(d => d.id === payload.new.department_id);
+        if (!dept) return;
+        const props = STATUS_PROPS[payload.new.status] || STATUS_PROPS.pending;
+        dept.status      = props.status;
+        dept.tag         = props.tag;
+        dept.tagClass    = props.tagClass;
+        dept.borderClass = props.borderClass;
+        dept.tagColor    = props.tagColor;
+        dept.requirements = dept.requirements.map(r => ({...r, done: payload.new.status === 'approved'}));
+        dept.note = payload.new.officer_note
+          || (payload.new.status === 'approved' ? 'Cleared. No further action required.'
+            : payload.new.status === 'rejected' ? 'Clearance rejected. Contact the department officer for details.'
+            : payload.new.status === 'flagged'  ? 'Flagged for action. Visit the department office to resolve this issue.'
+            : dept.note);
+        const approvedNow = DEPTS.filter(d => d.status === 'approved').length;
+        document.getElementById('completionPct').textContent = Math.round((approvedNow / DEPTS.length) * 100) + '%';
+        renderStepper();
+        renderDetail(selected);
+      })
+      .subscribe();
+  }
 })();
 </script>
 <script type="module" src="../js/topbar.js"></script>
