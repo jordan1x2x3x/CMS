@@ -283,20 +283,27 @@ const DEPTS = [
 
 // Apply default pending style to every dept
 const STATUS_PROPS = {
-  pending:  {status:'pending',  tag:'Pending Review',            tagClass:'b-pending',  borderClass:'border-pending',  tagColor:'var(--pending)'},
-  approved: {status:'approved', tag:'Approved',                  tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)'},
-  flagged:  {status:'flagged',  tag:'Flagged — Action Required', tagClass:'b-flagged',  borderClass:'border-flagged',  tagColor:'var(--flagged)'},
-  rejected: {status:'flagged',  tag:'Rejected',                  tagClass:'b-flagged',  borderClass:'border-flagged',  tagColor:'var(--flagged)'},
-  locked:   {status:'locked',   tag:'Locked',                    tagClass:'b-locked',   borderClass:'border-locked',   tagColor:'var(--purple-light)'},
+  pending:              {status:'pending',   tag:'Pending Review',            tagClass:'b-pending',  borderClass:'border-pending',  tagColor:'var(--pending)'},
+  pending_submission:   {status:'pending',   tag:'Upload Required',           tagClass:'b-pending',  borderClass:'border-pending',  tagColor:'var(--pending)'},
+  pending_review:       {status:'pending',   tag:'Pending Review',            tagClass:'b-pending',  borderClass:'border-pending',  tagColor:'var(--pending)'},
+  awaiting_verification:{status:'pending',   tag:'Awaiting Verification',     tagClass:'b-pending',  borderClass:'border-pending',  tagColor:'var(--pending)'},
+  approved:             {status:'approved',  tag:'Approved',                  tagClass:'b-approved', borderClass:'border-approved', tagColor:'var(--approved)'},
+  flagged:              {status:'flagged',   tag:'Flagged — Action Required', tagClass:'b-flagged',  borderClass:'border-flagged',  tagColor:'var(--flagged)'},
+  rejected:             {status:'flagged',   tag:'Rejected',                  tagClass:'b-flagged',  borderClass:'border-flagged',  tagColor:'var(--flagged)'},
+  locked:               {status:'locked',    tag:'Locked',                    tagClass:'b-locked',   borderClass:'border-locked',   tagColor:'var(--purple-light)'},
 };
 DEPTS.forEach(d => Object.assign(d, STATUS_PROPS.pending));
 
 const STATUS_DOT = {
-  approved:{cls:'s-approved',icon:'check'},
-  flagged: {cls:'s-flagged', icon:'priority_high'},
-  pending: {cls:'s-pending', icon:'schedule'},
-  locked:  {cls:'s-locked',  icon:'lock'},
-  na:      {cls:'s-na',      icon:'remove'},
+  approved:             {cls:'s-approved', icon:'check'},
+  flagged:              {cls:'s-flagged',  icon:'priority_high'},
+  rejected:             {cls:'s-flagged',  icon:'priority_high'},
+  pending:              {cls:'s-pending',  icon:'schedule'},
+  pending_submission:   {cls:'s-pending',  icon:'upload'},
+  pending_review:       {cls:'s-pending',  icon:'schedule'},
+  awaiting_verification:{cls:'s-pending',  icon:'manage_search'},
+  locked:               {cls:'s-locked',   icon:'lock'},
+  na:                   {cls:'s-na',       icon:'remove'},
 };
 
 let selected = 0;

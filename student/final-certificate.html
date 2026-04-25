@@ -392,10 +392,14 @@
   ];
 
   const STATUS_MAP = {
-    approved: { cls:'check-done',    icon:'check',    label:'' },
-    flagged:  { cls:'check-flagged', icon:'flag',     label:' ⚠ Flagged' },
-    pending:  { cls:'check-pending', icon:'schedule', label:'' },
-    default:  { cls:'check-pending', icon:'schedule', label:'' },
+    approved:             { cls:'check-done',    icon:'check',         label:'' },
+    flagged:              { cls:'check-flagged', icon:'flag',          label:' ⚠ Flagged' },
+    rejected:             { cls:'check-flagged', icon:'cancel',        label:' ✗ Rejected' },
+    pending:              { cls:'check-pending', icon:'schedule',      label:'' },
+    pending_submission:   { cls:'check-pending', icon:'upload_file',   label:'' },
+    pending_review:       { cls:'check-pending', icon:'schedule',      label:'' },
+    awaiting_verification:{ cls:'check-pending', icon:'manage_search', label:'' },
+    default:              { cls:'check-pending', icon:'schedule',      label:'' },
   };
 
   (async () => {

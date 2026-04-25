@@ -934,12 +934,13 @@
       return;
     }
 
-    // Create one clearance item per department
+    // Create one clearance item per department with correct initial status
+    const UPLOAD_DEPTS = new Set(['bursary', 'hod', 'cedgs']);
     const DEPARTMENTS = ['hod','cedgs','lab','college','esm','chapel','health','sport','hall','ict','alumni','student_affairs','library','bursary','academic'];
     const items = DEPARTMENTS.map(dept => ({
       request_id:    request.id,
       department_id: dept,
-      status:        'pending',
+      status:        UPLOAD_DEPTS.has(dept) ? 'pending_submission' : 'awaiting_verification',
     }));
     await supabase.from('clearance_items').insert(items);
 
@@ -976,11 +977,14 @@
   ];
 
   const STATUS_STYLE = {
-    approved: {bg:'var(--approved-bg)', color:'var(--approved)', label:'Approved',       icon:'task_alt'},
-    pending:  {bg:'var(--pending-bg)',  color:'var(--pending)',  label:'Pending',        icon:'hourglass_empty'},
-    flagged:  {bg:'var(--flagged-bg)',  color:'var(--flagged)',  label:'Flagged',        icon:'flag'},
-    rejected: {bg:'var(--flagged-bg)',  color:'var(--flagged)',  label:'Rejected',       icon:'cancel'},
-    locked:   {bg:'#F0EAF5',           color:'var(--purple)',   label:'Locked',         icon:'lock'},
+    approved:             {bg:'var(--approved-bg)', color:'var(--approved)', label:'Approved',              icon:'task_alt'},
+    pending:              {bg:'var(--pending-bg)',  color:'var(--pending)',  label:'Pending',               icon:'hourglass_empty'},
+    pending_submission:   {bg:'var(--pending-bg)',  color:'var(--pending)',  label:'Upload Required',        icon:'upload_file'},
+    pending_review:       {bg:'var(--pending-bg)',  color:'var(--pending)',  label:'Pending Review',         icon:'hourglass_empty'},
+    awaiting_verification:{bg:'var(--pending-bg)',  color:'var(--pending)',  label:'Awaiting Verification',  icon:'manage_search'},
+    flagged:              {bg:'var(--flagged-bg)',  color:'var(--flagged)',  label:'Flagged',               icon:'flag'},
+    rejected:             {bg:'var(--flagged-bg)',  color:'var(--flagged)',  label:'Rejected',              icon:'cancel'},
+    locked:               {bg:'#F0EAF5',           color:'var(--purple)',   label:'Locked',                icon:'lock'},
   };
 
   // ── Session guard + profile population ──
@@ -1040,8 +1044,12 @@
     }
 
     // ── Stats ──
+    const PENDING_STATES = new Set(['pending', 'pending_submission', 'pending_review', 'awaiting_verification']);
     const counts = {approved:0, pending:0, flagged:0, rejected:0};
-    Object.values(statusMap).forEach(s => { if (counts[s] !== undefined) counts[s]++; });
+    Object.values(statusMap).forEach(s => {
+      if (s === 'approved' || s === 'flagged' || s === 'rejected') counts[s]++;
+      else if (PENDING_STATES.has(s)) counts.pending++;
+    });
     const cleared  = counts.approved;
     const flagged  = counts.flagged + counts.rejected;
     const pending  = counts.pending;
@@ -1083,7 +1091,7 @@
 
     // ── Recent activity (non-pending items) ──
     const activityItems = DEPT_META
-      .filter(d => statusMap[d.id] !== 'pending')
+      .filter(d => !PENDING_STATES.has(statusMap[d.id]))
       .slice(0, 5);
     const activityHTML = activityItems.length
       ? activityItems.map(d => {

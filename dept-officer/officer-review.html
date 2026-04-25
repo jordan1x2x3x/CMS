@@ -653,15 +653,24 @@ function showToast(msg, type = 'approved') {
   document.getElementById('topbarMeta').textContent     = student.matric + ' · ' + deptName + ' Review';
 
   // Status badges
-  const statusClasses = {approved:'badge-approved', flagged:'badge-flagged', pending:'badge-pending', rejected:'badge-rejected'};
-  const statusLabels  = {approved:'Approved', flagged:'Flagged', pending:'Pending', rejected:'Rejected'};
-  const statusBarBgs  = {approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', pending:'var(--pending-bg)', rejected:'var(--rejected-bg)'};
+  const statusClasses = {
+    approved:'badge-approved', flagged:'badge-flagged', rejected:'badge-rejected',
+    pending:'badge-pending', pending_submission:'badge-pending', pending_review:'badge-pending', awaiting_verification:'badge-pending',
+  };
+  const statusLabels = {
+    approved:'Approved', flagged:'Flagged', rejected:'Rejected',
+    pending:'Pending', pending_submission:'Pending Submission', pending_review:'Pending Review', awaiting_verification:'Awaiting Verification',
+  };
+  const statusBarBgs = {
+    approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', rejected:'var(--rejected-bg)',
+    pending:'var(--pending-bg)', pending_submission:'var(--pending-bg)', pending_review:'var(--pending-bg)', awaiting_verification:'var(--pending-bg)',
+  };
   ['statusBadge','statusBadge2'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.className = 'badge ' + statusClasses[status]; el.textContent = statusLabels[status]; }
+    if (el) { el.className = 'badge ' + (statusClasses[status] || 'badge-pending'); el.textContent = statusLabels[status] || status; }
   });
   const bar = document.getElementById('statusBar');
-  if (bar) bar.style.background = statusBarBgs[status];
+  if (bar) bar.style.background = statusBarBgs[status] || 'var(--pending-bg)';
 
   // Documents — dept-specific
   const docs = DEPT_DOCS[dept] || DEPT_DOCS['chapel'];
@@ -693,8 +702,14 @@ function showToast(msg, type = 'approved') {
     '<option value="Other">Other (specify in comment)</option>';
 
   // Timeline — based on current status for this dept
-  const tlColors  = {approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', pending:'var(--pending-bg)', rejected:'var(--rejected-bg)'};
-  const tlIColors = {approved:'var(--approved)',    flagged:'var(--flagged)',    pending:'var(--pending)',    rejected:'var(--rejected)'};
+  const tlColors  = {
+    approved:'var(--approved-bg)', flagged:'var(--flagged-bg)', rejected:'var(--rejected-bg)',
+    pending:'var(--pending-bg)', pending_submission:'var(--pending-bg)', pending_review:'var(--pending-bg)', awaiting_verification:'var(--pending-bg)',
+  };
+  const tlIColors = {
+    approved:'var(--approved)', flagged:'var(--flagged)', rejected:'var(--rejected)',
+    pending:'var(--pending)', pending_submission:'var(--pending)', pending_review:'var(--pending)', awaiting_verification:'var(--pending)',
+  };
   const tlIcons   = {approved:'check_circle', flagged:'flag', pending:'schedule', rejected:'cancel'};
   const tlTitles  = {
     approved: `Clearance approved for ${deptName}`,

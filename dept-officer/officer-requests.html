@@ -196,15 +196,36 @@ let activeFilter = 'all';
 let activeType = '';
 let searchQuery = '';
 
+const PENDING_LIKE = new Set(['pending', 'pending_submission', 'pending_review', 'awaiting_verification']);
+
 function badgeHTML(status) {
-  const map = { pending:'badge-pending', approved:'badge-approved', flagged:'badge-flagged', rejected:'badge-rejected' };
-  const label = status.charAt(0).toUpperCase() + status.slice(1);
-  return `<span class="badge ${map[status] || 'badge-pending'}">${label}</span>`;
+  const map = {
+    pending:               'badge-pending',
+    pending_submission:    'badge-pending',
+    pending_review:        'badge-pending',
+    awaiting_verification: 'badge-pending',
+    approved:              'badge-approved',
+    flagged:               'badge-flagged',
+    rejected:              'badge-rejected',
+  };
+  const label = {
+    pending:               'Pending',
+    pending_submission:    'Pending Submission',
+    pending_review:        'Pending Review',
+    awaiting_verification: 'Awaiting Verification',
+    approved:              'Approved',
+    flagged:               'Flagged',
+    rejected:              'Rejected',
+  };
+  return `<span class="badge ${map[status] || 'badge-pending'}">${label[status] || status}</span>`;
 }
 
 function updateFilterTabs() {
   const counts = { all:ALL_ROWS.length, pending:0, flagged:0, approved:0, rejected:0 };
-  ALL_ROWS.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+  ALL_ROWS.forEach(r => {
+    if (PENDING_LIKE.has(r.status))      counts.pending++;
+    else if (counts[r.status] !== undefined) counts[r.status]++;
+  });
   const tabs = document.querySelectorAll('.filter-tab');
   const order = ['all','pending','flagged','approved','rejected'];
   const names = { all:'All', pending:'Pending', flagged:'Flagged', approved:'Approved', rejected:'Rejected' };
@@ -216,7 +237,9 @@ function updateFilterTabs() {
 function renderTable() {
   const body = document.getElementById('reqBody');
   const filtered = ALL_ROWS.filter(r => {
-    const matchFilter = activeFilter === 'all' || r.status === activeFilter;
+    const matchFilter = activeFilter === 'all'
+      || (activeFilter === 'pending' && PENDING_LIKE.has(r.status))
+      || (activeFilter !== 'pending' && r.status === activeFilter);
     const matchType   = !activeType || r.type === activeType;
     const matchSearch = !searchQuery || r.name.toLowerCase().includes(searchQuery) || r.matric.toLowerCase().includes(searchQuery);
     return matchFilter && matchType && matchSearch;

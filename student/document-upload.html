@@ -601,11 +601,12 @@
   } catch (_) { /* departments table not yet created — using hardcoded config */ }
 
   // ── Fetch real clearance status from Supabase ──────────────
-  // Default: upload depts → 'not-started', record_check depts → 'pending'
+  // Default when no request exists yet:
+  //   upload depts → 'not-started' (no request submitted)
+  //   record_check → 'not-started'
+  // After request submission the DB stores pending_submission / awaiting_verification
   const statusCache = {};
-  DEPT_CONFIG.forEach(d => {
-    statusCache[d.id] = d.type === 'upload' ? 'not-started' : 'pending';
-  });
+  DEPT_CONFIG.forEach(d => { statusCache[d.id] = 'not-started'; });
 
   try {
     const { data: request } = await supabase
@@ -655,18 +656,19 @@
 
   function uploadCard(dept, status) {
     const statusMap = {
-      'not-started': { cls:'not-started',  badgeCls:'s-none',     icon:'radio_button_unchecked', label:'Not Submitted' },
-      approved:      { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',           label:'Approved' },
-      pending:       { cls:'pending',       badgeCls:'s-pending',  icon:'hourglass_empty',        label:'Pending Review' },
-      flagged:       { cls:'action-needed', badgeCls:'s-action',   icon:'flag',                   label:'Action Needed' },
-      rejected:      { cls:'action-needed', badgeCls:'s-action',   icon:'error',                  label:'Rejected — Re-upload' },
+      'not-started':       { cls:'not-started',  badgeCls:'s-none',     icon:'radio_button_unchecked', label:'Not Submitted' },
+      pending_submission:  { cls:'not-started',  badgeCls:'s-none',     icon:'upload_file',            label:'Upload Required' },
+      pending_review:      { cls:'pending',       badgeCls:'s-pending',  icon:'hourglass_empty',        label:'Pending Review' },
+      approved:            { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',           label:'Approved' },
+      flagged:             { cls:'action-needed', badgeCls:'s-action',   icon:'flag',                   label:'Action Needed' },
+      rejected:            { cls:'action-needed', badgeCls:'s-action',   icon:'error',                  label:'Rejected — Re-upload' },
     };
     const s = statusMap[status] || statusMap['not-started'];
 
     const actionBtn =
       status === 'approved'
         ? `<button class="btn-download"><span class="material-symbols-outlined">download</span> Download Receipt</button>`
-        : status === 'pending'
+        : status === 'pending_review'
         ? `<button class="btn-view"><span class="material-symbols-outlined">visibility</span> View Submission</button>`
         : `<button class="btn-upload" onclick="triggerUpload('${dept.id}')"><span class="material-symbols-outlined">upload</span> Upload Now</button>`;
 
@@ -699,13 +701,14 @@
 
   function recordCheckCard(dept, status) {
     const statusMap = {
-      'not-started': { cls:'record-check',  badgeCls:'s-verify',   icon:'manage_search', label:'Awaiting Verification' },
-      approved:      { cls:'approved',       badgeCls:'s-approved', icon:'check_circle',  label:'Approved' },
-      pending:       { cls:'record-check',   badgeCls:'s-verify',   icon:'manage_search', label:'Awaiting Verification' },
-      flagged:       { cls:'action-needed',  badgeCls:'s-flagged',  icon:'flag',          label:'Flagged' },
-      rejected:      { cls:'action-needed',  badgeCls:'s-action',   icon:'cancel',        label:'Rejected' },
+      'not-started':        { cls:'record-check',  badgeCls:'s-verify',   icon:'manage_search', label:'Awaiting Verification' },
+      pending:              { cls:'record-check',  badgeCls:'s-verify',   icon:'manage_search', label:'Awaiting Verification' },
+      awaiting_verification:{ cls:'record-check',  badgeCls:'s-verify',   icon:'manage_search', label:'Awaiting Verification' },
+      approved:             { cls:'approved',      badgeCls:'s-approved', icon:'check_circle',  label:'Approved' },
+      flagged:              { cls:'action-needed', badgeCls:'s-flagged',  icon:'flag',          label:'Flagged' },
+      rejected:             { cls:'action-needed', badgeCls:'s-action',   icon:'cancel',        label:'Rejected' },
     };
-    const s = statusMap[status] || statusMap.pending;
+    const s = statusMap[status] || statusMap.awaiting_verification;
 
     const infoBox = status !== 'approved'
       ? `<div class="record-check-info">

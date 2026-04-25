@@ -441,8 +441,12 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
     };
   });
 
+  const PENDING_LIKE = new Set(['pending', 'pending_submission', 'pending_review', 'awaiting_verification']);
   const counts = { approved:0, pending:0, flagged:0, rejected:0 };
-  rows.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+  rows.forEach(r => {
+    if (r.status === 'approved' || r.status === 'flagged' || r.status === 'rejected') counts[r.status]++;
+    else if (PENDING_LIKE.has(r.status)) counts.pending++;
+  });
   const total = rows.length;
   const approvalPct = total ? Math.round(counts.approved / total * 100) : 0;
 
@@ -468,15 +472,16 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
   if (donutLabel) donutLabel.innerHTML = `${approvalPct}%<small>approved</small>`;
 
   // Pending requests list — top 6 actionable
-  const actionable = rows.filter(r => r.status === 'pending' || r.status === 'flagged').slice(0, 6);
+  const actionable = rows.filter(r => PENDING_LIKE.has(r.status) || r.status === 'flagged').slice(0, 6);
   const pendingList = document.getElementById('pendingList');
   if (pendingList) {
     if (actionable.length === 0) {
       pendingList.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:0.82rem;">No pending requests — all cleared!</div>';
     } else {
       pendingList.innerHTML = actionable.map(r => {
+        const STATUS_BADGE_LABEL = { pending:'Pending', pending_submission:'Pending Submission', pending_review:'Pending Review', awaiting_verification:'Awaiting Verification', flagged:'Flagged' };
         const badgeClass = r.status === 'flagged' ? 'badge-flagged' : 'badge-pending';
-        const badgeText  = r.status === 'flagged' ? 'Flagged' : 'Pending';
+        const badgeText  = STATUS_BADGE_LABEL[r.status] || 'Pending';
         const timeAgo = r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
         return `<a href="officer-review.html?item=${r.itemId}" class="req-row">
           <div class="req-avatar" style="background:${r.color};">${r.initials}</div>
@@ -494,7 +499,7 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
   }
 
   // Recent activity — last 4 non-pending items
-  const activityData = rows.filter(r => r.status !== 'pending').slice(0, 4);
+  const activityData = rows.filter(r => !PENDING_LIKE.has(r.status)).slice(0, 4);
   const activityList = document.querySelector('.activity-list');
   if (activityList) {
     const actIcons  = {approved:'check', flagged:'flag', rejected:'close'};
