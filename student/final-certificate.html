@@ -61,20 +61,20 @@
     .page-heading p  { font-size:0.85rem; color:var(--text-muted); margin-top:4px; }
 
     /* LAYOUT */
-    .cert-layout { display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start; }
+    .cert-layout { display:grid; grid-template-columns:1fr 320px; gap:1.5rem; align-items:start; }
 
     /* STATUS BANNER */
     .status-banner {
-      border-radius:12px; padding:1.25rem 1.5rem;
+      border-radius:12px; padding:1rem 1.5rem;
       display:flex; align-items:center; gap:1rem;
       margin-bottom:1.5rem;
       border:1.5px solid var(--flagged-bg);
       background:var(--flagged-bg);
     }
-    .status-banner-icon { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .status-banner-icon .material-symbols-outlined { font-size:22px; font-variation-settings:'FILL' 1; }
-    .status-banner-title { font-size:0.9rem; font-weight:700; }
-    .status-banner-desc  { font-size:0.78rem; margin-top:2px; color:var(--text-muted); }
+    .status-banner-icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .status-banner-icon .material-symbols-outlined { font-size:20px; font-variation-settings:'FILL' 1; }
+    .status-banner-title { font-size:0.88rem; font-weight:700; }
+    .status-banner-desc  { font-size:0.76rem; margin-top:2px; color:var(--text-muted); }
     .status-banner.locked   { background:#F5EEFF; border-color:#E9D5FF; }
     .status-banner.locked   .status-banner-icon { background:#E9D5FF; color:var(--purple); }
     .status-banner.locked   .status-banner-title { color:var(--purple-dark); }
@@ -82,30 +82,31 @@
     .status-banner.approved .status-banner-icon { background:var(--approved); color:white; }
     .status-banner.approved .status-banner-title { color:#065f46; }
 
-    /* CERTIFICATE PREVIEW */
+    /* CERTIFICATE PREVIEW CARD */
     .cert-preview-card {
       background:var(--white); border:1px solid var(--border);
       border-radius:12px; overflow:hidden;
-      box-shadow:0 1px 4px rgba(0,0,0,0.05);
-      margin-bottom:1.25rem;
+      box-shadow:0 2px 12px rgba(0,0,0,0.07);
     }
     .cert-preview-header {
       background:linear-gradient(135deg, var(--purple-dark), var(--purple));
-      padding:1.25rem 1.5rem;
+      padding:1rem 1.5rem;
       display:flex; align-items:center; justify-content:space-between;
     }
     .cert-preview-header h3 { font-size:0.85rem; font-weight:700; color:white; }
     .cert-preview-header span { font-size:0.7rem; color:rgba(255,255,255,0.6); }
 
-    /* The actual certificate mock */
+    /* The actual certificate */
     .certificate {
       position:relative;
-      padding:2.5rem;
-      filter:blur(2px);
+      padding:2rem 2.5rem;
+      filter:blur(3px);
       user-select:none;
       pointer-events:none;
+      transition:filter 0.4s ease;
     }
     .certificate.unlocked { filter:none; pointer-events:auto; }
+
     .cert-border {
       border:3px solid var(--purple);
       border-radius:8px;
@@ -123,81 +124,97 @@
       position:absolute; top:50%; left:50%;
       transform:translate(-50%,-50%) rotate(-30deg);
       font-family:'Newsreader',serif;
-      font-size:3.5rem; font-weight:700;
-      color:rgba(107,0,128,0.06);
+      font-size:4rem; font-weight:700;
+      color:rgba(107,0,128,0.05);
       white-space:nowrap;
       pointer-events:none;
     }
-    .cert-logo-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:1.5rem; }
-    .cert-logo-icon { width:50px; height:50px; background:var(--purple); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; }
-    .cert-logo-icon .material-symbols-outlined { font-size:26px; font-variation-settings:'FILL' 1; }
-    .cert-school-name { font-family:'Newsreader',serif; font-size:1rem; font-weight:700; color:var(--purple-dark); text-align:center; line-height:1.3; }
-    .cert-title { text-align:center; font-family:'Newsreader',serif; font-size:1.5rem; font-weight:700; color:var(--purple-dark); margin-bottom:0.25rem; }
-    .cert-subtitle { text-align:center; font-size:0.78rem; color:var(--text-muted); margin-bottom:1.5rem; }
-    .cert-divider { height:2px; background:linear-gradient(90deg, transparent, var(--purple), var(--green), transparent); margin-bottom:1.5rem; }
-    .cert-body { text-align:center; }
-    .cert-certify { font-size:0.78rem; color:var(--text-muted); margin-bottom:0.5rem; }
-    .cert-student-name { font-family:'Newsreader',serif; font-size:1.5rem; font-weight:700; color:var(--purple-dark); margin-bottom:0.25rem; }
-    .cert-matric { font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem; }
-    .cert-programme { font-size:0.85rem; color:var(--text-main); margin-bottom:0.25rem; }
-    .cert-dept { font-size:0.78rem; color:var(--text-muted); margin-bottom:1.5rem; }
-    .cert-statement { font-size:0.78rem; color:var(--text-muted); line-height:1.7; max-width:380px; margin:0 auto 1.5rem; }
-    .cert-footer-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border); }
-    .cert-sig { text-align:center; }
-    .cert-sig-line { width:120px; height:1px; background:var(--text-main); margin:0 auto 4px; }
-    .cert-sig-name { font-size:0.68rem; font-weight:700; color:var(--text-main); }
-    .cert-sig-role { font-size:0.62rem; color:var(--text-muted); }
-    .cert-seal { width:50px; height:50px; border-radius:50%; border:3px solid var(--purple); display:flex; align-items:center; justify-content:center; color:var(--purple); }
-    .cert-seal .material-symbols-outlined { font-size:24px; font-variation-settings:'FILL' 1; }
-    .cert-date { font-size:0.68rem; color:var(--text-muted); text-align:center; }
+    .cert-logo-row { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:1.25rem; }
+    .cert-logo-img { width:64px; height:64px; object-fit:contain; }
+    .cert-school-name { font-family:'Newsreader',serif; font-size:1.05rem; font-weight:700; color:var(--purple-dark); text-align:left; line-height:1.35; }
+    .cert-school-sub  { font-size:0.72rem; font-weight:400; color:var(--text-muted); font-family:'Inter',sans-serif; }
+    .cert-title    { text-align:center; font-family:'Newsreader',serif; font-size:1.6rem; font-weight:700; color:var(--purple-dark); margin-bottom:0.2rem; }
+    .cert-subtitle { text-align:center; font-size:0.78rem; color:var(--text-muted); margin-bottom:1.25rem; }
+    .cert-divider  { height:2px; background:linear-gradient(90deg, transparent, var(--purple), var(--green), transparent); margin-bottom:1.25rem; }
+    .cert-body     { text-align:center; }
+    .cert-certify  { font-size:0.78rem; color:var(--text-muted); margin-bottom:0.4rem; }
+    .cert-student-name { font-family:'Newsreader',serif; font-size:1.6rem; font-weight:700; color:var(--purple-dark); margin-bottom:0.2rem; }
+    .cert-matric   { font-size:0.75rem; color:var(--text-muted); margin-bottom:0.75rem; }
+    .cert-programme{ font-size:0.88rem; font-weight:600; color:var(--text-main); margin-bottom:0.2rem; }
+    .cert-dept     { font-size:0.76rem; color:var(--text-muted); margin-bottom:1.25rem; }
+    .cert-statement{ font-size:0.8rem; color:var(--text-muted); line-height:1.75; max-width:400px; margin:0 auto; }
+    .cert-footer-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); }
+    .cert-sig      { text-align:center; }
+    .cert-sig-line { width:130px; height:1px; background:var(--text-main); margin:0 auto 5px; }
+    .cert-sig-name { font-size:0.72rem; font-weight:700; color:var(--text-main); }
+    .cert-sig-role { font-size:0.64rem; color:var(--text-muted); }
+    .cert-seal     { width:52px; height:52px; border-radius:50%; border:3px solid var(--purple); display:flex; align-items:center; justify-content:center; color:var(--purple); }
+    .cert-seal .material-symbols-outlined { font-size:26px; font-variation-settings:'FILL' 1; }
+    .cert-date     { font-size:0.68rem; color:var(--text-muted); text-align:center; margin-top:4px; }
 
     /* Locked overlay */
     .cert-overlay {
       position:absolute; inset:0;
-      background:rgba(244,246,249,0.65);
+      background:rgba(244,246,249,0.6);
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:0.75rem; border-radius:0 0 12px 12px;
+      gap:0.75rem;
     }
-    .cert-overlay .material-symbols-outlined { font-size:40px; color:var(--purple-light); }
-    .cert-overlay p { font-size:0.82rem; font-weight:600; color:var(--purple-dark); }
+    .cert-overlay .material-symbols-outlined { font-size:42px; color:var(--purple-light); }
+    .cert-overlay p { font-size:0.84rem; font-weight:600; color:var(--purple-dark); }
+
+    /* RIGHT PANEL */
+    .right-panel { display:flex; flex-direction:column; gap:1rem; }
 
     /* Checklist */
     .checklist-card { background:var(--white); border:1px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
-    .checklist-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .checklist-header { padding:0.85rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
     .checklist-header h3 { font-size:0.85rem; font-weight:700; color:var(--text-main); }
     .checklist-progress { font-size:0.78rem; font-weight:700; color:var(--purple); }
-    .progress-bar-wrap { height:6px; background:var(--border); border-radius:100px; margin:0 1.25rem; }
-    .progress-bar-fill { height:100%; background:var(--purple); border-radius:100px; width:53%; }
-    .checklist-list { padding:0.75rem 1.25rem 1.25rem; display:flex; flex-direction:column; gap:2px; }
-    .check-item { display:flex; align-items:center; gap:10px; padding:7px 4px; border-radius:6px; font-size:0.8rem; }
+    .progress-bar-wrap { height:5px; background:var(--border); border-radius:100px; margin:0 1.25rem; }
+    .progress-bar-fill { height:100%; background:var(--purple); border-radius:100px; width:0%; transition:width 0.4s ease; }
+    .checklist-list { padding:0.5rem 1rem 0.75rem; display:flex; flex-direction:column; gap:1px; max-height:380px; overflow-y:auto; }
+    .check-item { display:flex; align-items:center; gap:8px; padding:5px 4px; border-radius:6px; font-size:0.78rem; }
     .check-item:hover { background:var(--surface); }
-    .check-icon { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .check-icon .material-symbols-outlined { font-size:13px; font-variation-settings:'FILL' 1; }
-    .check-done .check-icon { background:var(--approved-bg); color:var(--approved); }
-    .check-flagged .check-icon { background:var(--flagged-bg); color:var(--flagged); }
-    .check-pending .check-icon { background:var(--pending-bg); color:var(--pending); }
-    .check-locked .check-icon  { background:#F0EAF5; color:var(--purple-light); }
-    .check-na .check-icon      { background:var(--surface); color:var(--text-muted); }
+    .check-icon { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .check-icon .material-symbols-outlined { font-size:12px; font-variation-settings:'FILL' 1; }
+    .check-done    .check-icon { background:var(--approved-bg); color:var(--approved); }
+    .check-flagged .check-icon { background:var(--flagged-bg);  color:var(--flagged);  }
+    .check-pending .check-icon { background:var(--pending-bg);  color:var(--pending);  }
+    .check-locked  .check-icon { background:#F0EAF5; color:var(--purple-light); }
+    .check-na      .check-icon { background:var(--surface); color:var(--text-muted); }
     .check-name { flex:1; color:var(--text-main); }
-    .check-done .check-name { color:var(--text-muted); }
-    .check-na   .check-name { color:var(--text-muted); font-style:italic; }
+    .check-done    .check-name { color:var(--text-muted); }
+    .check-na      .check-name { color:var(--text-muted); font-style:italic; }
 
     /* Download button */
     .btn-download-cert {
-      width:100%; padding:14px; border-radius:10px; border:none;
-      font-family:'Inter',sans-serif; font-size:0.9rem; font-weight:700;
+      width:100%; padding:13px; border-radius:10px; border:none;
+      font-family:'Inter',sans-serif; font-size:0.88rem; font-weight:700;
       cursor:not-allowed; display:flex; align-items:center; justify-content:center; gap:8px;
-      margin-top:1rem; transition:opacity 0.2s;
+      transition:opacity 0.2s;
       background:var(--border); color:var(--text-muted);
     }
     .btn-download-cert.active { background:var(--green); color:white; cursor:pointer; }
     .btn-download-cert.active:hover { opacity:0.9; }
-    .btn-download-cert .material-symbols-outlined { font-size:20px; }
+    .btn-download-cert .material-symbols-outlined { font-size:19px; }
 
     footer { padding:1rem 2rem; text-align:center; font-size:0.72rem; color:var(--text-muted); border-top:1px solid var(--border); background:var(--white); }
 
-    @media (max-width:1024px) { .cert-layout { grid-template-columns:1fr; } }
+    @media (max-width:1100px) { .cert-layout { grid-template-columns:1fr; } }
     @media (max-width:768px)  { .sidebar { transform:translateX(-100%); } .main { margin-left:0; } }
+
+    /* PRINT — outputs only the certificate, one page */
+    @media print {
+      body { background:white; }
+      .sidebar, .topbar, .page-heading, .status-banner,
+      .cert-preview-header, .right-panel, footer,
+      .cert-overlay { display:none !important; }
+      .main { margin-left:0; }
+      .content { padding:0; }
+      .cert-layout { display:block; }
+      .cert-preview-card { border:none; box-shadow:none; border-radius:0; }
+      .certificate { filter:none !important; padding:1.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -257,93 +274,82 @@
 
     <div class="cert-layout">
 
-      <!-- LEFT: Certificate preview -->
-      <div>
-        <div class="cert-preview-card">
-          <div class="cert-preview-header">
-            <h3>Certificate Preview</h3>
-            <span>Blurred until all clearances are complete</span>
-          </div>
+      <!-- LEFT: Certificate -->
+      <div class="cert-preview-card">
+        <div class="cert-preview-header">
+          <h3>Certificate Preview</h3>
+          <span id="previewHint">Blurred until all clearances are complete</span>
+        </div>
+        <div style="position:relative;">
+          <div class="certificate" id="certPreview">
+            <div class="cert-border">
+              <div class="cert-watermark">MTU CLEARANCE</div>
 
-          <div style="position:relative;">
-            <div class="certificate" id="certPreview">
-              <div class="cert-border">
-                <div class="cert-watermark">MTU CLEARANCE</div>
-
-                <div class="cert-logo-row">
-                  <div class="cert-logo-icon"><span class="material-symbols-outlined">account_balance</span></div>
-                  <div class="cert-school-name">Mountain Top University<br/><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted);">Ibafo, Ogun State, Nigeria</span></div>
+              <div class="cert-logo-row">
+                <img src="../assets/mtu-logo.png" alt="MTU Logo" class="cert-logo-img" />
+                <div>
+                  <div class="cert-school-name">Mountain Top University</div>
+                  <div class="cert-school-sub">Ibafo, Ogun State, Nigeria</div>
                 </div>
+              </div>
 
-                <div class="cert-title">Certificate of Clearance</div>
-                <div class="cert-subtitle">Academic Session 2023/2024</div>
-                <div class="cert-divider"></div>
+              <div class="cert-title">Certificate of Clearance</div>
+              <div class="cert-subtitle" id="certSession">Academic Session —</div>
+              <div class="cert-divider"></div>
 
-                <div class="cert-body">
-                  <div class="cert-certify">This is to certify that</div>
-                  <div class="cert-student-name" id="certName">Odunukwe Chidire Jordan</div>
-                  <div class="cert-matric" id="certMatric">Matriculation No: MTU/CSC/2021/001</div>
-                  <div class="cert-programme" id="certProgramme">B.Sc. Computer Science</div>
-                  <div class="cert-dept" id="certDept">Department of Computer Science and Mathematics, CBAS</div>
-                  <div class="cert-statement">
-                    has satisfactorily completed all university clearance requirements for the
-                    <strong>2023/2024 Academic Session</strong> and is hereby cleared for graduation
-                    from Mountain Top University.
-                  </div>
+              <div class="cert-body">
+                <div class="cert-certify">This is to certify that</div>
+                <div class="cert-student-name" id="certName">—</div>
+                <div class="cert-matric" id="certMatric">Matriculation No: —</div>
+                <div class="cert-programme" id="certProgramme">—</div>
+                <div class="cert-dept" id="certDept">—</div>
+                <div class="cert-statement">
+                  has satisfactorily completed all university clearance requirements for the
+                  <strong id="certSessionInline">the current Academic Session</strong> and is hereby
+                  cleared for graduation from Mountain Top University.
                 </div>
+              </div>
 
-                <div class="cert-footer-row">
-                  <div class="cert-sig">
-                    <div class="cert-sig-line"></div>
-                    <div class="cert-sig-name">Dr. A. Olatunji</div>
-                    <div class="cert-sig-role">Registrar, MTU</div>
-                  </div>
-                  <div style="text-align:center;">
-                    <div class="cert-seal"><span class="material-symbols-outlined">verified</span></div>
-                    <div class="cert-date" id="certDate" style="margin-top:4px;">Date: ___________</div>
-                  </div>
-                  <div class="cert-sig">
-                    <div class="cert-sig-line"></div>
-                    <div class="cert-sig-name">Prof. B. Adeyemi</div>
-                    <div class="cert-sig-role">Vice-Chancellor, MTU</div>
-                  </div>
+              <div class="cert-footer-row">
+                <div class="cert-sig">
+                  <div class="cert-sig-line"></div>
+                  <div class="cert-sig-name">Dr. A. Olatunji</div>
+                  <div class="cert-sig-role">Registrar, MTU</div>
+                </div>
+                <div style="text-align:center;">
+                  <div class="cert-seal"><span class="material-symbols-outlined">verified</span></div>
+                  <div class="cert-date" id="certDate">Date: ___________</div>
+                </div>
+                <div class="cert-sig">
+                  <div class="cert-sig-line"></div>
+                  <div class="cert-sig-name">Prof. B. Adeyemi</div>
+                  <div class="cert-sig-role">Vice-Chancellor, MTU</div>
                 </div>
               </div>
             </div>
-
-            <!-- Locked overlay -->
-            <div class="cert-overlay" id="certOverlay">
-              <span class="material-symbols-outlined">lock</span>
-              <p>Complete all clearances to unlock</p>
-            </div>
           </div>
-        </div>
 
-        <!-- Info note -->
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem;font-size:0.82rem;color:var(--text-muted);line-height:1.7;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
-          <strong style="color:var(--text-main);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-            <span class="material-symbols-outlined" style="font-size:16px;color:var(--purple);font-variation-settings:'FILL' 1;">info</span>
-            About Your Certificate
-          </strong>
-          Once all 15 departments are cleared, your certificate will be digitally signed by the Registrar and the Vice-Chancellor. It will be available for download in PDF format and will serve as your official proof of clearance for the convocation ceremony.
+          <!-- Locked overlay -->
+          <div class="cert-overlay" id="certOverlay">
+            <span class="material-symbols-outlined">lock</span>
+            <p>Complete all clearances to unlock</p>
+          </div>
         </div>
       </div>
 
       <!-- RIGHT: Checklist + Download -->
-      <div>
+      <div class="right-panel">
         <div class="checklist-card">
           <div class="checklist-header">
             <h3>Clearance Checklist</h3>
-            <span class="checklist-progress" id="checklistProgress">8 / 15</span>
+            <span class="checklist-progress" id="checklistProgress">0 / 15</span>
           </div>
-          <div style="padding:0.75rem 1.25rem 0;">
+          <div style="padding:0.6rem 1.25rem 0;">
             <div class="progress-bar-wrap">
               <div class="progress-bar-fill" id="checklistBar"></div>
             </div>
           </div>
-          <div class="checklist-list" id="checklistItems">
-            <!-- populated by Supabase -->
-          </div>
+          <div class="checklist-list" id="checklistItems"></div>
         </div>
 
         <button class="btn-download-cert" id="downloadBtn" disabled>
@@ -351,16 +357,15 @@
           Download Certificate (PDF)
         </button>
 
-        <div id="downloadHint" style="margin-top:0.75rem;text-align:center;font-size:0.72rem;color:var(--text-muted);">
-          Certificate becomes available once all 15 departments are cleared
+        <div id="downloadHint" style="text-align:center;font-size:0.72rem;color:var(--text-muted);">
+          Available once all 15 departments are cleared
         </div>
 
-        <!-- Resolve flagged dept CTA (shown only when something is flagged) -->
-        <div id="resolveCta" style="display:none;margin-top:1.25rem;background:var(--flagged-bg);border:1px solid #FED7AA;border-radius:10px;padding:1rem;">
+        <div id="resolveCta" style="display:none;background:var(--flagged-bg);border:1px solid #FED7AA;border-radius:10px;padding:1rem;">
           <div style="font-size:0.78rem;font-weight:700;color:var(--flagged);margin-bottom:4px;">⚠ Next Action Required</div>
           <div id="resolveDesc" style="font-size:0.78rem;color:#92400E;margin-bottom:0.75rem;line-height:1.5;"></div>
-          <a href="clearance-tracking.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--flagged);color:white;border-radius:8px;padding:9px 16px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
-            <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span>
+          <a href="clearance-tracking.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--flagged);color:white;border-radius:8px;padding:8px 14px;font-size:0.78rem;font-weight:600;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:15px;">open_in_new</span>
             <span id="resolveBtn">Resolve Issue</span>
           </a>
         </div>
@@ -416,10 +421,14 @@
     document.getElementById('sidebarName').textContent   = fullName;
     document.getElementById('sidebarMatric').textContent = profile.matric_number || '—';
     document.getElementById('topbarAvatar').textContent  = initials;
-    document.getElementById('certName').textContent      = fullName;
-    document.getElementById('certMatric').textContent    = 'Matriculation No: ' + (profile.matric_number || '—');
-    document.getElementById('certProgramme').textContent = profile.programme || '—';
-    document.getElementById('certDept').textContent      = [profile.department, profile.college].filter(Boolean).join(', ') || '—';
+    const yr = new Date().getFullYear();
+    const acadSession = `${yr}/${yr + 1} Academic Session`;
+    document.getElementById('certName').textContent          = fullName;
+    document.getElementById('certMatric').textContent        = 'Matriculation No: ' + (profile.matric_number || '—');
+    document.getElementById('certProgramme').textContent     = profile.programme || '—';
+    document.getElementById('certDept').textContent          = [profile.department, profile.college].filter(Boolean).join(', ') || '—';
+    document.getElementById('certSession').textContent       = 'Academic Session ' + yr + '/' + (yr + 1);
+    document.getElementById('certSessionInline').textContent = 'the ' + acadSession;
 
     // Load latest clearance request
     const { data: req } = await supabase.from('clearance_requests')
@@ -471,6 +480,7 @@
 
       document.getElementById('certOverlay').style.display = 'none';
       document.getElementById('certPreview').classList.add('unlocked');
+      document.getElementById('previewHint').textContent = 'Certificate unlocked — ready to download';
 
       const today = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
       document.getElementById('certDate').textContent = 'Date: ' + today;
