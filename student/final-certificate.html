@@ -144,10 +144,11 @@
     .cert-dept     { font-size:0.76rem; color:var(--text-muted); margin-bottom:1.25rem; }
     .cert-statement{ font-size:0.8rem; color:var(--text-muted); line-height:1.75; max-width:400px; margin:0 auto; }
     .cert-footer-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); }
-    .cert-sig      { text-align:center; }
-    .cert-sig-line { width:130px; height:1px; background:var(--text-main); margin:0 auto 5px; }
-    .cert-sig-name { font-size:0.72rem; font-weight:700; color:var(--text-main); }
-    .cert-sig-role { font-size:0.64rem; color:var(--text-muted); }
+    .cert-sig        { text-align:center; }
+    .cert-sig-space  { height:40px; }
+    .cert-sig-line   { width:130px; height:1px; background:var(--text-main); margin:0 auto 5px; }
+    .cert-sig-name   { font-size:0.72rem; font-weight:700; color:var(--text-main); }
+    .cert-sig-role   { font-size:0.64rem; color:var(--text-muted); }
     .cert-seal     { width:52px; height:52px; border-radius:50%; border:3px solid var(--purple); display:flex; align-items:center; justify-content:center; color:var(--purple); }
     .cert-seal .material-symbols-outlined { font-size:26px; font-variation-settings:'FILL' 1; }
     .cert-date     { font-size:0.68rem; color:var(--text-muted); text-align:center; margin-top:4px; }
@@ -205,6 +206,7 @@
 
     /* PRINT — outputs only the certificate, one page */
     @media print {
+      @page { margin:1cm; size:A4 portrait; }
       body { background:white; }
       .sidebar, .topbar, .page-heading, .status-banner,
       .cert-preview-header, .right-panel, footer,
@@ -212,8 +214,9 @@
       .main { margin-left:0; }
       .content { padding:0; }
       .cert-layout { display:block; }
-      .cert-preview-card { border:none; box-shadow:none; border-radius:0; }
-      .certificate { filter:none !important; padding:1.5rem; }
+      .cert-preview-card { border:none; box-shadow:none; border-radius:0; page-break-after:avoid; }
+      .certificate { filter:none !important; padding:1cm; page-break-inside:avoid; }
+      .cert-border { page-break-inside:avoid; }
     }
   </style>
 </head>
@@ -312,8 +315,9 @@
 
               <div class="cert-footer-row">
                 <div class="cert-sig">
+                  <div class="cert-sig-space"></div>
                   <div class="cert-sig-line"></div>
-                  <div class="cert-sig-name">Dr. A. Olatunji</div>
+                  <div class="cert-sig-name">Mr. Olufemi Oyewole</div>
                   <div class="cert-sig-role">Registrar, MTU</div>
                 </div>
                 <div style="text-align:center;">
@@ -321,8 +325,9 @@
                   <div class="cert-date" id="certDate">Date: ___________</div>
                 </div>
                 <div class="cert-sig">
+                  <div class="cert-sig-space"></div>
                   <div class="cert-sig-line"></div>
-                  <div class="cert-sig-name">Prof. B. Adeyemi</div>
+                  <div class="cert-sig-name">Prof. Elijah A. Ayolabi</div>
                   <div class="cert-sig-role">Vice-Chancellor, MTU</div>
                 </div>
               </div>
@@ -422,12 +427,12 @@
     document.getElementById('sidebarMatric').textContent = profile.matric_number || '—';
     document.getElementById('topbarAvatar').textContent  = initials;
     const yr = new Date().getFullYear();
-    const acadSession = `${yr}/${yr + 1} Academic Session`;
+    const acadSession = `${yr - 1}/${yr} Academic Session`;
     document.getElementById('certName').textContent          = fullName;
     document.getElementById('certMatric').textContent        = 'Matriculation No: ' + (profile.matric_number || '—');
     document.getElementById('certProgramme').textContent     = profile.programme || '—';
     document.getElementById('certDept').textContent          = [profile.department, profile.college].filter(Boolean).join(', ') || '—';
-    document.getElementById('certSession').textContent       = 'Academic Session ' + yr + '/' + (yr + 1);
+    document.getElementById('certSession').textContent       = 'Academic Session ' + (yr - 1) + '/' + yr;
     document.getElementById('certSessionInline').textContent = 'the ' + acadSession;
 
     // Load latest clearance request
