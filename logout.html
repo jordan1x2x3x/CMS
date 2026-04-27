@@ -12,6 +12,7 @@
   <p>Signing out…</p>
   <script type="module">
     localStorage.removeItem('cms_session');
+    localStorage.removeItem('cms_profile_v1');
     const { supabase } = await import('./js/supabase.js');
     await supabase.auth.signOut();
     window.location.href = 'login.html';

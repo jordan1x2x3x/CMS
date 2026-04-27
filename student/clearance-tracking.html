@@ -369,11 +369,34 @@ renderDetail(selected);
 
 // Load real data from Supabase
 (async () => {
-  const { supabase } = await import('../js/supabase.js');
+  const [{ supabase }, { getCachedProfile, setCachedProfile }] = await Promise.all([
+    import('../js/supabase.js'),
+    import('../js/profile-cache.js'),
+  ]);
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = '../login.html'; return; }
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+  // Run profile (cache-miss) and clearance_request in parallel
+  let profile = getCachedProfile();
+  let request;
+  if (profile) {
+    const { data } = await supabase
+      .from('clearance_requests').select('id')
+      .eq('student_id', session.user.id)
+      .order('submitted_at', { ascending: false }).limit(1).maybeSingle();
+    request = data;
+  } else {
+    const [profileRes, requestRes] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', session.user.id).single(),
+      supabase.from('clearance_requests').select('id')
+        .eq('student_id', session.user.id)
+        .order('submitted_at', { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    profile = profileRes.data;
+    request = requestRes.data;
+    if (profile) setCachedProfile(profile);
+  }
+
   if (!profile || profile.role !== 'student') { window.location.href = '../login.html'; return; }
 
   const fullName = (profile.first_name + ' ' + profile.last_name).trim();
@@ -382,14 +405,6 @@ renderDetail(selected);
   document.getElementById('sidebarName').textContent   = fullName;
   document.getElementById('sidebarMatric').textContent = profile.matric_number || '';
   document.getElementById('topbarAvatar').textContent  = initials.toUpperCase();
-
-  const { data: request } = await supabase
-    .from('clearance_requests')
-    .select('id')
-    .eq('student_id', session.user.id)
-    .order('submitted_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
 
   if (request) {
     const { data: items } = await supabase
