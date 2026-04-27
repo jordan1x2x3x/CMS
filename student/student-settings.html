@@ -535,10 +535,18 @@
 
 <script type="module">
   (async () => {
-    const { supabase } = await import('../js/supabase.js');
+    const [{ supabase }, { getCachedProfile, setCachedProfile }] = await Promise.all([
+      import('../js/supabase.js'),
+      import('../js/profile-cache.js'),
+    ]);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = '../login.html'; return; }
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    let profile = getCachedProfile();
+    if (!profile) {
+      const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+      profile = data;
+      if (profile) setCachedProfile(profile);
+    }
     if (!profile) { window.location.href = '../login.html'; return; }
     const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '??';
     const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
