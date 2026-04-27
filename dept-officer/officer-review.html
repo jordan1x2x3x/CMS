@@ -596,12 +596,20 @@ function showToast(msg, type = 'approved') {
 
 // ── Session guard, student loader & department population ──
 (async function() {
-  const { supabase } = await import('../js/supabase.js');
+  const [{ supabase }, { getCachedProfile, setCachedProfile }] = await Promise.all([
+    import('../js/supabase.js'),
+    import('../js/profile-cache.js'),
+  ]);
 
   const { data: { session: authSession } } = await supabase.auth.getSession();
   if (!authSession) { window.location.href = '../login.html'; return; }
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', authSession.user.id).maybeSingle();
+  let profile = getCachedProfile();
+  if (!profile) {
+    const { data } = await supabase.from('profiles').select('*').eq('id', authSession.user.id).maybeSingle();
+    profile = data;
+    if (profile) setCachedProfile(profile);
+  }
   if (!profile || profile.role !== 'officer') { window.location.href = '../login.html'; return; }
 
   const dept     = profile.department || 'chapel';

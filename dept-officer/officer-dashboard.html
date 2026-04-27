@@ -401,11 +401,19 @@ const DEPT_ICONS = {
 const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6','#be185d','#b45309','#0f766e','#7c3aed'];
 
 (async () => {
-  const { supabase } = await import('../js/supabase.js');
+  const [{ supabase }, { getCachedProfile, setCachedProfile }] = await Promise.all([
+    import('../js/supabase.js'),
+    import('../js/profile-cache.js'),
+  ]);
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) { window.location.href = '../login.html'; return; }
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+  let profile = getCachedProfile();
+  if (!profile) {
+    const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    profile = data;
+    if (profile) setCachedProfile(profile);
+  }
   if (!profile || profile.role !== 'officer') { window.location.href = '../login.html'; return; }
 
   const dept     = profile.department || 'chapel';
