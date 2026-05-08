@@ -813,23 +813,84 @@
     fileName.textContent = file.name;
     fileSize.textContent = `${sizeMB} MB`;
     filePreview.classList.add('visible');
-
-    // Simulate upload progress
     uploadProgress.classList.add('visible');
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 18;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        progressLabel.textContent = 'Upload complete!';
-        progressFill.style.background = 'var(--approved)';
-        showToast(`"${file.name}" uploaded successfully!`, true);
-      } else {
-        progressLabel.textContent = `Uploading… ${Math.round(progress)}%`;
+    progressLabel.textContent = 'Uploading…';
+    progressFill.style.width = '30%';
+
+    uploadToSupabase(file);
+  }
+
+  async function uploadToSupabase(file) {
+    const { supabase } = await import('../js/supabase.js');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { showToast('Session expired. Please log in again.', false); return; }
+
+    if (!activeDeptId) { showToast('Please select a department first.', false); return; }
+
+    const ext       = file.name.split('.').pop();
+    const path      = `${session.user.id}/${activeDeptId}/${Date.now()}_${file.name}`;
+
+    progressFill.style.width = '60%';
+    progressLabel.textContent = 'Uploading to server…';
+
+    // Upload to Supabase Storage
+    const { error: storageErr } = await supabase.storage
+      .from('clearance-documents')
+      .upload(path, file, { upsert: true });
+
+    if (storageErr) {
+      progressFill.style.background = 'var(--rejected)';
+      progressLabel.textContent = 'Upload failed.';
+      showToast('Upload failed: ' + storageErr.message, false);
+      return;
+    }
+
+    progressFill.style.width = '85%';
+    progressLabel.textContent = 'Saving record…';
+
+    // Get the latest clearance request for this student
+    const { data: request } = await supabase
+      .from('clearance_requests')
+      .select('id')
+      .eq('student_id', session.user.id)
+      .order('submitted_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (request) {
+      // Get the clearance item for this department
+      const { data: item } = await supabase
+        .from('clearance_items')
+        .select('id')
+        .eq('request_id', request.id)
+        .eq('department_id', activeDeptId)
+        .maybeSingle();
+
+      if (item) {
+        // Save document record
+        await supabase.from('documents').insert({
+          item_id:      item.id,
+          student_id:   session.user.id,
+          file_name:    file.name,
+          storage_path: path,
+          mime_type:    file.type,
+        });
+
+        // Update clearance item status to pending (awaiting officer review)
+        await supabase.from('clearance_items')
+          .update({ status: 'pending' })
+          .eq('id', item.id)
+          .eq('status', 'pending');
       }
-      progressFill.style.width = `${Math.min(progress, 100)}%`;
-    }, 120);
+    }
+
+    progressFill.style.width = '100%';
+    progressFill.style.background = 'var(--approved)';
+    progressLabel.textContent = 'Upload complete!';
+    showToast(`"${file.name}" uploaded successfully!`, true);
+
+    // Refresh the document list after a short delay
+    setTimeout(() => location.reload(), 1800);
   }
 
   function clearFile() {
@@ -841,7 +902,10 @@
     progressLabel.textContent = 'Uploading…';
   }
 
-  function triggerUpload(dept) {
+  let activeDeptId = null;
+
+  function triggerUpload(deptId) {
+    activeDeptId = deptId;
     document.getElementById('dropZone').scrollIntoView({ behavior: 'smooth', block: 'center' });
     fileInput.click();
   }
