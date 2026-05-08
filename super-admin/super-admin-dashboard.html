@@ -459,12 +459,16 @@
     </div>
   `).join('');
 
-  // ── Activity Feed from localStorage ───────────────────────
-  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
+  // ── Activity Feed from audit_logs ────────────────────────
   const actEl = document.getElementById('activityList');
-  const recent = [...decisions].reverse().slice(0, 6);
-  if (recent.length === 0) {
-    const recentUsers = sorted.slice(0,5);
+  const { data: logs } = await supabase
+    .from('audit_logs')
+    .select('action, meta, created_at, profiles!actor_id(first_name, last_name)')
+    .order('created_at', { ascending: false })
+    .limit(6);
+
+  if (!logs || logs.length === 0) {
+    const recentUsers = sorted.slice(0, 5);
     if (recentUsers.length > 0) {
       actEl.innerHTML = recentUsers.map(p => `
         <div class="activity-item">
@@ -479,16 +483,23 @@
       actEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:0.82rem;padding:1rem 0;">No activity yet</div>';
     }
   } else {
-    const colors = { approved:'green', flagged:'amber', rejected:'red' };
-    actEl.innerHTML = recent.map(d => `
-      <div class="activity-item">
-        <div class="activity-dot ${colors[d.action]||''}"></div>
-        <div class="activity-body">
-          <div class="activity-text"><strong>${d.officerName||'Officer'}</strong> ${d.action} <strong>${d.studentName||'student'}</strong> — ${d.dept||''}</div>
-          <div class="activity-time">${new Date(d.timestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
-        </div>
-      </div>
-    `).join('');
+    const dotColor = { approved:'green', flagged:'amber', rejected:'red' };
+    actEl.innerHTML = logs.map(l => {
+      const p = l.profiles;
+      const officerName = p ? `${p.first_name} ${p.last_name}` : 'Officer';
+      const actionVerb = l.action.replace('_clearance_item', '');
+      const studentPart = l.meta?.student_name ? ` <strong>${l.meta.student_name}</strong>` : '';
+      const deptPart = l.meta?.dept_name ? ` — ${l.meta.dept_name}` : '';
+      const dot = dotColor[actionVerb] || 'green';
+      return `
+        <div class="activity-item">
+          <div class="activity-dot ${dot}"></div>
+          <div class="activity-body">
+            <div class="activity-text"><strong>${officerName}</strong> ${actionVerb}${studentPart}${deptPart}</div>
+            <div class="activity-time">${new Date(l.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+    }).join('');
   }
 </script>
 <script type="module" src="../js/topbar.js"></script>

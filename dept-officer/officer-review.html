@@ -552,7 +552,11 @@ function takeAction(status, reason) {
         actor_id:  session.user.id,
         action:    status + '_clearance_item',
         target_id: itemId,
-        meta:      { reason, comment },
+        meta:      {
+          reason, comment,
+          student_name: document.getElementById('studentName')?.textContent,
+          dept_name:    document.getElementById('infoClearanceDept')?.textContent,
+        },
       });
     }
   })();

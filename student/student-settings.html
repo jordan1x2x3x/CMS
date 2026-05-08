@@ -622,8 +622,9 @@
     if (nw.length < 8) { showToast('Password must be at least 8 characters', true); return; }
     if (nw !== cf) { showToast('Passwords do not match', true); return; }
     const { supabase } = await import('../js/supabase.js');
-    const sess = JSON.parse(localStorage.getItem('cms_session') || '{}');
-    const { error: authErr } = await supabase.auth.signInWithPassword({ email: sess.email, password: cur });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) { showToast('Session expired. Please log in again.', true); return; }
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: user.email, password: cur });
     if (authErr) { showToast('Current password is incorrect', true); return; }
     const { error } = await supabase.auth.updateUser({ password: nw });
     if (error) { showToast('Failed to update password: ' + error.message, true); return; }

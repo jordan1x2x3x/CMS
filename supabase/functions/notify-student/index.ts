@@ -1,9 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
-const SUPABASE_URL   = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_KEY   = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const GMAIL_USER   = Deno.env.get('GMAIL_USER')!;
+const GMAIL_PASS   = Deno.env.get('GMAIL_PASS')!;
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 const DEPT_NAMES: Record<string, string> = {
   hod:            'Head of Department (HOD)',
@@ -28,27 +30,30 @@ const TOTAL_DEPTS = 15;
 serve(async (req) => {
   try {
     const payload = await req.json();
+    console.log('Webhook received:', JSON.stringify(payload));
 
     const newRecord = payload.record;
     const oldRecord = payload.old_record;
 
-    // Only act when status actually changes
-    if (!newRecord || !oldRecord || newRecord.status === oldRecord.status) {
-      return new Response('no status change', { status: 200 });
-    }
+    console.log('New status:', newRecord?.status, '| Old status:', oldRecord?.status);
 
     const notifiable = ['approved', 'flagged', 'rejected'];
-    if (!notifiable.includes(newRecord.status)) {
+    if (!notifiable.includes(newRecord?.status)) {
+      console.log('Status not notifiable, skipping.');
       return new Response('status not notifiable', { status: 200 });
+    }
+
+    if (oldRecord && newRecord.status === oldRecord.status) {
+      console.log('Status unchanged, skipping.');
+      return new Response('no status change', { status: 200 });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Get clearance item → request → student profile
-    const { data: item } = await supabase
+    const { data: item, error: itemErr } = await supabase
       .from('clearance_items')
       .select(`
-        id, department_id, status,
+        id, department_id, status, reason,
         clearance_requests (
           id, student_id,
           profiles ( first_name, last_name, email )
@@ -57,19 +62,26 @@ serve(async (req) => {
       .eq('id', newRecord.id)
       .single();
 
-    if (!item) return new Response('item not found', { status: 200 });
+    if (itemErr || !item) {
+      console.error('Failed to fetch item:', itemErr);
+      return new Response('item not found', { status: 200 });
+    }
 
     const req_data  = item.clearance_requests as any;
     const profile   = req_data?.profiles as any;
-    const studentId = req_data?.student_id;
     const requestId = req_data?.id;
 
-    if (!profile?.email) return new Response('no student email', { status: 200 });
+    if (!profile?.email) {
+      console.error('No student email found.');
+      return new Response('no student email', { status: 200 });
+    }
+
+    console.log('Sending email to:', profile.email);
 
     const firstName = profile.first_name || 'Student';
     const deptName  = DEPT_NAMES[item.department_id] || item.department_id;
 
-    // Check if ALL departments are now approved (completion)
+    // Check if ALL departments are approved
     const { data: allItems } = await supabase
       .from('clearance_items')
       .select('status')
@@ -78,39 +90,42 @@ serve(async (req) => {
     const allApproved =
       allItems &&
       allItems.length === TOTAL_DEPTS &&
-      allItems.every(i => i.status === 'approved');
+      allItems.every((i: any) => i.status === 'approved');
 
-    let subject: string;
-    let html: string;
+    console.log('All approved?', allApproved, '| Items count:', allItems?.length);
 
-    if (allApproved) {
-      subject = '🎓 Congratulations! Your MTU Clearance is Complete';
-      html    = completionEmail(firstName);
-    } else {
-      subject = statusSubject(newRecord.status, deptName);
-      html    = statusEmail(firstName, newRecord.status, deptName, newRecord.reason || '');
-    }
+    const subject = allApproved
+      ? '🎓 Congratulations! Your MTU Clearance is Complete'
+      : statusSubject(newRecord.status, deptName);
 
-    // Send via Resend
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization:  `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from:    'MTU Clearance Portal <onboarding@resend.dev>',
-        to:      [profile.email],
-        subject,
-        html,
-      }),
+    const html = allApproved
+      ? completionEmail(firstName)
+      : statusEmail(firstName, newRecord.status, deptName, item.reason || '');
+
+    // Send via Gmail SMTP
+    const client = new SmtpClient();
+    await client.connectTLS({
+      hostname: 'smtp.gmail.com',
+      port: 465,
+      username: GMAIL_USER,
+      password: GMAIL_PASS,
     });
 
-    const result = await res.json();
-    return new Response(JSON.stringify(result), { status: 200 });
+    await client.send({
+      from: `MTU Clearance Portal <${GMAIL_USER}>`,
+      to: profile.email,
+      subject,
+      content: 'Please view this email in an HTML-compatible client.',
+      html,
+    });
+
+    await client.close();
+    console.log('Email sent successfully to:', profile.email);
+
+    return new Response(JSON.stringify({ success: true, to: profile.email }), { status: 200 });
 
   } catch (err) {
-    console.error(err);
+    console.error('Unhandled error:', String(err));
     return new Response(String(err), { status: 500 });
   }
 });
@@ -155,43 +170,30 @@ function statusEmail(name: string, status: string, dept: string, reason: string)
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6F9;padding:40px 0;">
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-        <!-- Header -->
         <tr>
           <td style="background:linear-gradient(135deg,#4A0058,#6B0080);padding:32px 40px;">
-            <table width="100%" cellpadding="0" cellspacing="0">
-              <tr>
-                <td>
-                  <div style="background:#76B82A;width:40px;height:40px;border-radius:8px;display:inline-block;text-align:center;line-height:40px;font-size:20px;margin-bottom:12px;">🎓</div>
-                  <div style="font-size:20px;font-weight:700;color:#ffffff;font-family:Georgia,serif;">MTU Clearance Portal</div>
-                  <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;">Mountain Top University</div>
-                </td>
-              </tr>
-            </table>
+            <div style="font-size:20px;font-weight:700;color:#ffffff;font-family:Georgia,serif;">MTU Clearance Portal</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;">Mountain Top University</div>
           </td>
         </tr>
-        <!-- Status banner -->
         <tr>
           <td style="background:${c.color};padding:16px 40px;">
             <span style="color:#ffffff;font-size:15px;font-weight:700;">${c.icon} ${c.heading}</span>
           </td>
         </tr>
-        <!-- Body -->
         <tr>
           <td style="padding:36px 40px;">
             <p style="font-size:15px;color:#1A0020;margin:0 0 12px;">Dear <strong>${name}</strong>,</p>
             <p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 24px;">${c.body}</p>
-            <table cellpadding="0" cellspacing="0"><tr><td>
-              <a href="https://jordan1x2x3x.github.io/CMS/student/clearance-tracking.html"
-                 style="display:inline-block;background:#6B0080;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:700;">
-                View Clearance Status →
-              </a>
-            </td></tr></table>
+            <a href="https://jordan1x2x3x.github.io/CMS/student/clearance-tracking.html"
+               style="display:inline-block;background:#6B0080;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:700;">
+              View Clearance Status →
+            </a>
           </td>
         </tr>
-        <!-- Footer -->
         <tr>
           <td style="background:#F9FAFB;padding:20px 40px;border-top:1px solid #E5E7EB;">
-            <p style="font-size:11px;color:#9CA3AF;margin:0;">This is an automated notification from the MTU Clearance Portal. Do not reply to this email. For support, contact <a href="mailto:registrar@mtu.edu.ng" style="color:#6B0080;">registrar@mtu.edu.ng</a>.</p>
+            <p style="font-size:11px;color:#9CA3AF;margin:0;">Automated notification from MTU Clearance Portal. Contact <a href="mailto:registrar@mtu.edu.ng" style="color:#6B0080;">registrar@mtu.edu.ng</a> for support.</p>
           </td>
         </tr>
       </table>
@@ -209,43 +211,33 @@ function completionEmail(name: string): string {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F4F6F9;padding:40px 0;">
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-        <!-- Header -->
         <tr>
           <td style="background:linear-gradient(135deg,#4A0058,#6B0080);padding:32px 40px;">
-            <div style="background:#76B82A;width:40px;height:40px;border-radius:8px;display:inline-block;text-align:center;line-height:40px;font-size:20px;margin-bottom:12px;">🎓</div>
             <div style="font-size:20px;font-weight:700;color:#ffffff;font-family:Georgia,serif;">MTU Clearance Portal</div>
             <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;">Mountain Top University</div>
           </td>
         </tr>
-        <!-- Banner -->
         <tr>
           <td style="background:#10B981;padding:16px 40px;">
             <span style="color:#ffffff;font-size:15px;font-weight:700;">🎉 Clearance Complete — All 15 Departments Approved!</span>
           </td>
         </tr>
-        <!-- Body -->
         <tr>
           <td style="padding:36px 40px;">
             <p style="font-size:15px;color:#1A0020;margin:0 0 12px;">Dear <strong>${name}</strong>,</p>
             <p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 16px;">
-              Congratulations! 🎊 You have successfully completed your graduation clearance at Mountain Top University.
-              All <strong>15 departments</strong> have reviewed and approved your request.
+              Congratulations! 🎊 You have successfully completed your graduation clearance. All <strong>15 departments</strong> have approved your request.
             </p>
-            <p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 24px;">
-              You may now log in to the portal to download your official <strong>Clearance Certificate</strong>.
-            </p>
-            <table cellpadding="0" cellspacing="0"><tr><td>
-              <a href="https://jordan1x2x3x.github.io/CMS/student/final-certificate.html"
-                 style="display:inline-block;background:#76B82A;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:700;">
-                Download Certificate →
-              </a>
-            </td></tr></table>
+            <p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 24px;">You may now download your official <strong>Clearance Certificate</strong>.</p>
+            <a href="https://jordan1x2x3x.github.io/CMS/student/final-certificate.html"
+               style="display:inline-block;background:#76B82A;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:700;">
+              Download Certificate →
+            </a>
           </td>
         </tr>
-        <!-- Footer -->
         <tr>
           <td style="background:#F9FAFB;padding:20px 40px;border-top:1px solid #E5E7EB;">
-            <p style="font-size:11px;color:#9CA3AF;margin:0;">This is an automated notification from the MTU Clearance Portal. For support, contact <a href="mailto:registrar@mtu.edu.ng" style="color:#6B0080;">registrar@mtu.edu.ng</a>.</p>
+            <p style="font-size:11px;color:#9CA3AF;margin:0;">Automated notification from MTU Clearance Portal. Contact <a href="mailto:registrar@mtu.edu.ng" style="color:#6B0080;">registrar@mtu.edu.ng</a> for support.</p>
           </td>
         </tr>
       </table>
