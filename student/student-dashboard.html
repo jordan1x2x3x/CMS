@@ -920,6 +920,25 @@
 
     const academicYear = new Date().getFullYear() + '/' + (new Date().getFullYear() + 1);
 
+    // Block duplicate — check if an active request already exists for this year
+    const { data: existing } = await supabase
+      .from('clearance_requests')
+      .select('id')
+      .eq('student_id', session.user.id)
+      .eq('academic_year', academicYear)
+      .neq('status', 'cancelled')
+      .maybeSingle();
+
+    if (existing) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Request';
+      document.getElementById('modalForm').style.display = 'none';
+      document.getElementById('modalSuccess').classList.add('show');
+      document.querySelector('#modalSuccess p').textContent =
+        'You already have an active clearance request for this academic year. Head to Clearance Status to track your progress.';
+      return;
+    }
+
     // Create clearance request
     const { data: request, error: reqErr } = await supabase
       .from('clearance_requests')
