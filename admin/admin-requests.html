@@ -283,7 +283,7 @@
       if (activeFilter !== 'all' && r.overall !== activeFilter) return false;
       if (activeDept !== 'all') {
         const ds = r.statuses.find(s => s.dept === activeDept);
-        if (!ds || ds.status === 'approved') return false;
+        if (!ds) return false;
       }
       if (searchVal) {
         const q = searchVal.toLowerCase();
