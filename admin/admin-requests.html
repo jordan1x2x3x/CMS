@@ -357,6 +357,16 @@
     document.getElementById('studentModal').style.display = 'flex';
   });
 
+  // Pre-select dept from URL param (e.g. ?dept=hod)
+  const urlDept = new URLSearchParams(window.location.search).get('dept');
+  if (urlDept) {
+    activeDept = urlDept;
+    const deptEl = document.getElementById('deptFilter');
+    if (deptEl) deptEl.value = urlDept;
+  }
+
+  renderTable();
+
   document.getElementById('filterTabs').addEventListener('click', e => {
     const btn = e.target.closest('.tab-btn');
     if (!btn) return;
@@ -380,8 +390,6 @@
 
   document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
   document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
-
-  renderTable();
 </script>
 <script type="module" src="../js/topbar.js"></script>
 </body>

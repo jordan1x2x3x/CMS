@@ -76,6 +76,10 @@
     .btn-edit { background: var(--purple); color: white; }
     .btn-edit:hover { background: var(--purple-dark); }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .dept-card { transition: box-shadow 0.15s, transform 0.15s; }
+    .dept-card:hover { box-shadow: 0 4px 20px rgba(107,0,128,0.12); transform: translateY(-2px); }
+    .toast-info { position:fixed;bottom:24px;right:24px;background:#1A1A2E;color:white;padding:12px 20px;border-radius:10px;font-size:0.82rem;font-weight:500;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);opacity:0;transition:opacity 0.2s;pointer-events:none; }
+    .toast-info.show { opacity:1; }
   </style>
 </head>
 <body>
@@ -123,12 +127,14 @@
         <h2>All Departments <span style="font-size:0.78rem;font-weight:500;color:var(--muted);margin-left:8px;">(15)</span></h2>
         <p>Each department has a dedicated officer reviewing student clearance requests</p>
       </div>
-      <button class="add-btn"><span class="material-symbols-outlined" style="font-size:17px;">add</span>Add Department</button>
+      <button class="add-btn" id="addDeptBtn"><span class="material-symbols-outlined" style="font-size:17px;">info</span>15 Departments Fixed</button>
     </div>
 
     <div class="dept-grid" id="deptGrid"></div>
   </div>
 </div>
+
+<div id="infoToast" class="toast-info">The 15 clearance departments are predefined by the institution and cannot be added or removed.</div>
 
 <!-- Logout modal -->
 <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
@@ -185,8 +191,9 @@
   const grid = document.getElementById('deptGrid');
   DEPT_META.forEach(dept => {
     const dItems = items.filter(it => it.department_id === dept.key);
+    const isPending = s => ['pending','pending_submission','awaiting_verification'].includes(s);
     const approved = dItems.filter(it => it.status === 'approved').length;
-    const pending  = dItems.filter(it => it.status === 'pending').length;
+    const pending  = dItems.filter(it => isPending(it.status)).length;
     const flagged  = dItems.filter(it => it.status === 'flagged').length;
     const rejected = dItems.filter(it => it.status === 'rejected').length;
     const total = dItems.length || 1;
@@ -211,11 +218,17 @@
           </div>
         </div>
         <div class="dept-card-footer">
-          <button class="action-btn btn-view" onclick="window.location.href='admin-requests.html'">
-            <span class="material-symbols-outlined">visibility</span>View
+          <button class="action-btn btn-view" onclick="window.location.href='admin-requests.html?dept=${dept.key}'">
+            <span class="material-symbols-outlined">visibility</span>View Students
           </button>
         </div>
       </div>`;
+  });
+
+  document.getElementById('addDeptBtn').addEventListener('click', () => {
+    const t = document.getElementById('infoToast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
   });
 
   document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
