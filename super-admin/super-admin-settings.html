@@ -300,12 +300,17 @@
   }
 
   document.getElementById('changePwBtn').addEventListener('click', async () => {
+    const cur = document.getElementById('currentPw').value;
     const newPw = document.getElementById('newPw').value;
     const confirmPw = document.getElementById('confirmPw').value;
-    if (newPw.length < 8) { alert('Password must be at least 8 characters.'); return; }
-    if (newPw !== confirmPw) { alert('Passwords do not match.'); return; }
+    if (!cur) { toast('Please enter your current password.'); return; }
+    if (newPw.length < 8) { toast('New password must be at least 8 characters.'); return; }
+    if (newPw !== confirmPw) { toast('Passwords do not match.'); return; }
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: user.email, password: cur });
+    if (authErr) { toast('Current password is incorrect.'); return; }
     const { error } = await supabase.auth.updateUser({ password: newPw });
-    if (error) { alert('Failed to update password: ' + error.message); return; }
+    if (error) { toast('Failed to update password: ' + error.message); return; }
     document.getElementById('currentPw').value = '';
     document.getElementById('newPw').value = '';
     document.getElementById('confirmPw').value = '';
