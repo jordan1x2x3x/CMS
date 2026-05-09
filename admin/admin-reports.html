@@ -134,7 +134,7 @@
           <div class="report-icon" style="background:var(--approved-bg);"><span class="material-symbols-outlined" style="color:var(--approved);">table_chart</span></div>
           <div class="report-info">
             <div class="report-title">Full Clearance Report</div>
-            <div class="report-desc">All 24 students × 15 departments — status per cell</div>
+            <div class="report-desc" id="fullReportDesc">Loading…</div>
             <div class="report-action"><span class="material-symbols-outlined">download</span>Export CSV</div>
           </div>
         </div>
@@ -202,18 +202,22 @@
     { key:'academic', label:'Academic Affairs' }, { key:'chapel', label:'Chapel' },
   ];
 
-  const [{ data: students }, { data: allItems }] = await Promise.all([
+  // Load all student profiles (for CSV name/matric lookup) + clearance data
+  const [{ data: allStudents }, { data: allItems }, { data: requests }] = await Promise.all([
     supabase.from('profiles').select('id, first_name, last_name, matric_number').eq('role', 'student'),
     supabase.from('clearance_items').select('status, department_id, clearance_requests(student_id)'),
+    supabase.from('clearance_requests').select('student_id').neq('status', 'cancelled'),
   ]);
 
-  const studentList = students || [];
-  const items = allItems || [];
+  // Only count/export students who have actually submitted a clearance request
+  const submittedIds = new Set((requests || []).map(r => r.student_id));
+  const studentList  = (allStudents || []).filter(s => submittedIds.has(s.id));
+  const items        = allItems || [];
 
   const deptStats = DEPT_META.map(dept => {
     const dItems = items.filter(it => it.department_id === dept.key);
     const approved = dItems.filter(it => it.status === 'approved').length;
-    const pending  = dItems.filter(it => it.status === 'pending').length;
+    const pending  = dItems.filter(it => ['pending','pending_submission','awaiting_verification'].includes(it.status)).length;
     const flagged  = dItems.filter(it => it.status === 'flagged').length;
     const rejected = dItems.filter(it => it.status === 'rejected').length;
     return { ...dept, approved, pending, flagged, rejected };
@@ -228,13 +232,16 @@
   });
   const grandTotal = studentList.length * 15 || 1;
   const overallPct = Math.round((totalApproved / grandTotal) * 100);
-  const decisionsCount = items.filter(it => it.status !== 'pending').length;
+  // Officer decisions = items where an officer actively acted (not initial default statuses)
+  const decisionsCount = items.filter(it => ['approved','flagged','rejected'].includes(it.status)).length;
 
   document.getElementById('summaryGrid').innerHTML = `
     <div class="summary-item"><div class="summary-val" style="color:var(--purple);">${studentList.length}</div><div class="summary-lbl">Total Students</div></div>
     <div class="summary-item"><div class="summary-val" style="color:var(--approved);">${totalCleared}</div><div class="summary-lbl">Fully Cleared</div></div>
     <div class="summary-item"><div class="summary-val" style="color:var(--pending);">${overallPct}%</div><div class="summary-lbl">Overall Approval Rate</div></div>
     <div class="summary-item"><div class="summary-val" style="color:var(--text);">${decisionsCount}</div><div class="summary-lbl">Officer Decisions</div></div>`;
+  document.getElementById('fullReportDesc').textContent =
+    `${studentList.length} student${studentList.length !== 1 ? 's' : ''} × 15 departments — status per cell`;
 
   // Bar chart
   const barChart = document.getElementById('barChart');
@@ -272,9 +279,17 @@
   }
 
   function exportDecisionsCSV() {
-    const decidedItems = items.filter(it => it.status !== 'pending');
-    const headers = ['Department','Status'];
-    const rows = [headers.join(','), ...decidedItems.map(it => [it.department_id, it.status].join(','))];
+    const decidedItems = items.filter(it => ['approved','flagged','rejected'].includes(it.status));
+    const headers = ['Student Name','Matric','Department','Decision'];
+    const rows = [headers.join(',')];
+    decidedItems.forEach(it => {
+      const sid  = it.clearance_requests?.student_id;
+      const s    = (allStudents || []).find(x => x.id === sid);
+      const name = s ? [s.first_name, s.last_name].filter(Boolean).join(' ') : '—';
+      const mat  = s?.matric_number || '—';
+      const dept = DEPT_META.find(d => d.key === it.department_id)?.label || it.department_id;
+      rows.push([name, mat, dept, it.status].join(','));
+    });
     downloadCSV(rows.join('\n'), 'mtu_officer_decisions.csv');
   }
 
