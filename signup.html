@@ -623,6 +623,47 @@
               <p style="font-size:0.72rem;color:#6B7280;margin-top:4px;">You will only handle clearance requests for the department you select here.</p>
               <span class="field-error">Please select your clearance department.</span>
             </div>
+
+            <!-- HOD Academic Department — only shown when HOD is selected above -->
+            <div class="field full conditional" id="field-hod-academic-dept" style="display:none;">
+              <label for="hodAcademicDept">Academic Department You Manage</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">domain</span>
+                <select id="hodAcademicDept" name="hodAcademicDept">
+                  <option value="" disabled selected>Select your academic department</option>
+                  <optgroup label="CBAS — College of Basic and Applied Sciences">
+                    <option value="Computer Science and Mathematics">Computer Science and Mathematics</option>
+                    <option value="Biological Sciences">Biological Sciences</option>
+                    <option value="Biochemistry">Biochemistry</option>
+                    <option value="Chemical Sciences">Chemical Sciences</option>
+                    <option value="Food Science and Technology">Food Science and Technology</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Geosciences">Geosciences</option>
+                  </optgroup>
+                  <optgroup label="CHMS — College of Humanities, Management and Social Sciences">
+                    <option value="Languages">Languages</option>
+                    <option value="Music">Music</option>
+                    <option value="Fine and Applied Arts">Fine and Applied Arts</option>
+                    <option value="Philosophy and Religious Studies">Philosophy and Religious Studies</option>
+                    <option value="Mass Communication">Mass Communication</option>
+                    <option value="Economics">Economics</option>
+                    <option value="Business Administration">Business Administration</option>
+                    <option value="Accounting and Finance">Accounting and Finance</option>
+                    <option value="Public Administration">Public Administration</option>
+                    <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
+                  </optgroup>
+                  <optgroup label="CAHS — College of Allied Health Sciences">
+                    <option value="Nursing Science">Nursing Science</option>
+                    <option value="Medical Laboratory Science">Medical Laboratory Science</option>
+                    <option value="Nutrition and Dietetics">Nutrition and Dietetics</option>
+                    <option value="Public Health">Public Health</option>
+                    <option value="Biomedical Technology">Biomedical Technology</option>
+                  </optgroup>
+                </select>
+              </div>
+              <p style="font-size:0.72rem;color:#6B7280;margin-top:4px;">Students in this academic department will be automatically routed to your dashboard for HOD clearance.</p>
+              <span class="field-error">Please select the academic department you manage.</span>
+            </div>
           </div>
 
           <div class="form-nav">
@@ -936,6 +977,12 @@
     toggleField('field-officer-dept', cfg.officerDept);
     toggleField('field-access-code', cfg.accessCode);
 
+    // Always hide HOD academic dept when role changes — re-shown only if officerDept = 'hod'
+    const hodField = document.getElementById('field-hod-academic-dept');
+    if (hodField) { hodField.style.display = 'none'; hodField.classList.remove('has-error'); }
+    const hodSelect = document.getElementById('hodAcademicDept');
+    if (hodSelect) hodSelect.value = '';
+
     // Reset cascade when role changes
     if (cfg.dept) {
       resetSelect('department', 'Select College first', true);
@@ -949,6 +996,18 @@
     el.disabled = disabled;
     el.value = '';
   }
+
+  // ── Officer Dept → HOD Academic Dept cascade ──
+  document.getElementById('officerDept').addEventListener('change', function () {
+    const hodField = document.getElementById('field-hod-academic-dept');
+    if (this.value === 'hod') {
+      hodField.style.display = 'block';
+    } else {
+      hodField.style.display = 'none';
+      document.getElementById('hodAcademicDept').value = '';
+      hodField.classList.remove('has-error');
+    }
+  });
 
   // ── College → Department cascade ──
   document.getElementById('college').addEventListener('change', function () {
@@ -1054,6 +1113,18 @@
       valid = false;
     }
 
+    // HOD officers must also select their academic department
+    if (selectedRole === 'officer' && document.getElementById('officerDept')?.value === 'hod') {
+      const hodDeptEl  = document.getElementById('hodAcademicDept');
+      const hodFieldEl = document.getElementById('field-hod-academic-dept');
+      if (!hodDeptEl?.value) {
+        if (hodFieldEl) hodFieldEl.classList.add('has-error');
+        valid = false;
+      } else {
+        if (hodFieldEl) hodFieldEl.classList.remove('has-error');
+      }
+    }
+
     return valid;
   }
 
@@ -1127,6 +1198,15 @@
       p_programme: document.getElementById('programme')?.value || null,
     });
     if (profileErr) { showSignupError('Profile save failed: ' + profileErr.message); resetSubmitBtn(submitBtn); return; }
+
+    // Save academic_dept for HOD officers — stored separately from the RPC
+    if (selectedRole === 'officer' && document.getElementById('officerDept')?.value === 'hod') {
+      const hodAcademicDept = document.getElementById('hodAcademicDept')?.value;
+      if (hodAcademicDept) {
+        await supabase.from('profiles').update({ academic_dept: hodAcademicDept }).eq('id', userId);
+      }
+    }
+
     if (selectedRole !== 'student') {
       await supabase.from('access_codes').update({ used_by: userId, used_at: new Date().toISOString() }).eq('code', accessCode);
     }

@@ -953,13 +953,28 @@
       return;
     }
 
+    // Determine which HOD officer serves this student's academic department
+    // profile.department for students = their academic dept (e.g. "Computer Science and Mathematics")
+    const { data: studentProf } = await supabase
+      .from('profiles').select('department').eq('id', session.user.id).maybeSingle();
+
+    const { data: hodOfficer } = studentProf?.department
+      ? await supabase.from('profiles').select('id')
+          .eq('role', 'officer').eq('department', 'hod')
+          .eq('academic_dept', studentProf.department).maybeSingle()
+      : { data: null };
+
+    // Units where requests are routed to a specific officer by academic dept
+    const DEPT_ASSIGNED = { hod: hodOfficer?.id || null };
+
     // Create one clearance item per department with correct initial status
     const UPLOAD_DEPTS = new Set(['bursary', 'hod', 'cedgs']);
     const DEPARTMENTS = ['hod','cedgs','lab','college','esm','chapel','health','sport','hall','ict','alumni','student_affairs','library','bursary','academic'];
     const items = DEPARTMENTS.map(dept => ({
-      request_id:    request.id,
-      department_id: dept,
-      status:        UPLOAD_DEPTS.has(dept) ? 'pending_submission' : 'awaiting_verification',
+      request_id:         request.id,
+      department_id:      dept,
+      status:             UPLOAD_DEPTS.has(dept) ? 'pending_submission' : 'awaiting_verification',
+      assigned_officer_id: DEPT_ASSIGNED[dept] || null,
     }));
     await supabase.from('clearance_items').insert(items);
 

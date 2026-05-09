@@ -198,8 +198,8 @@
           <div class="info-grid">
             <div class="info-item"><label>Programme</label><span id="infoProg">B.Sc Computer Science</span></div>
             <div class="info-item"><label>College</label><span id="infoCollege">CBAS</span></div>
+            <div class="info-item"><label>Academic Department</label><span id="infoAcademicDept">—</span></div>
             <div class="info-item"><label>Clearance Type</label><span id="infoClearance">🎓 Graduation</span></div>
-            <div class="info-item"><label>Academic Session</label><span>2024/2025</span></div>
             <div class="info-item"><label>Submitted</label><span id="infoSubmitted">Apr 14, 2026</span></div>
             <div class="info-item"><label>Clearance Dept</label><span id="infoClearanceDept">University Chapel</span></div>
           </div>
@@ -535,8 +535,13 @@ function showToast(msg, type = 'approved') {
   const deptIcon = DEPT_ICONS[dept] || 'badge';
   const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || 'CO';
 
+  const academicDept  = profile.academic_dept || null;
+  const chipLabel     = dept === 'hod' && academicDept ? `HOD · ${academicDept}` : deptName;
+  const chipRoleLabel = dept === 'hod' ? 'Head of Department' : 'Department Officer';
   const chip = document.getElementById('deptChipName');
-  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${chipLabel}`;
+  const chipRoleEl = document.querySelector('.dept-chip-role');
+  if (chipRoleEl) chipRoleEl.textContent = chipRoleLabel;
   document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials);
 
   // Load clearance item from ?item=ID param (Supabase row ID)
@@ -546,7 +551,7 @@ function showToast(msg, type = 'approved') {
   if (itemId) {
     const { data: item } = await supabase
       .from('clearance_items')
-      .select('id, status, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme, college))')
+      .select('id, status, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme, college, department))')
       .eq('id', itemId).maybeSingle();
 
     if (item) {
@@ -556,6 +561,7 @@ function showToast(msg, type = 'approved') {
       const ini = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '??';
       student = { name: [fn, ln].filter(Boolean).join(' '), matric: p?.matric_number || '—',
         programme: p?.programme || '—', college: p?.college || '—',
+        academicDept: p?.department || '—',
         type: 'Graduation', initials: ini };
       status = item.status || 'pending';
       submittedDate = req?.submitted_at ? new Date(req.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
@@ -570,9 +576,10 @@ function showToast(msg, type = 'approved') {
   document.getElementById('studentName').textContent   = student.name;
   document.getElementById('studentMatric').textContent  = student.matric;
   document.getElementById('studentAvatar').textContent  = student.initials;
-  document.getElementById('infoProg').textContent       = student.programme;
-  document.getElementById('infoCollege').textContent    = student.college;
-  document.getElementById('infoClearance').textContent  = (student.type === 'Graduation' ? '🎓 ' : '📤 ') + student.type;
+  document.getElementById('infoProg').textContent         = student.programme;
+  document.getElementById('infoCollege').textContent      = student.college;
+  document.getElementById('infoAcademicDept').textContent = student.academicDept || '—';
+  document.getElementById('infoClearance').textContent    = (student.type === 'Graduation' ? '🎓 ' : '📤 ') + student.type;
   document.getElementById('infoSubmitted').textContent  = submittedDate;
   document.getElementById('infoClearanceDept').textContent = deptName;
   document.getElementById('topbarName').textContent     = student.name;

@@ -421,16 +421,32 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
   const deptIcon = DEPT_ICONS[dept] || 'badge';
   const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || 'CO';
 
-  document.getElementById('deptChipName').innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
-  document.getElementById('topbarSub').textContent  = deptName + ' — Clearance Officer';
+  // For HOD officers, display which academic department they manage
+  const academicDept   = profile.academic_dept || null;
+  const chipLabel      = dept === 'hod' && academicDept ? `HOD · ${academicDept}` : deptName;
+  const chipRoleLabel  = dept === 'hod' ? 'Head of Department' : 'Department Officer';
+  document.getElementById('deptChipName').innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${chipLabel}`;
+  const chipRoleEl = document.querySelector('.dept-chip-role');
+  if (chipRoleEl) chipRoleEl.textContent = chipRoleLabel;
+  document.getElementById('topbarSub').textContent  = chipLabel + ' — Clearance Officer';
   document.getElementById('topbarAvatar').textContent = initials;
 
-  // Load all clearance items for this department
-  const { data: items } = await supabase
+  // Units that route by academic dept — only show items assigned to this officer
+  const DEPT_SPECIFIC = new Set(['hod']);
+
+  // Load all clearance items for this department (scoped to this officer if dept-specific)
+  let itemsQuery = supabase
     .from('clearance_items')
     .select('id, status, updated_at, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme))')
     .eq('department_id', dept)
     .order('updated_at', { ascending: false });
+
+  if (DEPT_SPECIFIC.has(dept)) {
+    // Show items assigned to this officer; fallback to unassigned (legacy items before migration)
+    itemsQuery = itemsQuery.or(`assigned_officer_id.eq.${session.user.id},assigned_officer_id.is.null`);
+  }
+
+  const { data: items } = await itemsQuery;
 
   const rows = (items || []).map((item, i) => {
     const req = item.clearance_requests;
