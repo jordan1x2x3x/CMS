@@ -252,8 +252,9 @@
       const it = sItems.find(x => x.department_id === d.key);
       return { dept: d.key, label: d.label, status: it?.status || 'pending', reason: it?.reason || '' };
     });
+    const isPending = st => ['pending','pending_submission','awaiting_verification'].includes(st);
     const approved = statuses.filter(x => x.status === 'approved').length;
-    const pending  = statuses.filter(x => x.status === 'pending').length;
+    const pending  = statuses.filter(x => isPending(x.status)).length;
     const flagged  = statuses.filter(x => x.status === 'flagged').length;
     const rejected = statuses.filter(x => x.status === 'rejected').length;
     const overall  = approved === 15 ? 'cleared' : rejected > 0 ? 'rejected' : flagged > 0 ? 'flagged' : 'in-progress';
@@ -304,9 +305,10 @@
   }
 
   // Row click → open detail modal
-  const statusIcon  = { approved:'check_circle', pending:'hourglass_empty', flagged:'flag', rejected:'cancel' };
-  const statusColor = { approved:'var(--approved)', pending:'var(--pending)', flagged:'var(--flagged)', rejected:'var(--rejected)' };
-  const statusBg    = { approved:'var(--approved-bg)', pending:'#FFFBEB', flagged:'#FFF7ED', rejected:'var(--rejected-bg)' };
+  const statusIcon  = { approved:'check_circle', pending:'hourglass_empty', pending_submission:'hourglass_empty', awaiting_verification:'schedule', flagged:'flag', rejected:'cancel' };
+  const statusColor = { approved:'var(--approved)', pending:'var(--pending)', pending_submission:'var(--pending)', awaiting_verification:'var(--pending)', flagged:'var(--flagged)', rejected:'var(--rejected)' };
+  const statusBg    = { approved:'var(--approved-bg)', pending:'#FFFBEB', pending_submission:'#FFFBEB', awaiting_verification:'#FFFBEB', flagged:'#FFF7ED', rejected:'var(--rejected-bg)' };
+  const statusLabel = { approved:'Approved', pending:'Pending', pending_submission:'Pending', awaiting_verification:'Pending', flagged:'Flagged', rejected:'Rejected' };
 
   document.getElementById('tableBody').addEventListener('click', e => {
     const tr = e.target.closest('tr[data-id]');
@@ -338,13 +340,19 @@
         <div style="font-size:0.7rem;color:var(--muted);">Rejected</div>
       </div>`;
 
-    document.getElementById('modalDepts').innerHTML = r.statuses.map(s => `
-      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.75rem;border-radius:8px;background:${statusBg[s.status]};">
-        <span class="material-symbols-outlined" style="color:${statusColor[s.status]};font-size:18px;">${statusIcon[s.status]}</span>
+    document.getElementById('modalDepts').innerHTML = r.statuses.map(s => {
+      const ic = statusIcon[s.status]  || 'hourglass_empty';
+      const co = statusColor[s.status] || 'var(--pending)';
+      const bg = statusBg[s.status]    || '#FFFBEB';
+      const lb = statusLabel[s.status] || 'Pending';
+      return `
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.75rem;border-radius:8px;background:${bg};">
+        <span class="material-symbols-outlined" style="color:${co};font-size:18px;">${ic}</span>
         <span style="font-size:0.82rem;font-weight:600;flex:1;">${s.label}</span>
         ${s.reason ? `<span style="font-size:0.72rem;color:var(--muted);max-width:220px;text-align:right;">${s.reason}</span>` : ''}
-        <span style="font-size:0.72rem;font-weight:600;color:${statusColor[s.status]};text-transform:capitalize;">${s.status}</span>
-      </div>`).join('');
+        <span style="font-size:0.72rem;font-weight:600;color:${co};">${lb}</span>
+      </div>`;
+    }).join('');
 
     document.getElementById('studentModal').style.display = 'flex';
   });
