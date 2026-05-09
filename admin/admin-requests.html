@@ -231,42 +231,45 @@
   const deptFilterEl = document.getElementById('deptFilter');
   DEPT_META.forEach(d => { const o = document.createElement('option'); o.value = d.key; o.textContent = d.label; deptFilterEl.appendChild(o); });
 
-  // Load all students + their clearance items
-  const { data: studentProfiles } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, matric_number, programme')
-    .eq('role', 'student')
+  // Query from clearance_requests directly — admin policy guarantees all rows are visible
+  const { data: requests } = await supabase
+    .from('clearance_requests')
+    .select('id, student_id, profiles(id, first_name, last_name, matric_number, programme), clearance_items(status, department_id, reason)')
     .order('created_at', { ascending: true });
 
-  const { data: allItems } = await supabase
-    .from('clearance_items')
-    .select('status, department_id, reason, clearance_requests(student_id)');
+  const isPending = st => ['pending','pending_submission','awaiting_verification'].includes(st);
 
-  const students = studentProfiles || [];
-  const items = allItems || [];
-
-  // Only show students who have actually submitted a clearance request
-  const submittedIds = new Set(items.map(it => it.clearance_requests?.student_id).filter(Boolean));
-
-  // Build per-student rows
-  const rows = students.filter(s => submittedIds.has(s.id)).map(s => {
-    const sItems = items.filter(it => it.clearance_requests?.student_id === s.id);
+  const rows = (requests || []).map(req => {
+    const s     = req.profiles || {};
+    const sItems = req.clearance_items || [];
     const statuses = DEPT_META.map(d => {
       const it = sItems.find(x => x.department_id === d.key);
       return { dept: d.key, label: d.label, status: it?.status || 'pending', reason: it?.reason || '' };
     });
-    const isPending = st => ['pending','pending_submission','awaiting_verification'].includes(st);
     const approved = statuses.filter(x => x.status === 'approved').length;
     const pending  = statuses.filter(x => isPending(x.status)).length;
     const flagged  = statuses.filter(x => x.status === 'flagged').length;
     const rejected = statuses.filter(x => x.status === 'rejected').length;
     const overall  = approved === 15 ? 'cleared' : rejected > 0 ? 'rejected' : flagged > 0 ? 'flagged' : 'in-progress';
-    const name = [s.first_name, s.last_name].filter(Boolean).join(' ') || '—';
+    const name     = [s.first_name, s.last_name].filter(Boolean).join(' ') || '—';
     const initials = ((s.first_name?.[0]||'') + (s.last_name?.[0]||'')).toUpperCase() || '?';
-    return { id: s.id, name, initials, matric: s.matric_number || '—', statuses, approved, pending, flagged, rejected, overall };
+    return { id: req.student_id, name, initials, matric: s.matric_number || '—', statuses, approved, pending, flagged, rejected, overall };
   });
 
   document.getElementById('totalCount').textContent = `${rows.length} student${rows.length !== 1 ? 's' : ''} total`;
+
+  // Add counts to tab buttons
+  const tabCounts = {
+    all:         rows.length,
+    cleared:     rows.filter(r => r.overall === 'cleared').length,
+    'in-progress': rows.filter(r => r.overall === 'in-progress').length,
+    flagged:     rows.filter(r => r.overall === 'flagged').length,
+    rejected:    rows.filter(r => r.overall === 'rejected').length,
+  };
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const f = btn.dataset.filter;
+    if (tabCounts[f] !== undefined) btn.textContent = `${btn.textContent.split('(')[0].trim()} (${tabCounts[f]})`;
+  });
 
   let activeFilter = 'all', activeDept = 'all', searchVal = '';
 
