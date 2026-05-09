@@ -171,6 +171,29 @@
   </div>
 </div>
 
+<!-- Student detail modal -->
+<div id="studentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:16px;width:100%;max-width:620px;overflow:hidden;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+    <div style="background:linear-gradient(135deg,#4A0058,#6B0080);padding:1.5rem 1.75rem;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:0.9rem;">
+        <div id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem;flex-shrink:0;"></div>
+        <div>
+          <div id="modalName" style="font-weight:700;color:white;font-size:0.95rem;"></div>
+          <div id="modalMatric" style="font-size:0.72rem;color:rgba(255,255,255,0.6);margin-top:2px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span id="modalOverall" class="badge"></span>
+        <button onclick="document.getElementById('studentModal').style.display='none'" style="background:rgba(255,255,255,0.15);border:none;border-radius:8px;color:white;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="font-size:17px;">close</span>
+        </button>
+      </div>
+    </div>
+    <div id="modalStats" style="display:flex;padding:1rem 1.75rem;background:#F9FAFB;border-bottom:1px solid #E5E7EB;gap:1rem;"></div>
+    <div id="modalDepts" style="padding:1.25rem 1.75rem;display:flex;flex-direction:column;gap:0.5rem;max-height:55vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
 <!-- Logout modal -->
 <div id="logoutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;align-items:center;justify-content:center;">
   <div style="background:white;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;">
@@ -217,7 +240,7 @@
 
   const { data: allItems } = await supabase
     .from('clearance_items')
-    .select('status, department_id, clearance_requests(student_id)');
+    .select('status, department_id, reason, clearance_requests(student_id)');
 
   const students = studentProfiles || [];
   const items = allItems || [];
@@ -227,7 +250,7 @@
     const sItems = items.filter(it => it.clearance_requests?.student_id === s.id);
     const statuses = DEPT_META.map(d => {
       const it = sItems.find(x => x.department_id === d.key);
-      return { dept: d.key, label: d.label, status: it?.status || 'pending' };
+      return { dept: d.key, label: d.label, status: it?.status || 'pending', reason: it?.reason || '' };
     });
     const approved = statuses.filter(x => x.status === 'approved').length;
     const pending  = statuses.filter(x => x.status === 'pending').length;
@@ -266,7 +289,7 @@
       const pills = nonApproved.slice(0,4).map(s =>
         `<span class="dept-pill" style="${pillColors[s.status]}">${s.label}</span>`
       ).join('') + (nonApproved.length > 4 ? `<span class="dept-pill" style="background:var(--bg);color:var(--muted);">+${nonApproved.length-4}</span>` : '');
-      return `<tr>
+      return `<tr data-id="${r.id}" style="cursor:pointer;">
         <td><div class="student-cell">
           <div class="student-avatar">${r.initials}</div>
           <div><div class="student-name">${r.name}</div><div class="student-id">${r.matric}</div></div>
@@ -279,6 +302,52 @@
       </tr>`;
     }).join('');
   }
+
+  // Row click → open detail modal
+  const statusIcon  = { approved:'check_circle', pending:'hourglass_empty', flagged:'flag', rejected:'cancel' };
+  const statusColor = { approved:'var(--approved)', pending:'var(--pending)', flagged:'var(--flagged)', rejected:'var(--rejected)' };
+  const statusBg    = { approved:'var(--approved-bg)', pending:'#FFFBEB', flagged:'#FFF7ED', rejected:'var(--rejected-bg)' };
+
+  document.getElementById('tableBody').addEventListener('click', e => {
+    const tr = e.target.closest('tr[data-id]');
+    if (!tr) return;
+    const r = rows.find(x => x.id === tr.dataset.id);
+    if (!r) return;
+
+    document.getElementById('modalAvatar').textContent  = r.initials;
+    document.getElementById('modalName').textContent    = r.name;
+    document.getElementById('modalMatric').textContent  = r.matric;
+    document.getElementById('modalOverall').className   = 'badge ' + badgeClass[r.overall];
+    document.getElementById('modalOverall').textContent = badgeLabel[r.overall];
+
+    document.getElementById('modalStats').innerHTML = `
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--approved);">${r.approved}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Approved</div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--pending);">${r.pending}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Pending</div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--flagged);">${r.flagged}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Flagged</div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--rejected);">${r.rejected}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Rejected</div>
+      </div>`;
+
+    document.getElementById('modalDepts').innerHTML = r.statuses.map(s => `
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.75rem;border-radius:8px;background:${statusBg[s.status]};">
+        <span class="material-symbols-outlined" style="color:${statusColor[s.status]};font-size:18px;">${statusIcon[s.status]}</span>
+        <span style="font-size:0.82rem;font-weight:600;flex:1;">${s.label}</span>
+        ${s.reason ? `<span style="font-size:0.72rem;color:var(--muted);max-width:220px;text-align:right;">${s.reason}</span>` : ''}
+        <span style="font-size:0.72rem;font-weight:600;color:${statusColor[s.status]};text-transform:capitalize;">${s.status}</span>
+      </div>`).join('');
+
+    document.getElementById('studentModal').style.display = 'flex';
+  });
 
   document.getElementById('filterTabs').addEventListener('click', e => {
     const btn = e.target.closest('.tab-btn');
