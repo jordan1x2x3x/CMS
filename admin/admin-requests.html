@@ -165,7 +165,7 @@
       </div>
       <div class="table-footer">
         <span id="footerCount">Loading…</span>
-        <span>24 students total</span>
+        <span id="totalCount"></span>
       </div>
     </div>
   </div>
@@ -265,6 +265,8 @@
     const initials = ((s.first_name?.[0]||'') + (s.last_name?.[0]||'')).toUpperCase() || '?';
     return { id: s.id, name, initials, matric: s.matric_number || '—', statuses, approved, pending, flagged, rejected, overall };
   });
+
+  document.getElementById('totalCount').textContent = `${rows.length} student${rows.length !== 1 ? 's' : ''} total`;
 
   let activeFilter = 'all', activeDept = 'all', searchVal = '';
 
