@@ -124,10 +124,10 @@
   <div class="content">
     <div class="page-header">
       <div>
-        <h2>All Departments <span style="font-size:0.78rem;font-weight:500;color:var(--muted);margin-left:8px;">(15)</span></h2>
+        <h2>All Departments <span style="font-size:0.78rem;font-weight:500;color:var(--muted);margin-left:8px;" id="deptCount">(15)</span></h2>
         <p>Each department has a dedicated officer reviewing student clearance requests</p>
       </div>
-      <button class="add-btn" id="addDeptBtn"><span class="material-symbols-outlined" style="font-size:17px;">info</span>15 Departments Fixed</button>
+      <button class="add-btn" id="addDeptBtn"><span class="material-symbols-outlined" style="font-size:17px;">info</span>Departments Fixed</button>
     </div>
 
     <div class="dept-grid" id="deptGrid"></div>
@@ -181,17 +181,17 @@
 
   // Load clearance items + officer profiles per dept
   const [{ data: allItems }, { data: officers }] = await Promise.all([
-    supabase.from('clearance_items').select('status, department_id'),
-    supabase.from('profiles').select('first_name, last_name, department').eq('role', 'officer'),
+    supabase.from('clearance_items').select('status, department_id, assigned_officer_id'),
+    supabase.from('profiles').select('id, first_name, last_name, department, academic_dept').eq('role', 'officer'),
   ]);
 
   const items = allItems || [];
   const officerList = officers || [];
+  const hodOfficers = officerList.filter(o => o.department === 'hod');
 
-  const grid = document.getElementById('deptGrid');
-  DEPT_META.forEach(dept => {
-    const dItems = items.filter(it => it.department_id === dept.key);
-    const isPending = s => ['pending','pending_submission','awaiting_verification'].includes(s);
+  const isPending = s => ['pending','pending_submission','awaiting_verification'].includes(s);
+
+  function buildCard(dept, dItems, officerName, officerSubLabel, viewHref) {
     const approved = dItems.filter(it => it.status === 'approved').length;
     const pending  = dItems.filter(it => isPending(it.status)).length;
     const flagged  = dItems.filter(it => it.status === 'flagged').length;
@@ -199,17 +199,18 @@
     const total = dItems.length || 1;
     const pct = Math.round((approved / total) * 100);
     const fillColor = pct >= 70 ? '#10B981' : pct >= 40 ? '#F59E0B' : '#EF4444';
-    const off = officerList.find(o => o.department === dept.key);
-    const officerName = off ? [off.first_name, off.last_name].filter(Boolean).join(' ') : '—';
-    grid.innerHTML += `
+    return `
       <div class="dept-card">
         <div class="dept-card-header">
           <div class="dept-icon"><span class="material-symbols-outlined">${dept.icon}</span></div>
-          <div><div class="dept-card-title">${dept.label}</div><div class="dept-card-key">${dept.key}</div></div>
+          <div>
+            <div class="dept-card-title">${dept.label}</div>
+            <div class="dept-card-key">${officerSubLabel || dept.key}</div>
+          </div>
         </div>
         <div class="dept-card-body">
           <div class="dept-row"><span class="dept-row-label">Officer</span><span class="dept-row-val">${officerName}</span></div>
-          <div class="dept-row"><span class="dept-row-label">Approved</span><span class="dept-row-val" style="color:var(--approved);">${approved}/${total}</span></div>
+          <div class="dept-row"><span class="dept-row-label">Approved</span><span class="dept-row-val" style="color:var(--approved);">${approved}/${dItems.length || 0}</span></div>
           <div class="dept-row"><span class="dept-row-label">Pending</span><span class="dept-row-val" style="color:var(--pending);">${pending}</span></div>
           <div class="dept-row"><span class="dept-row-label">Flagged / Rejected</span><span class="dept-row-val" style="color:var(--flagged);">${flagged + rejected}</span></div>
           <div class="progress-wrap">
@@ -218,12 +219,50 @@
           </div>
         </div>
         <div class="dept-card-footer">
-          <button class="action-btn btn-view" onclick="window.location.href='admin-requests.html?dept=${dept.key}'">
+          <button class="action-btn btn-view" onclick="window.location.href='${viewHref}'">
             <span class="material-symbols-outlined">visibility</span>View Students
           </button>
         </div>
       </div>`;
+  }
+
+  const grid = document.getElementById('deptGrid');
+
+  // Render the 14 non-HOD departments
+  DEPT_META.filter(d => d.key !== 'hod').forEach(dept => {
+    const dItems = items.filter(it => it.department_id === dept.key);
+    const off = officerList.find(o => o.department === dept.key);
+    const officerName = off ? [off.first_name, off.last_name].filter(Boolean).join(' ') : '—';
+    grid.innerHTML += buildCard(dept, dItems, officerName, dept.key, `admin-requests.html?dept=${dept.key}`);
   });
+
+  // Render one card per HOD officer
+  const hodMeta = DEPT_META.find(d => d.key === 'hod');
+  if (hodOfficers.length === 0) {
+    grid.innerHTML += `
+      <div class="dept-card" style="border:2px dashed var(--border);opacity:0.6;">
+        <div class="dept-card-header">
+          <div class="dept-icon"><span class="material-symbols-outlined">${hodMeta.icon}</span></div>
+          <div><div class="dept-card-title">HOD / Project</div><div class="dept-card-key">No HOD officers registered</div></div>
+        </div>
+        <div class="dept-card-body" style="color:var(--muted);font-size:0.8rem;text-align:center;padding:1.5rem;">
+          No HOD officer accounts have been created yet.
+        </div>
+      </div>`;
+  } else {
+    hodOfficers.forEach(officer => {
+      const hodName = [officer.first_name, officer.last_name].filter(Boolean).join(' ') || '—';
+      const academicDept = officer.academic_dept || 'Unspecified Department';
+      const dItems = items.filter(it => it.department_id === 'hod' &&
+        (it.assigned_officer_id === officer.id || it.assigned_officer_id === null));
+      const hodDeptMeta = { ...hodMeta, label: `HOD · ${academicDept}` };
+      grid.innerHTML += buildCard(hodDeptMeta, dItems, hodName, academicDept, `admin-requests.html?dept=hod`);
+    });
+  }
+
+  // Update page count: 14 non-HOD + one card per HOD officer (min 1 for the placeholder)
+  const cardCount = 14 + Math.max(hodOfficers.length, 1);
+  document.getElementById('deptCount').textContent = `(${cardCount})`;
 
   document.getElementById('addDeptBtn').addEventListener('click', () => {
     const t = document.getElementById('infoToast');

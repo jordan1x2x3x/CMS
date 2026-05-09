@@ -317,7 +317,7 @@ window.filterTable   = (v) => { searchQuery = v.toLowerCase(); renderTable(); };
     .order('updated_at', { ascending: false });
 
   if (DEPT_SPECIFIC.has(dept)) {
-    itemsQuery = itemsQuery.or(`assigned_officer_id.eq.${session.user.id},assigned_officer_id.is.null`);
+    itemsQuery = itemsQuery.eq('assigned_officer_id', session.user.id);
   }
 
   const { data: items } = await itemsQuery;

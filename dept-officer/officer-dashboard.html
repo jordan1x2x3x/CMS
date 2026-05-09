@@ -442,8 +442,7 @@ const AVA_COLORS = ['#6B0080','#0e7490','#065f46','#92400e','#1e3a5f','#5b21b6',
     .order('updated_at', { ascending: false });
 
   if (DEPT_SPECIFIC.has(dept)) {
-    // Show items assigned to this officer; fallback to unassigned (legacy items before migration)
-    itemsQuery = itemsQuery.or(`assigned_officer_id.eq.${session.user.id},assigned_officer_id.is.null`);
+    itemsQuery = itemsQuery.eq('assigned_officer_id', session.user.id);
   }
 
   const { data: items } = await itemsQuery;
