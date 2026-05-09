@@ -473,18 +473,20 @@
     <div class="form-body" id="formBody">
       <form id="signupForm" novalidate>
 
-        <!-- ── STEP 1: Role Selection ── -->
+        <!-- ── STEP 1: Account Type ── -->
         <div class="step-panel active" id="panel-1">
           <h3>
             <span class="material-symbols-outlined">manage_accounts</span>
-            Select Your Role
+            Who are you registering as?
           </h3>
+
           <div class="role-cards" id="roleCards">
             <label class="role-card" id="rc-student">
               <input type="radio" name="role" value="student" />
               <div class="role-icon"><span class="material-symbols-outlined">school</span></div>
               <div class="role-info">
                 <h4>Student</h4>
+                <p>Track your clearance progress across all departments</p>
               </div>
             </label>
             <label class="role-card" id="rc-officer">
@@ -492,24 +494,20 @@
               <div class="role-icon"><span class="material-symbols-outlined">assignment_ind</span></div>
               <div class="role-info">
                 <h4>Department Officer</h4>
-              </div>
-            </label>
-            <label class="role-card" id="rc-admin">
-              <input type="radio" name="role" value="admin" />
-              <div class="role-icon"><span class="material-symbols-outlined">admin_panel_settings</span></div>
-              <div class="role-info">
-                <h4>Admin</h4>
-              </div>
-            </label>
-            <label class="role-card" id="rc-super_admin">
-              <input type="radio" name="role" value="super_admin" />
-              <div class="role-icon"><span class="material-symbols-outlined">shield_person</span></div>
-              <div class="role-info">
-                <h4>Super Admin</h4>
+                <p>Review and approve clearance requests for your department</p>
               </div>
             </label>
           </div>
-          <span class="field-error" id="role-error" style="display:none; margin-top:8px;">Please select a role to continue.</span>
+
+          <!-- Admin/Super Admin are assigned manually — not via this form -->
+          <div style="display:flex;align-items:flex-start;gap:9px;margin-top:1rem;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:0.75rem 1rem;">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#16A34A;flex-shrink:0;margin-top:1px;">info</span>
+            <p style="font-size:0.75rem;color:#166534;line-height:1.55;">
+              <strong>Registrar / Admin?</strong> Admin and Super Admin accounts are assigned manually by the ICT Unit — they are not created through this form. Contact <strong>ict@mtu.edu.ng</strong> or visit the Registrar's office.
+            </p>
+          </div>
+
+          <span class="field-error" id="role-error" style="display:none; margin-top:8px;">Please select an account type to continue.</span>
 
           <div class="form-nav">
             <span></span>
@@ -622,6 +620,47 @@
               </div>
               <p style="font-size:0.72rem;color:#6B7280;margin-top:4px;">You will only handle clearance requests for the department you select here.</p>
               <span class="field-error">Please select your clearance department.</span>
+            </div>
+
+            <!-- HOD Academic Department — only shown when HOD is selected above -->
+            <div class="field full conditional" id="field-hod-academic-dept" style="display:none;">
+              <label for="hodAcademicDept">Academic Department You Manage</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">domain</span>
+                <select id="hodAcademicDept" name="hodAcademicDept">
+                  <option value="" disabled selected>Select your academic department</option>
+                  <optgroup label="CBAS — College of Basic and Applied Sciences">
+                    <option value="Computer Science and Mathematics">Computer Science and Mathematics</option>
+                    <option value="Biological Sciences">Biological Sciences</option>
+                    <option value="Biochemistry">Biochemistry</option>
+                    <option value="Chemical Sciences">Chemical Sciences</option>
+                    <option value="Food Science and Technology">Food Science and Technology</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Geosciences">Geosciences</option>
+                  </optgroup>
+                  <optgroup label="CHMS — College of Humanities, Management and Social Sciences">
+                    <option value="Languages">Languages</option>
+                    <option value="Music">Music</option>
+                    <option value="Fine and Applied Arts">Fine and Applied Arts</option>
+                    <option value="Philosophy and Religious Studies">Philosophy and Religious Studies</option>
+                    <option value="Mass Communication">Mass Communication</option>
+                    <option value="Economics">Economics</option>
+                    <option value="Business Administration">Business Administration</option>
+                    <option value="Accounting and Finance">Accounting and Finance</option>
+                    <option value="Public Administration">Public Administration</option>
+                    <option value="Industrial Relations and Personnel Management">Industrial Relations and Personnel Management</option>
+                  </optgroup>
+                  <optgroup label="CAHS — College of Allied Health Sciences">
+                    <option value="Nursing Science">Nursing Science</option>
+                    <option value="Medical Laboratory Science">Medical Laboratory Science</option>
+                    <option value="Nutrition and Dietetics">Nutrition and Dietetics</option>
+                    <option value="Public Health">Public Health</option>
+                    <option value="Biomedical Technology">Biomedical Technology</option>
+                  </optgroup>
+                </select>
+              </div>
+              <p style="font-size:0.72rem;color:#6B7280;margin-top:4px;">Students in this academic department will be automatically routed to your dashboard for HOD clearance.</p>
+              <span class="field-error">Please select the academic department you manage.</span>
             </div>
           </div>
 
@@ -896,12 +935,14 @@
   };
 
   // ── Role map: which fields each role needs ──
+  // Admin and Super Admin are NOT self-registerable — they are assigned manually.
   const ROLE_MAP = {
-    student:     { college: true,  dept: true,  matric: true,  programme: true,  officerDept: false, accessCode: false },
-    officer:     { college: false, dept: false, matric: false, programme: false, officerDept: true,  accessCode: true  },
-    admin:       { college: false, dept: false, matric: false, programme: false, officerDept: false, accessCode: true  },
-    super_admin: { college: false, dept: false, matric: false, programme: false, officerDept: false, accessCode: true  },
+    student: { college: true,  dept: true,  matric: true,  programme: true,  officerDept: false, accessCode: false },
+    officer: { college: false, dept: false, matric: false, programme: false, officerDept: true,  accessCode: true  },
   };
+
+  // Roles permitted through public self-registration
+  const ALLOWED_SELF_REGISTER_ROLES = new Set(['student', 'officer']);
 
   // ── Role card selection ──
   document.querySelectorAll('.role-card').forEach(card => {
@@ -936,6 +977,12 @@
     toggleField('field-officer-dept', cfg.officerDept);
     toggleField('field-access-code', cfg.accessCode);
 
+    // Always hide HOD academic dept when role changes — re-shown only if officerDept = 'hod'
+    const hodField = document.getElementById('field-hod-academic-dept');
+    if (hodField) { hodField.style.display = 'none'; hodField.classList.remove('has-error'); }
+    const hodSelect = document.getElementById('hodAcademicDept');
+    if (hodSelect) hodSelect.value = '';
+
     // Reset cascade when role changes
     if (cfg.dept) {
       resetSelect('department', 'Select College first', true);
@@ -949,6 +996,18 @@
     el.disabled = disabled;
     el.value = '';
   }
+
+  // ── Officer Dept → HOD Academic Dept cascade ──
+  document.getElementById('officerDept').addEventListener('change', function () {
+    const hodField = document.getElementById('field-hod-academic-dept');
+    if (this.value === 'hod') {
+      hodField.style.display = 'block';
+    } else {
+      hodField.style.display = 'none';
+      document.getElementById('hodAcademicDept').value = '';
+      hodField.classList.remove('has-error');
+    }
+  });
 
   // ── College → Department cascade ──
   document.getElementById('college').addEventListener('change', function () {
@@ -1054,6 +1113,18 @@
       valid = false;
     }
 
+    // HOD officers must also select their academic department
+    if (selectedRole === 'officer' && document.getElementById('officerDept')?.value === 'hod') {
+      const hodDeptEl  = document.getElementById('hodAcademicDept');
+      const hodFieldEl = document.getElementById('field-hod-academic-dept');
+      if (!hodDeptEl?.value) {
+        if (hodFieldEl) hodFieldEl.classList.add('has-error');
+        valid = false;
+      } else {
+        if (hodFieldEl) hodFieldEl.classList.remove('has-error');
+      }
+    }
+
     return valid;
   }
 
@@ -1094,6 +1165,12 @@
     e.preventDefault();
     if (!validateStep3()) return;
 
+    // Frontend whitelist guard — blocks DOM/devtools manipulation
+    if (!ALLOWED_SELF_REGISTER_ROLES.has(selectedRole)) {
+      showSignupError('Invalid account type. Admin and Super Admin accounts must be created by the ICT Unit.');
+      return;
+    }
+
     const fullname  = (document.getElementById('fullname')?.value || '').trim();
     const parts     = fullname.split(' ');
     const firstName = parts[0] || '';
@@ -1127,6 +1204,15 @@
       p_programme: document.getElementById('programme')?.value || null,
     });
     if (profileErr) { showSignupError('Profile save failed: ' + profileErr.message); resetSubmitBtn(submitBtn); return; }
+
+    // Save academic_dept for HOD officers — stored separately from the RPC
+    if (selectedRole === 'officer' && document.getElementById('officerDept')?.value === 'hod') {
+      const hodAcademicDept = document.getElementById('hodAcademicDept')?.value;
+      if (hodAcademicDept) {
+        await supabase.from('profiles').update({ academic_dept: hodAcademicDept }).eq('id', userId);
+      }
+    }
+
     if (selectedRole !== 'student') {
       await supabase.from('access_codes').update({ used_by: userId, used_at: new Date().toISOString() }).eq('code', accessCode);
     }

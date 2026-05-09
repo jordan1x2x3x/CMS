@@ -143,14 +143,14 @@
       <div class="card-header"><h3>Security</h3><p>Manage your password and session settings</p></div>
       <div class="field">
         <div><div class="field-label">Current Password</div></div>
-        <input class="field-input" type="password" placeholder="••••••••" />
+        <input class="field-input" id="adminCurrentPw" type="password" placeholder="••••••••" />
       </div>
       <div class="field">
         <div><div class="field-label">New Password</div></div>
-        <input class="field-input" type="password" placeholder="Min. 8 characters" />
+        <input class="field-input" id="adminNewPw" type="password" placeholder="Min. 8 characters" />
       </div>
       <div class="field" style="justify-content:flex-end;">
-        <button class="save-btn" style="background:var(--rejected);">Update Password</button>
+        <button class="save-btn" id="updatePwBtn" style="background:var(--rejected);">Update Password</button>
       </div>
     </div>
 
@@ -185,9 +185,44 @@
   document.getElementById('avatarInitial').textContent = initials;
   document.getElementById('nameInput').value = fullName;
 
-  // find the email input (second input) and populate it
   const emailInput = document.querySelector('input[type="email"]');
-  if (emailInput) emailInput.value = profile.email || session.user.email || '';
+  if (emailInput) { emailInput.value = profile.email || session.user.email || ''; emailInput.disabled = true; }
+
+  function showToast(msg, ok = true) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = `position:fixed;bottom:24px;right:24px;background:${ok?'#10B981':'#EF4444'};color:white;padding:12px 20px;border-radius:10px;font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.15);`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // Save profile (name split on first space)
+  document.querySelector('.save-btn').addEventListener('click', async () => {
+    const val = document.getElementById('nameInput').value.trim();
+    if (!val) return showToast('Name cannot be empty', false);
+    const parts = val.split(' ');
+    const first = parts[0]; const last = parts.slice(1).join(' ') || '';
+    const { error } = await supabase.from('profiles').update({ first_name: first, last_name: last }).eq('id', session.user.id);
+    if (error) return showToast('Failed to save: ' + error.message, false);
+    document.getElementById('adminName').textContent = val;
+    document.getElementById('avatarInitial').textContent = ((first[0]||'') + (last[0]||'')).toUpperCase() || 'A';
+    showToast('Profile updated');
+  });
+
+  // Change password
+  document.getElementById('updatePwBtn').addEventListener('click', async () => {
+    const cur = document.getElementById('adminCurrentPw').value;
+    const nw  = document.getElementById('adminNewPw').value;
+    if (!cur || !nw) return showToast('Please fill both password fields', false);
+    if (nw.length < 8) return showToast('New password must be at least 8 characters', false);
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: profile.email || session.user.email, password: cur });
+    if (authErr) return showToast('Current password is incorrect', false);
+    const { error } = await supabase.auth.updateUser({ password: nw });
+    if (error) return showToast('Failed to update password: ' + error.message, false);
+    document.getElementById('adminCurrentPw').value = '';
+    document.getElementById('adminNewPw').value = '';
+    showToast('Password updated successfully');
+  });
 
   document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
   document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });

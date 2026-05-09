@@ -198,8 +198,8 @@
           <div class="info-grid">
             <div class="info-item"><label>Programme</label><span id="infoProg">B.Sc Computer Science</span></div>
             <div class="info-item"><label>College</label><span id="infoCollege">CBAS</span></div>
+            <div class="info-item"><label>Academic Department</label><span id="infoAcademicDept">—</span></div>
             <div class="info-item"><label>Clearance Type</label><span id="infoClearance">🎓 Graduation</span></div>
-            <div class="info-item"><label>Academic Session</label><span>2024/2025</span></div>
             <div class="info-item"><label>Submitted</label><span id="infoSubmitted">Apr 14, 2026</span></div>
             <div class="info-item"><label>Clearance Dept</label><span id="infoClearanceDept">University Chapel</span></div>
           </div>
@@ -212,28 +212,7 @@
           <h3><span class="material-symbols-outlined">attach_file</span>Submitted Documents</h3>
         </div>
         <div id="docList">
-          <div class="doc-item">
-            <div class="doc-icon"><span class="material-symbols-outlined">picture_as_pdf</span></div>
-            <div class="doc-info">
-              <div class="doc-name">Chapel_Attendance_Record.pdf</div>
-              <div class="doc-meta">PDF · 1.2 MB · Uploaded Apr 14, 2026</div>
-            </div>
-            <div class="doc-actions">
-              <button class="doc-btn"><span class="material-symbols-outlined">visibility</span>View</button>
-              <button class="doc-btn"><span class="material-symbols-outlined">download</span>Download</button>
-            </div>
-          </div>
-          <div class="doc-item">
-            <div class="doc-icon"><span class="material-symbols-outlined">image</span></div>
-            <div class="doc-info">
-              <div class="doc-name">Chapel_Tithe_Receipt_2024.jpg</div>
-              <div class="doc-meta">JPEG · 840 KB · Uploaded Apr 14, 2026</div>
-            </div>
-            <div class="doc-actions">
-              <button class="doc-btn"><span class="material-symbols-outlined">visibility</span>View</button>
-              <button class="doc-btn"><span class="material-symbols-outlined">download</span>Download</button>
-            </div>
-          </div>
+          <div class="doc-empty">Loading documents…</div>
         </div>
       </div>
 
@@ -364,53 +343,6 @@
 </div>
 
 <script>
-const REQUESTS = [
-  { id:1,  name:'Odunukwe C. Jordan',   matric:'MTU/CSC/2021/001', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 14, 2026', initials:'OJ', color:'#6B0080' },
-  { id:2,  name:'Adeyemi Miracle',       matric:'MTU/BCH/2021/014', programme:'B.Sc Biochemistry',               college:'CBAS', type:'Graduation', submitted:'Apr 13, 2026', initials:'AM', color:'#0e7490' },
-  { id:3,  name:'Eze Oluwaseun',         matric:'MTU/NRS/2021/007', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 13, 2026', initials:'EO', color:'#065f46' },
-  { id:4,  name:'Fashola Kehinde',       matric:'MTU/MLS/2021/022', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 12, 2026', initials:'FK', color:'#92400e' },
-  { id:5,  name:'Nwosu Blessing',        matric:'MTU/ECO/2021/031', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 11, 2026', initials:'NB', color:'#1e3a5f' },
-  { id:6,  name:'Ibrahim Aisha',         matric:'MTU/PHL/2020/008', programme:'B.A Philosophy',                  college:'CHMS', type:'Withdrawal', submitted:'Apr 10, 2026', initials:'IA', color:'#5b21b6' },
-  { id:7,  name:'Okonkwo David',         matric:'MTU/CSC/2021/019', programme:'B.Sc Software Engineering',       college:'CBAS', type:'Graduation', submitted:'Apr 09, 2026', initials:'OD', color:'#be185d' },
-  { id:8,  name:'Lawal Fatimah',         matric:'MTU/ACF/2021/005', programme:'B.Sc Accounting and Finance',     college:'CHMS', type:'Graduation', submitted:'Apr 09, 2026', initials:'LF', color:'#b45309' },
-  { id:9,  name:'Chukwu Emeka',          matric:'MTU/CSC/2020/003', programme:'B.Sc Computer Science',           college:'CBAS', type:'Graduation', submitted:'Apr 08, 2026', initials:'CE', color:'#0f766e' },
-  { id:10, name:'Adeola Tunde',          matric:'MTU/PHY/2021/011', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Apr 07, 2026', initials:'AT', color:'#7c3aed' },
-  { id:11, name:'Bello Fatima',          matric:'MTU/NUT/2020/016', programme:'B.Sc Nutrition & Dietetics',      college:'CAHS', type:'Graduation', submitted:'Apr 06, 2026', initials:'BF', color:'#dc2626' },
-  { id:12, name:'Taiwo Samuel',          matric:'MTU/MCS/2021/009', programme:'B.Sc Mass Communication',         college:'CHMS', type:'Graduation', submitted:'Apr 05, 2026', initials:'TS', color:'#059669' },
-  { id:13, name:'Obi Grace',             matric:'MTU/BIO/2021/027', programme:'B.Sc Biological Sciences',        college:'CBAS', type:'Graduation', submitted:'Apr 05, 2026', initials:'OG', color:'#0369a1' },
-  { id:14, name:'Hassan Musa',           matric:'MTU/GEO/2021/033', programme:'B.Sc Geosciences',                college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'HM', color:'#4d7c0f' },
-  { id:15, name:'Amara Chisom',          matric:'MTU/CHM/2021/018', programme:'B.Sc Chemical Sciences',          college:'CBAS', type:'Graduation', submitted:'Apr 04, 2026', initials:'AC', color:'#9333ea' },
-  { id:16, name:'Daniels Victor',        matric:'MTU/BMT/2021/041', programme:'B.Sc Biomedical Technology',      college:'CAHS', type:'Graduation', submitted:'Apr 03, 2026', initials:'DV', color:'#c2410c' },
-  { id:17, name:'Yusuf Khadijat',        matric:'MTU/FST/2021/012', programme:'B.Sc Food Science & Technology',  college:'CBAS', type:'Graduation', submitted:'Apr 03, 2026', initials:'YK', color:'#0891b2' },
-  { id:18, name:'Nnamdi Peter',          matric:'MTU/ECO/2021/025', programme:'B.Sc Economics',                  college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'NP', color:'#65a30d' },
-  { id:19, name:'Oke Christiana',        matric:'MTU/PHL/2021/006', programme:'B.A Philosophy & Religion',       college:'CHMS', type:'Graduation', submitted:'Apr 02, 2026', initials:'OC', color:'#b91c1c' },
-  { id:20, name:'Adeleye Rotimi',        matric:'MTU/MLS/2021/038', programme:'B.Sc Medical Lab Science',        college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'AR', color:'#0f172a' },
-  { id:21, name:'Nnaji Chidinma',        matric:'MTU/NRS/2021/029', programme:'B.Sc Nursing Science',            college:'CAHS', type:'Graduation', submitted:'Apr 01, 2026', initials:'NC', color:'#92400e' },
-  { id:22, name:'Okeke Emmanuel',        matric:'MTU/CSC/2020/044', programme:'B.Sc Cyber Security',             college:'CBAS', type:'Withdrawal', submitted:'Mar 31, 2026', initials:'OE', color:'#312e81' },
-  { id:23, name:'Adeleke Rukayat',       matric:'MTU/BAD/2021/017', programme:'B.Sc Business Administration',   college:'CHMS', type:'Graduation', submitted:'Mar 30, 2026', initials:'AR', color:'#166534' },
-  { id:24, name:'Musa Hauwa',            matric:'MTU/PHY/2020/052', programme:'B.Sc Physics',                    college:'CBAS', type:'Graduation', submitted:'Mar 29, 2026', initials:'MH', color:'#0c4a6e' },
-];
-
-function getDeptStatus(studentId, dept) {
-  const decisions = JSON.parse(localStorage.getItem('cms_decisions') || '[]');
-  const saved = decisions.find(d => d.studentId === studentId && d.dept === dept);
-  if (saved) return saved.status;
-  const chapelMap = {
-    1:'flagged', 2:'pending', 3:'pending', 4:'pending', 5:'pending',
-    6:'pending', 7:'pending', 8:'pending', 9:'flagged', 10:'flagged',
-    11:'rejected', 12:'approved', 13:'approved', 14:'approved', 15:'approved',
-    16:'approved', 17:'approved', 18:'approved', 19:'approved', 20:'approved',
-    21:'approved', 22:'approved', 23:'approved', 24:'approved'
-  };
-  if (dept === 'chapel') return chapelMap[studentId] || 'pending';
-  const seeds = {hod:3,cedgs:7,lab:11,college:17,health:19,sport:23,hall:29,ict:31,alumni:37,affairs:41,library:43,bursary:47,esm:53,academic:59};
-  const v = (studentId * (seeds[dept] || 13)) % 97;
-  if (v < 10) return 'rejected';
-  if (v < 24) return 'flagged';
-  if (v < 50) return 'pending';
-  return 'approved';
-}
-
 const DEPT_NAMES = {
   hod:'Head of Department (HOD)', cedgs:'CEDGS', lab:'Lab Instructor',
   college:'College Officer', chapel:'University Chapel', health:'Health Centre',
@@ -423,24 +355,6 @@ const DEPT_ICONS = {
   chapel:'church', health:'local_hospital', sport:'sports', hall:'home',
   ict:'computer', alumni:'groups', affairs:'diversity_3', library:'menu_book',
   bursary:'account_balance_wallet', esm:'music_note', academic:'verified',
-};
-
-const DEPT_DOCS = {
-  chapel:   [{name:'Chapel_Attendance_Record.pdf',      type:'PDF',  size:'1.2 MB', icon:'picture_as_pdf'}, {name:'Chapel_Tithe_Receipt_2024.jpg',         type:'JPEG', size:'840 KB', icon:'image'}],
-  hod:      [{name:'HOD_Clearance_Form.pdf',            type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Project_Thesis_Submission.pdf',          type:'PDF',  size:'3.4 MB', icon:'picture_as_pdf'}],
-  cedgs:    [{name:'CEDGS_Clearance_Form.pdf',          type:'PDF',  size:'0.6 MB', icon:'picture_as_pdf'}, {name:'Entrepreneurship_Project_Report.pdf',    type:'PDF',  size:'2.1 MB', icon:'picture_as_pdf'}],
-  lab:      [{name:'Lab_Equipment_Return_Form.pdf',     type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'Lab_Usage_Clearance.pdf',               type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
-  college:  [{name:'College_Clearance_Form.pdf',        type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Academic_Transcript_Request.pdf',        type:'PDF',  size:'0.9 MB', icon:'picture_as_pdf'}],
-  health:   [{name:'Medical_Clearance_Form.pdf',        type:'PDF',  size:'0.6 MB', icon:'picture_as_pdf'}, {name:'Health_Record_Update.pdf',               type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
-  sport:    [{name:'Sport_Equipment_Return.pdf',        type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}, {name:'Sport_Clearance_Certificate.pdf',        type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
-  hall:     [{name:'Room_Clearance_Form.pdf',           type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Hall_Property_Return_Receipt.pdf',       type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
-  ict:      [{name:'ICT_Equipment_Return_Form.pdf',     type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'Student_Portal_Clearance.pdf',           type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
-  alumni:   [{name:'Alumni_Registration_Form.pdf',      type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Alumni_Dues_Receipt.pdf',                type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
-  affairs:  [{name:'Student_Affairs_Clearance.pdf',     type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Conduct_Clearance_Certificate.pdf',      type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
-  library:  [{name:'Library_Clearance_Form.pdf',        type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'Book_Return_Confirmation.pdf',           type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
-  bursary:  [{name:'School_Fees_Clearance.pdf',         type:'PDF',  size:'0.6 MB', icon:'picture_as_pdf'}, {name:'Bursary_Statement.pdf',                  type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}],
-  esm:      [{name:'ESM_Clearance_Form.pdf',            type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}, {name:'ESM_Membership_Receipt.pdf',             type:'PDF',  size:'0.3 MB', icon:'picture_as_pdf'}],
-  academic: [{name:'Academic_Clearance_Form.pdf',       type:'PDF',  size:'0.5 MB', icon:'picture_as_pdf'}, {name:'Results_Verification_Letter.pdf',        type:'PDF',  size:'0.4 MB', icon:'picture_as_pdf'}],
 };
 
 const DEPT_FLAG_REASONS = {
@@ -573,7 +487,11 @@ function takeAction(status, reason) {
         actor_id:  session.user.id,
         action:    status + '_clearance_item',
         target_id: itemId,
-        meta:      { reason, comment },
+        meta:      {
+          reason, comment,
+          student_name: document.getElementById('studentName')?.textContent,
+          dept_name:    document.getElementById('infoClearanceDept')?.textContent,
+        },
       });
     }
   })();
@@ -617,8 +535,13 @@ function showToast(msg, type = 'approved') {
   const deptIcon = DEPT_ICONS[dept] || 'badge';
   const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || 'CO';
 
+  const academicDept  = profile.academic_dept || null;
+  const chipLabel     = dept === 'hod' && academicDept ? `HOD · ${academicDept}` : deptName;
+  const chipRoleLabel = dept === 'hod' ? 'Head of Department' : 'Department Officer';
   const chip = document.getElementById('deptChipName');
-  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${deptName}`;
+  if (chip) chip.innerHTML = `<span class="material-symbols-outlined">${deptIcon}</span>${chipLabel}`;
+  const chipRoleEl = document.querySelector('.dept-chip-role');
+  if (chipRoleEl) chipRoleEl.textContent = chipRoleLabel;
   document.querySelectorAll('.topbar-avatar').forEach(el => el.textContent = initials);
 
   // Load clearance item from ?item=ID param (Supabase row ID)
@@ -628,7 +551,7 @@ function showToast(msg, type = 'approved') {
   if (itemId) {
     const { data: item } = await supabase
       .from('clearance_items')
-      .select('id, status, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme, college))')
+      .select('id, status, clearance_requests(id, submitted_at, profiles(first_name, last_name, matric_number, programme, college, department))')
       .eq('id', itemId).maybeSingle();
 
     if (item) {
@@ -638,6 +561,7 @@ function showToast(msg, type = 'approved') {
       const ini = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '??';
       student = { name: [fn, ln].filter(Boolean).join(' '), matric: p?.matric_number || '—',
         programme: p?.programme || '—', college: p?.college || '—',
+        academicDept: p?.department || '—',
         type: 'Graduation', initials: ini };
       status = item.status || 'pending';
       submittedDate = req?.submitted_at ? new Date(req.submitted_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
@@ -652,9 +576,10 @@ function showToast(msg, type = 'approved') {
   document.getElementById('studentName').textContent   = student.name;
   document.getElementById('studentMatric').textContent  = student.matric;
   document.getElementById('studentAvatar').textContent  = student.initials;
-  document.getElementById('infoProg').textContent       = student.programme;
-  document.getElementById('infoCollege').textContent    = student.college;
-  document.getElementById('infoClearance').textContent  = (student.type === 'Graduation' ? '🎓 ' : '📤 ') + student.type;
+  document.getElementById('infoProg').textContent         = student.programme;
+  document.getElementById('infoCollege').textContent      = student.college;
+  document.getElementById('infoAcademicDept').textContent = student.academicDept || '—';
+  document.getElementById('infoClearance').textContent    = (student.type === 'Graduation' ? '🎓 ' : '📤 ') + student.type;
   document.getElementById('infoSubmitted').textContent  = submittedDate;
   document.getElementById('infoClearanceDept').textContent = deptName;
   document.getElementById('topbarName').textContent     = student.name;
@@ -680,20 +605,52 @@ function showToast(msg, type = 'approved') {
   const bar = document.getElementById('statusBar');
   if (bar) bar.style.background = statusBarBgs[status] || 'var(--pending-bg)';
 
-  // Documents — dept-specific
-  const docs = DEPT_DOCS[dept] || DEPT_DOCS['chapel'];
-  document.getElementById('docList').innerHTML = docs.map(d => `
-    <div class="doc-item">
-      <div class="doc-icon"><span class="material-symbols-outlined">${d.icon}</span></div>
-      <div class="doc-info">
-        <div class="doc-name">${d.name}</div>
-        <div class="doc-meta">${d.type} · ${d.size} · Uploaded ${student.submitted}</div>
-      </div>
-      <div class="doc-actions">
-        <button class="doc-btn"><span class="material-symbols-outlined">visibility</span>View</button>
-        <button class="doc-btn"><span class="material-symbols-outlined">download</span>Download</button>
-      </div>
-    </div>`).join('');
+  // Documents — load from Supabase Storage
+  const docList = document.getElementById('docList');
+  if (itemId) {
+    const { data: docs } = await supabase
+      .from('documents')
+      .select('id, file_name, mime_type, storage_path, uploaded_at')
+      .eq('item_id', itemId)
+      .order('uploaded_at', { ascending: false });
+
+    if (docs && docs.length > 0) {
+      const docRows = await Promise.all(docs.map(async (doc) => {
+        const fileIcon = doc.mime_type === 'application/pdf' ? 'picture_as_pdf'
+                       : doc.mime_type?.startsWith('image/') ? 'image' : 'description';
+        const uploadedDate = new Date(doc.uploaded_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+        // Generate a 60-min signed URL for both view and download
+        const { data: signedData } = await supabase.storage
+          .from('clearance-documents')
+          .createSignedUrl(doc.storage_path, 3600);
+
+        const url = signedData?.signedUrl || '#';
+
+        return `
+          <div class="doc-item">
+            <div class="doc-icon"><span class="material-symbols-outlined">${fileIcon}</span></div>
+            <div class="doc-info">
+              <div class="doc-name">${doc.file_name}</div>
+              <div class="doc-meta">Uploaded ${uploadedDate}</div>
+            </div>
+            <div class="doc-actions">
+              <a href="${url}" target="_blank" class="doc-btn">
+                <span class="material-symbols-outlined">visibility</span>View
+              </a>
+              <a href="${url}" download="${doc.file_name}" class="doc-btn">
+                <span class="material-symbols-outlined">download</span>Download
+              </a>
+            </div>
+          </div>`;
+      }));
+      docList.innerHTML = docRows.join('');
+    } else {
+      docList.innerHTML = '<div class="doc-empty">No documents uploaded for this department yet.</div>';
+    }
+  } else {
+    docList.innerHTML = '<div class="doc-empty">No documents available.</div>';
+  }
 
   // Flag reasons — dept-specific
   const flagReasons = DEPT_FLAG_REASONS[dept] || DEPT_FLAG_REASONS['chapel'];

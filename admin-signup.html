@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Registration | MTU Clearance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple: #6B0080; --purple-dark: #4A0058; --purple-light: #8B20A0;
+      --green: #76B82A; --surface: #F4F6F9; --white: #FFFFFF;
+      --border: #D1D9E6; --text-main: #1A0020; --text-muted: #5A6A80;
+      --error: #EF4444; --focus: rgba(107,0,128,0.18);
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+    nav {
+      background: var(--purple-dark); display: flex; align-items: center;
+      justify-content: space-between; padding: 0 2rem; height: 60px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo { width: 44px; height: 44px; background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 2px; }
+    .nav-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .nav-title { font-family: 'Newsreader', serif; font-size: 1.1rem; font-weight: 700; color: white; }
+
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; }
+
+    /* ── ACCESS DENIED ── */
+    .denied-box {
+      background: white; border-radius: 16px; padding: 3rem 2.5rem; max-width: 420px;
+      width: 100%; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .denied-icon {
+      width: 72px; height: 72px; border-radius: 50%; background: #FEF2F2;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;
+    }
+    .denied-icon .material-symbols-outlined { font-size: 36px; color: var(--error); }
+    .denied-box h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .denied-box p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: white; border-radius: 16px; padding: 2.5rem;
+      max-width: 520px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .form-header { margin-bottom: 2rem; }
+    .admin-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(107,0,128,0.08); border: 1px solid rgba(107,0,128,0.2);
+      color: var(--purple); font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 100px; margin-bottom: 1rem;
+    }
+    .admin-badge .material-symbols-outlined { font-size: 14px; }
+    .form-header h2 { font-family: 'Newsreader', serif; font-size: 1.6rem; font-weight: 700; color: var(--purple-dark); margin-bottom: 0.3rem; }
+    .form-header p { font-size: 0.85rem; color: var(--text-muted); }
+
+    .field { margin-bottom: 1.2rem; }
+    label { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 6px; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-icon { position: absolute; left: 12px; color: var(--text-muted); font-size: 18px; pointer-events: none; }
+    .input-wrap input,
+    .input-wrap select {
+      width: 100%; padding: 12px 12px 12px 40px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem;
+      color: var(--text-main); transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none; appearance: none;
+    }
+    .input-wrap input::placeholder { color: #A0AABB; }
+    .input-wrap input:focus, .input-wrap select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--focus); }
+    .toggle-pw { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; }
+    .toggle-pw .material-symbols-outlined { font-size: 18px; }
+
+    .field.has-error .input-wrap input,
+    .field.has-error .input-wrap select { border-color: var(--error); }
+    .field-error { display: none; font-size: 0.75rem; color: var(--error); margin-top: 4px; }
+    .field.has-error .field-error { display: block; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .access-note {
+      margin-top: 6px; font-size: 0.74rem; color: var(--text-muted);
+      display: flex; align-items: flex-start; gap: 5px; line-height: 1.5;
+    }
+    .access-note .material-symbols-outlined { font-size: 14px; color: var(--purple); flex-shrink: 0; margin-top: 1px; }
+
+    .info-banner {
+      background: #FFF9E6; border: 1px solid #F5D060; border-radius: 8px;
+      padding: 10px 14px; font-size: 0.78rem; color: #7A5C00;
+      display: flex; align-items: flex-start; gap: 8px; margin-bottom: 1.5rem;
+    }
+    .info-banner .material-symbols-outlined { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    .error-box {
+      display: none; background: #FEF2F2; border: 1.5px solid #FECACA;
+      border-radius: 9px; padding: 10px 14px; font-size: 0.82rem;
+      color: #991B1B; margin-bottom: 1rem; align-items: center; gap: 8px;
+    }
+    .error-box .material-symbols-outlined { font-size: 17px; flex-shrink: 0; }
+
+    .success-box {
+      display: none; background: #ECFDF5; border: 1.5px solid #6EE7B7;
+      border-radius: 9px; padding: 1.5rem; text-align: center; margin-bottom: 1rem;
+    }
+    .success-box .material-symbols-outlined { font-size: 40px; color: #10B981; display: block; margin-bottom: 0.75rem; }
+    .success-box h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; color: #064E3B; }
+    .success-box p { font-size: 0.82rem; color: #065F46; }
+
+    .btn-primary {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
+      color: white; border: none; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 8px; transition: opacity 0.2s; margin-top: 1.5rem;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary .material-symbols-outlined { font-size: 20px; }
+
+    .login-link { text-align: center; margin-top: 1.25rem; font-size: 0.83rem; color: var(--text-muted); }
+    .login-link a { color: var(--purple); font-weight: 600; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+
+    footer { background: var(--purple-dark); color: rgba(255,255,255,0.45); padding: 1rem 2rem; font-size: 0.75rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo"><img src="assets/mtu-logo.png" alt="MTU" /></div>
+    <span class="nav-title">Mountain Top University</span>
+  </a>
+</nav>
+
+<main id="mainArea">
+  <!-- Content injected by JS: either denied-box or form-card -->
+</main>
+
+<footer>&copy; 2026 Mountain Top University. Restricted Access.</footer>
+
+<script type="module">
+  const { supabase } = await import('./js/supabase.js');
+
+  // ── Secret URL token — change this to rotate the link ──────────────────
+  const VALID_TOKEN = 'MTU-ICT-ADMIN-2026';
+
+  const params = new URLSearchParams(window.location.search);
+  const token  = (params.get('token') || '').trim();
+
+  if (token !== VALID_TOKEN) {
+    renderDenied();
+  } else {
+    renderForm();
+  }
+
+  // ── ACCESS DENIED ───────────────────────────────────────────────────────
+  function renderDenied() {
+    document.getElementById('mainArea').innerHTML = `
+      <div class="denied-box">
+        <div class="denied-icon"><span class="material-symbols-outlined">lock</span></div>
+        <h2>Access Restricted</h2>
+        <p>This page is not publicly accessible. If you were invited to register as an administrator, please use the link provided to you by the ICT Unit.</p>
+      </div>`;
+  }
+
+  // ── REGISTRATION FORM ───────────────────────────────────────────────────
+  function renderForm() {
+    document.getElementById('mainArea').innerHTML = `
+      <div class="form-card">
+        <div class="form-header">
+          <div class="admin-badge"><span class="material-symbols-outlined">admin_panel_settings</span>Restricted Registration</div>
+          <h2>Admin Account Setup</h2>
+          <p>Create your administrator account for the MTU Clearance Portal.</p>
+        </div>
+
+        <div class="info-banner">
+          <span class="material-symbols-outlined">info</span>
+          <span>You need an <strong>access code</strong> from the current Super Admin to complete registration. Contact the ICT Unit if you don't have one.</span>
+        </div>
+
+        <form id="adminSignupForm" novalidate>
+
+          <div class="field-row">
+            <div class="field" id="field-firstName">
+              <label for="firstName">First Name</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">person</span>
+                <input type="text" id="firstName" placeholder="e.g. Chidi" autocomplete="given-name" />
+              </div>
+              <span class="field-error">First name is required.</span>
+            </div>
+            <div class="field" id="field-lastName">
+              <label for="lastName">Last Name</label>
+              <div class="input-wrap">
+                <span class="material-symbols-outlined input-icon">person</span>
+                <input type="text" id="lastName" placeholder="e.g. Okonkwo" autocomplete="family-name" />
+              </div>
+              <span class="field-error">Last name is required.</span>
+            </div>
+          </div>
+
+          <div class="field" id="field-email">
+            <label for="email">Institutional Email</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined input-icon">email</span>
+              <input type="email" id="email" placeholder="name@mtu.edu.ng" autocomplete="email" />
+            </div>
+            <span class="field-error">A valid @mtu.edu.ng email is required.</span>
+          </div>
+
+          <div class="field" id="field-role">
+            <label for="role">Account Role</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined input-icon">shield_person</span>
+              <select id="role">
+                <option value="" disabled selected>Select role</option>
+                <option value="admin">Admin / Registrar</option>
+                <option value="super_admin">Super Admin / ICT</option>
+              </select>
+            </div>
+            <span class="field-error">Please select a role.</span>
+          </div>
+
+          <div class="field" id="field-accessCode">
+            <label for="accessCode">Access Code</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined input-icon">key</span>
+              <input type="text" id="accessCode" placeholder="Enter one-time access code" autocomplete="off" style="text-transform:uppercase;" />
+            </div>
+            <span class="field-error">A valid access code is required.</span>
+            <div class="access-note">
+              <span class="material-symbols-outlined">info</span>
+              The access code is issued by the Super Admin and is single-use.
+            </div>
+          </div>
+
+          <div class="field" id="field-password">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined input-icon">lock</span>
+              <input type="password" id="password" placeholder="Min. 8 characters" autocomplete="new-password" />
+              <button type="button" class="toggle-pw" id="togglePw">
+                <span class="material-symbols-outlined" id="togglePwIcon">visibility</span>
+              </button>
+            </div>
+            <span class="field-error">Password must be at least 8 characters.</span>
+          </div>
+
+          <div class="field" id="field-confirmPassword">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined input-icon">lock_reset</span>
+              <input type="password" id="confirmPassword" placeholder="Re-enter password" autocomplete="new-password" />
+            </div>
+            <span class="field-error">Passwords do not match.</span>
+          </div>
+
+          <div class="error-box" id="formError">
+            <span class="material-symbols-outlined">error</span>
+            <span id="formErrorMsg"></span>
+          </div>
+
+          <div class="success-box" id="successBox">
+            <span class="material-symbols-outlined">check_circle</span>
+            <h3>Account Created!</h3>
+            <p>Your administrator account has been set up. Redirecting you to login…</p>
+          </div>
+
+          <button type="submit" class="btn-primary" id="submitBtn">
+            <span>Create Admin Account</span>
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+          </button>
+        </form>
+
+        <div class="login-link">Already have an account? <a href="login.html">Sign in</a></div>
+      </div>`;
+
+    // ── Password toggle ───────────────────────────────────────────────────
+    document.getElementById('togglePw').addEventListener('click', () => {
+      const inp  = document.getElementById('password');
+      const icon = document.getElementById('togglePwIcon');
+      const hide = inp.type === 'password';
+      inp.type = hide ? 'text' : 'password';
+      icon.textContent = hide ? 'visibility_off' : 'visibility';
+    });
+
+    // ── Auto-uppercase access code ────────────────────────────────────────
+    document.getElementById('accessCode').addEventListener('input', function() {
+      const pos = this.selectionStart;
+      this.value = this.value.toUpperCase();
+      this.setSelectionRange(pos, pos);
+    });
+
+    // ── Form submit ───────────────────────────────────────────────────────
+    document.getElementById('adminSignupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const firstName     = document.getElementById('firstName').value.trim();
+      const lastName      = document.getElementById('lastName').value.trim();
+      const email         = document.getElementById('email').value.trim().toLowerCase();
+      const role          = document.getElementById('role').value;
+      const accessCode    = document.getElementById('accessCode').value.trim().toUpperCase();
+      const password      = document.getElementById('password').value;
+      const confirmPw     = document.getElementById('confirmPassword').value;
+      const submitBtn     = document.getElementById('submitBtn');
+
+      // ── Client-side validation ──────────────────────────────────────────
+      let valid = true;
+
+      const require = (fieldId, condition, msg) => {
+        const f = document.getElementById(fieldId);
+        if (!condition) {
+          f.classList.add('has-error');
+          if (msg) f.querySelector('.field-error').textContent = msg;
+          valid = false;
+        } else {
+          f.classList.remove('has-error');
+        }
+      };
+
+      require('field-firstName', firstName, null);
+      require('field-lastName', lastName, null);
+      require('field-email', email && email.endsWith('@mtu.edu.ng'), 'A valid @mtu.edu.ng email is required.');
+      require('field-role', role, null);
+      require('field-accessCode', accessCode, null);
+      require('field-password', password.length >= 8, 'Password must be at least 8 characters.');
+      require('field-confirmPassword', password === confirmPw, 'Passwords do not match.');
+
+      if (!valid) return;
+
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = 'Creating account…';
+      hideError();
+
+      // ── Validate access code ────────────────────────────────────────────
+      const { data: codeRow, error: codeErr } = await supabase
+        .from('access_codes')
+        .select('id, intended_role, used_by, expires_at')
+        .eq('code', accessCode)
+        .single();
+
+      if (codeErr || !codeRow) {
+        showError('Access code not found. Please check the code and try again.');
+        resetBtn(submitBtn); return;
+      }
+      if (codeRow.used_by) {
+        showError('This access code has already been used.');
+        resetBtn(submitBtn); return;
+      }
+      if (new Date(codeRow.expires_at) < new Date()) {
+        showError('This access code has expired. Request a new one from the Super Admin.');
+        resetBtn(submitBtn); return;
+      }
+      if (codeRow.intended_role !== role) {
+        showError(`This access code is for "${codeRow.intended_role}", not "${role}". Please use the correct code for your role.`);
+        resetBtn(submitBtn); return;
+      }
+
+      // ── Create auth user ────────────────────────────────────────────────
+      const { data: authData, error: signUpErr } = await supabase.auth.signUp({ email, password });
+      if (signUpErr || !authData?.user) {
+        showError(signUpErr?.message || 'Failed to create account. The email may already be registered.');
+        resetBtn(submitBtn); return;
+      }
+
+      const userId = authData.user.id;
+
+      // ── Create profile ──────────────────────────────────────────────────
+      const { error: profileErr } = await supabase.rpc('create_profile', {
+        user_id:    userId,
+        first_name: firstName,
+        last_name:  lastName,
+        email:      email,
+        role:       role,
+        department: null,
+        matric:     null,
+        college:    null,
+        programme:  null,
+      });
+
+      if (profileErr) {
+        showError('Account created but profile setup failed: ' + profileErr.message);
+        resetBtn(submitBtn); return;
+      }
+
+      // ── Mark access code as used ────────────────────────────────────────
+      await supabase
+        .from('access_codes')
+        .update({ used_by: userId, used_at: new Date().toISOString() })
+        .eq('code', accessCode);
+
+      // ── Sign out auto-session and redirect ──────────────────────────────
+      await supabase.auth.signOut();
+
+      document.getElementById('adminSignupForm').style.display = 'none';
+      document.getElementById('successBox').style.display = 'block';
+      setTimeout(() => { window.location.href = 'login.html'; }, 2500);
+    });
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('formError');
+    box.style.display = 'flex';
+    document.getElementById('formErrorMsg').textContent = msg;
+  }
+  function hideError() {
+    document.getElementById('formError').style.display = 'none';
+  }
+  function resetBtn(btn) {
+    btn.disabled = false;
+    btn.querySelector('span').textContent = 'Create Admin Account';
+  }
+</script>
+</body>
+</html>

@@ -165,9 +165,32 @@
       </div>
       <div class="table-footer">
         <span id="footerCount">Loading…</span>
-        <span>24 students total</span>
+        <span id="totalCount"></span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Student detail modal -->
+<div id="studentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:16px;width:100%;max-width:620px;overflow:hidden;margin:auto;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+    <div style="background:linear-gradient(135deg,#4A0058,#6B0080);padding:1.5rem 1.75rem;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:0.9rem;">
+        <div id="modalAvatar" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem;flex-shrink:0;"></div>
+        <div>
+          <div id="modalName" style="font-weight:700;color:white;font-size:0.95rem;"></div>
+          <div id="modalMatric" style="font-size:0.72rem;color:rgba(255,255,255,0.6);margin-top:2px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span id="modalOverall" class="badge"></span>
+        <button onclick="document.getElementById('studentModal').style.display='none'" style="background:rgba(255,255,255,0.15);border:none;border-radius:8px;color:white;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="font-size:17px;">close</span>
+        </button>
+      </div>
+    </div>
+    <div id="modalStats" style="display:flex;padding:1rem 1.75rem;background:#F9FAFB;border-bottom:1px solid #E5E7EB;gap:1rem;"></div>
+    <div id="modalDepts" style="padding:1.25rem 1.75rem;display:flex;flex-direction:column;gap:0.5rem;max-height:55vh;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -208,35 +231,44 @@
   const deptFilterEl = document.getElementById('deptFilter');
   DEPT_META.forEach(d => { const o = document.createElement('option'); o.value = d.key; o.textContent = d.label; deptFilterEl.appendChild(o); });
 
-  // Load all students + their clearance items
-  const { data: studentProfiles } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, matric_number, programme')
-    .eq('role', 'student')
+  // Query from clearance_requests directly — admin policy guarantees all rows are visible
+  const { data: requests } = await supabase
+    .from('clearance_requests')
+    .select('id, student_id, profiles(id, first_name, last_name, matric_number, programme), clearance_items(status, department_id, reason)')
     .order('created_at', { ascending: true });
 
-  const { data: allItems } = await supabase
-    .from('clearance_items')
-    .select('status, department_id, clearance_requests(student_id)');
+  const isPending = st => ['pending','pending_submission','awaiting_verification'].includes(st);
 
-  const students = studentProfiles || [];
-  const items = allItems || [];
-
-  // Build per-student rows
-  const rows = students.map(s => {
-    const sItems = items.filter(it => it.clearance_requests?.student_id === s.id);
+  const rows = (requests || []).map(req => {
+    const s     = req.profiles || {};
+    const sItems = req.clearance_items || [];
     const statuses = DEPT_META.map(d => {
       const it = sItems.find(x => x.department_id === d.key);
-      return { dept: d.key, label: d.label, status: it?.status || 'pending' };
+      return { dept: d.key, label: d.label, status: it?.status || 'pending', reason: it?.reason || '' };
     });
     const approved = statuses.filter(x => x.status === 'approved').length;
-    const pending  = statuses.filter(x => x.status === 'pending').length;
+    const pending  = statuses.filter(x => isPending(x.status)).length;
     const flagged  = statuses.filter(x => x.status === 'flagged').length;
     const rejected = statuses.filter(x => x.status === 'rejected').length;
     const overall  = approved === 15 ? 'cleared' : rejected > 0 ? 'rejected' : flagged > 0 ? 'flagged' : 'in-progress';
-    const name = [s.first_name, s.last_name].filter(Boolean).join(' ') || '—';
+    const name     = [s.first_name, s.last_name].filter(Boolean).join(' ') || '—';
     const initials = ((s.first_name?.[0]||'') + (s.last_name?.[0]||'')).toUpperCase() || '?';
-    return { id: s.id, name, initials, matric: s.matric_number || '—', statuses, approved, pending, flagged, rejected, overall };
+    return { id: req.student_id, name, initials, matric: s.matric_number || '—', statuses, approved, pending, flagged, rejected, overall };
+  });
+
+  document.getElementById('totalCount').textContent = `${rows.length} student${rows.length !== 1 ? 's' : ''} total`;
+
+  // Add counts to tab buttons
+  const tabCounts = {
+    all:         rows.length,
+    cleared:     rows.filter(r => r.overall === 'cleared').length,
+    'in-progress': rows.filter(r => r.overall === 'in-progress').length,
+    flagged:     rows.filter(r => r.overall === 'flagged').length,
+    rejected:    rows.filter(r => r.overall === 'rejected').length,
+  };
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const f = btn.dataset.filter;
+    if (tabCounts[f] !== undefined) btn.textContent = `${btn.textContent.split('(')[0].trim()} (${tabCounts[f]})`;
   });
 
   let activeFilter = 'all', activeDept = 'all', searchVal = '';
@@ -251,7 +283,7 @@
       if (activeFilter !== 'all' && r.overall !== activeFilter) return false;
       if (activeDept !== 'all') {
         const ds = r.statuses.find(s => s.dept === activeDept);
-        if (!ds || ds.status === 'approved') return false;
+        if (!ds) return false;
       }
       if (searchVal) {
         const q = searchVal.toLowerCase();
@@ -266,7 +298,7 @@
       const pills = nonApproved.slice(0,4).map(s =>
         `<span class="dept-pill" style="${pillColors[s.status]}">${s.label}</span>`
       ).join('') + (nonApproved.length > 4 ? `<span class="dept-pill" style="background:var(--bg);color:var(--muted);">+${nonApproved.length-4}</span>` : '');
-      return `<tr>
+      return `<tr data-id="${r.id}" style="cursor:pointer;">
         <td><div class="student-cell">
           <div class="student-avatar">${r.initials}</div>
           <div><div class="student-name">${r.name}</div><div class="student-id">${r.matric}</div></div>
@@ -279,6 +311,69 @@
       </tr>`;
     }).join('');
   }
+
+  // Row click → open detail modal
+  const statusIcon  = { approved:'check_circle', pending:'hourglass_empty', pending_submission:'hourglass_empty', awaiting_verification:'schedule', flagged:'flag', rejected:'cancel' };
+  const statusColor = { approved:'var(--approved)', pending:'var(--pending)', pending_submission:'var(--pending)', awaiting_verification:'var(--pending)', flagged:'var(--flagged)', rejected:'var(--rejected)' };
+  const statusBg    = { approved:'var(--approved-bg)', pending:'#FFFBEB', pending_submission:'#FFFBEB', awaiting_verification:'#FFFBEB', flagged:'#FFF7ED', rejected:'var(--rejected-bg)' };
+  const statusLabel = { approved:'Approved', pending:'Pending', pending_submission:'Pending', awaiting_verification:'Pending', flagged:'Flagged', rejected:'Rejected' };
+
+  document.getElementById('tableBody').addEventListener('click', e => {
+    const tr = e.target.closest('tr[data-id]');
+    if (!tr) return;
+    const r = rows.find(x => x.id === tr.dataset.id);
+    if (!r) return;
+
+    document.getElementById('modalAvatar').textContent  = r.initials;
+    document.getElementById('modalName').textContent    = r.name;
+    document.getElementById('modalMatric').textContent  = r.matric;
+    document.getElementById('modalOverall').className   = 'badge ' + badgeClass[r.overall];
+    document.getElementById('modalOverall').textContent = badgeLabel[r.overall];
+
+    document.getElementById('modalStats').innerHTML = `
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--approved);">${r.approved}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Approved</div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--pending);">${r.pending}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Pending</div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--flagged);">${r.flagged}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Flagged</div>
+      </div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:1.25rem;font-weight:700;color:var(--rejected);">${r.rejected}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">Rejected</div>
+      </div>`;
+
+    document.getElementById('modalDepts').innerHTML = r.statuses.map(s => {
+      const ic = statusIcon[s.status]  || 'hourglass_empty';
+      const co = statusColor[s.status] || 'var(--pending)';
+      const bg = statusBg[s.status]    || '#FFFBEB';
+      const lb = statusLabel[s.status] || 'Pending';
+      return `
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.75rem;border-radius:8px;background:${bg};">
+        <span class="material-symbols-outlined" style="color:${co};font-size:18px;">${ic}</span>
+        <span style="font-size:0.82rem;font-weight:600;flex:1;">${s.label}</span>
+        ${s.reason ? `<span style="font-size:0.72rem;color:var(--muted);max-width:220px;text-align:right;">${s.reason}</span>` : ''}
+        <span style="font-size:0.72rem;font-weight:600;color:${co};">${lb}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('studentModal').style.display = 'flex';
+  });
+
+  // Pre-select dept from URL param (e.g. ?dept=hod)
+  const urlDept = new URLSearchParams(window.location.search).get('dept');
+  if (urlDept) {
+    activeDept = urlDept;
+    const deptEl = document.getElementById('deptFilter');
+    if (deptEl) deptEl.value = urlDept;
+  }
+
+  renderTable();
 
   document.getElementById('filterTabs').addEventListener('click', e => {
     const btn = e.target.closest('.tab-btn');
@@ -303,8 +398,6 @@
 
   document.getElementById('logoutBtn').addEventListener('click', () => document.getElementById('logoutModal').style.display = 'flex');
   document.getElementById('confirmLogout').addEventListener('click', () => { window.location.href = '../logout.html'; });
-
-  renderTable();
 </script>
 <script type="module" src="../js/topbar.js"></script>
 </body>

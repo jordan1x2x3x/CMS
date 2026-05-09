@@ -196,7 +196,7 @@
           </div>
           <div class="save-row">
             <button class="btn-cancel">Cancel</button>
-            <button class="btn-primary" onclick="showToast('Profile updated')"><span class="material-symbols-outlined">save</span>Save Changes</button>
+            <button class="btn-primary" id="saveProfileBtn"><span class="material-symbols-outlined">save</span>Save Changes</button>
           </div>
         </div>
       </div>
@@ -213,7 +213,7 @@
           <div class="form-grid" style="grid-template-columns:1fr;gap:1rem;margin-bottom:1rem;">
             <div class="form-group">
               <label>Current Password</label>
-              <input type="password" placeholder="Current password" />
+              <input type="password" id="curPw" placeholder="Current password" />
             </div>
             <div class="form-group">
               <label>New Password</label>
@@ -222,12 +222,12 @@
             </div>
             <div class="form-group">
               <label>Confirm New Password</label>
-              <input type="password" placeholder="Repeat new password" />
+              <input type="password" id="cfPw" placeholder="Repeat new password" />
             </div>
           </div>
           <div class="save-row">
             <button class="btn-cancel">Cancel</button>
-            <button class="btn-primary" onclick="showToast('Password updated')"><span class="material-symbols-outlined">lock_reset</span>Update Password</button>
+            <button class="btn-primary" id="updatePwBtn"><span class="material-symbols-outlined">lock_reset</span>Update Password</button>
           </div>
         </div>
       </div>
@@ -336,6 +336,35 @@
     if (ln) ln.value = profile.last_name  || '';
     const emailEl = document.getElementById('settingsEmail');
     if (emailEl) emailEl.value = profile.email || session.user.email || '';
+
+    // Save profile name
+    document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
+      const first = fn?.value.trim(); const last = ln?.value.trim();
+      if (!first) { showToast('First name cannot be empty'); return; }
+      const { error } = await supabase.from('profiles').update({ first_name: first, last_name: last }).eq('id', session.user.id);
+      if (error) { showToast('Failed to save profile'); return; }
+      showToast('Profile updated');
+    });
+
+    // Change password
+    document.getElementById('updatePwBtn')?.addEventListener('click', async () => {
+      const cur = document.getElementById('curPw').value;
+      const nw  = document.getElementById('newPw').value;
+      const cf  = document.getElementById('cfPw').value;
+      if (!cur || !nw || !cf) { showToast('Please fill all password fields'); return; }
+      if (nw.length < 8) { showToast('Password must be at least 8 characters'); return; }
+      if (nw !== cf) { showToast('Passwords do not match'); return; }
+      const email = profile.email || session.user.email;
+      const { error: authErr } = await supabase.auth.signInWithPassword({ email, password: cur });
+      if (authErr) { showToast('Current password is incorrect'); return; }
+      const { error } = await supabase.auth.updateUser({ password: nw });
+      if (error) { showToast('Failed to update password'); return; }
+      document.getElementById('curPw').value = '';
+      document.getElementById('newPw').value = '';
+      document.getElementById('cfPw').value = '';
+      checkPw('');
+      showToast('Password updated successfully');
+    });
   });
 </script>
 <script type="module" src="../js/topbar.js"></script>
