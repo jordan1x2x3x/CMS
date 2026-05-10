@@ -41,7 +41,7 @@ The MTU Clearance Management System is a web-based portal that digitises and man
 | Frontend | Vanilla HTML, CSS, JavaScript (ES6 modules) |
 | Backend | Supabase (PostgreSQL + Auth + Storage + Edge Functions) |
 | Email | Supabase Edge Function + Resend |
-| Hosting | Static hosting (GitHub Pages) |
+| Hosting | Vercel (cms-ashy-five.vercel.app) |
 | Version Control | GitHub |
 
 ---
@@ -547,9 +547,19 @@ RESEND_API_KEY
 
 ## 13. Deployment & Setup
 
+### Live URL
+
+The system is hosted on Vercel at:
+```
+https://cms-ashy-five.vercel.app
+```
+
+Any push to the `main` branch on GitHub automatically triggers a redeployment on Vercel — no manual steps required.
+
 ### Prerequisites
 - Supabase project (free tier or above)
-- Static file hosting (GitHub Pages, Netlify, etc.)
+- Vercel account (free Hobby plan is sufficient)
+- GitHub repository connected to Vercel
 
 ### Initial Setup Steps
 
@@ -579,7 +589,7 @@ RESEND_API_KEY
 
 8. **Create first Super Admin** — go to Supabase Dashboard → Authentication → Users → Add user, then insert a profile row directly with `role = 'super_admin'`
 
-9. **Deploy frontend** — push the repo to GitHub and enable GitHub Pages on the `main` branch
+9. **Deploy frontend** — push the repo to GitHub, then import the repository on Vercel (vercel.com). Select **Other** as the framework preset, leave build command and output directory empty, and click **Deploy**. Vercel will provide a live URL automatically.
 
 ### Rotating the Admin Signup Token
 
