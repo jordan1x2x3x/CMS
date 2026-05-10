@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
+import nodemailer from 'npm:nodemailer@6';
 
 const GMAIL_USER   = Deno.env.get('GMAIL_USER')!;
 const GMAIL_PASS   = Deno.env.get('GMAIL_PASS')!;
@@ -102,24 +102,22 @@ serve(async (req) => {
       ? completionEmail(firstName)
       : statusEmail(firstName, newRecord.status, deptName, item.reason || '');
 
-    // Send via Gmail SMTP
-    const client = new SmtpClient();
-    await client.connectTLS({
-      hostname: 'smtp.gmail.com',
+    // Send via Gmail SMTP using nodemailer
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
       port: 465,
-      username: GMAIL_USER,
-      password: GMAIL_PASS,
+      secure: true,
+      auth: { user: GMAIL_USER, pass: GMAIL_PASS },
     });
 
-    await client.send({
+    await transporter.sendMail({
       from: `MTU Clearance Portal <${GMAIL_USER}>`,
       to: profile.email,
       subject,
-      content: 'Please view this email in an HTML-compatible client.',
+      text: 'Please view this email in an HTML-compatible client.',
       html,
     });
 
-    await client.close();
     console.log('Email sent successfully to:', profile.email);
 
     return new Response(JSON.stringify({ success: true, to: profile.email }), { status: 200 });
@@ -185,7 +183,7 @@ function statusEmail(name: string, status: string, dept: string, reason: string)
           <td style="padding:36px 40px;">
             <p style="font-size:15px;color:#1A0020;margin:0 0 12px;">Dear <strong>${name}</strong>,</p>
             <p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 24px;">${c.body}</p>
-            <a href="https://jordan1x2x3x.github.io/CMS/student/clearance-tracking.html"
+            <a href="https://cms-ashy-five.vercel.app/student/clearance-tracking.html"
                style="display:inline-block;background:#6B0080;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:700;">
               View Clearance Status →
             </a>
@@ -229,7 +227,7 @@ function completionEmail(name: string): string {
               Congratulations! 🎊 You have successfully completed your graduation clearance. All <strong>15 departments</strong> have approved your request.
             </p>
             <p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 24px;">You may now download your official <strong>Clearance Certificate</strong>.</p>
-            <a href="https://jordan1x2x3x.github.io/CMS/student/final-certificate.html"
+            <a href="https://cms-ashy-five.vercel.app/student/final-certificate.html"
                style="display:inline-block;background:#76B82A;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:13px;font-weight:700;">
               Download Certificate →
             </a>
